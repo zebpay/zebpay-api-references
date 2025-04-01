@@ -1,0 +1,11 @@
+# Ignore macOS system files
+.DS_Store
+
+# Ignore node_modules in any "node" subfolder under any "clients" folder
+**/clients/**/node/node_modules/
+
+# Ignore .venv folders in any "python" subfolder under any "clients" folder
+**/clients/**/python/.venv/
+
+# Ignore all .env files under any subdirectory of "clients"
+**/clients/**/.env
