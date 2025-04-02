@@ -20,15 +20,15 @@ async function runExamples() {
         console.log('Initializing client with JWT authentication...');
         if(process.env.JWT_TOKEN)
         client = new FuturesApiClient({
-        jwt: process.env.JWT_TOKEN
+            jwt: process.env.JWT_TOKEN
         });
     }
     else if(process.env.API_KEY && process.env.SECRET_KEY) {
         // Initialize client with API Key authentication
         console.log('Initializing client with API Key authentication...');
-        const apiKeyClient = new FuturesApiClient({
-        apiKey: process.env.API_KEY,
-        secretKey: process.env.SECRET_KEY
+        client = new FuturesApiClient({
+            apiKey: process.env.API_KEY,
+            secretKey: process.env.SECRET_KEY
         });
     }
     else {
