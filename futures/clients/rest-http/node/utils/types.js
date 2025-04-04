@@ -159,21 +159,22 @@
  * @property {number} initialMargin - Initial margin requirement
  * @property {number} liquidationPrice - Estimated liquidation price
  * @property {string} marginMode - Margin mode (isolated or cross)
+ * @property {string} [status] - Position status (OPEN, CLOSED, LIQUIDATED) - if applicable
  */
 
 /**
  * Leverage data model representing user leverage settings for a trading pair
  *
  * @typedef {Object} Leverage
- * @property {string} symbol - Trading pair symbol
+ * @property {string} symbol - Trading pair symbol (e.g., 'BTCINR')
  * @property {string} marginMode - Margin mode (isolated or cross)
  * @property {number} longLeverage - Leverage for long positions
  * @property {number} shortLeverage - Leverage for short positions
  * @property {Object} info - Raw leverage data from the exchange
  * @property {string} info.contractName - Trading pair name
- * @property {number} info.leverage - Current leverage value
+ * @property {number} [info.leverage] - Current leverage value (present in get responses)
+ * @property {number} [info.updatedLeverage] - New leverage value (present in update responses)
  * @property {number} info.openPositionCount - Number of open positions
- * @property {number} [info.updatedLeverage] - New leverage value after update
  */
 
 /**
@@ -335,9 +336,23 @@
  */
 
 /**
- * CanceledOrder data model representing a canceled order response
+ * Response data model for TP/SL orders
  *
- * @typedef {Object} CancelOrderReponseData
+ * @typedef {CreateOrderResponseData} AddTPSLResponseData
+ */
+
+
+/**
+ * ClosePositionResponseData data model representing the response from closing a position
+ * This is an alias for CreateOrderResponseData since closing a position returns order details
+ *
+ * @typedef {CreateOrderResponseData} ClosePositionResponseData
+ */
+
+/**
+ * Canceled Order data model representing a canceled order response
+ *
+ * @typedef {Object} CancelOrderResponseData
  * @property {string} clientOrderId - Client order identifier
  * @property {string} status - Order status (e.g., "canceled")
  * @property {string} symbol - Trading pair symbol
@@ -346,4 +361,30 @@
  * @property {number} info.orderId - Exchange order identifier
  * @property {string} info.status - Order status in exchange format
  * @property {boolean} info.success - Indicates if cancellation was successful
+ */
+
+/**
+ * Paginated response for order listings
+ * @typedef {Object} OrdersListResponse
+ * @property {Order[]} data - List of orders
+ * @property {number} totalCount - Total number of orders matching the query
+ * @property {number} nextTimestamp - Timestamp for pagination to fetch next page
+ */
+
+/**
+ * TradesListResponse data model representing paginated list of trades
+ *
+ * @typedef {Object} TradesListResponse
+ * @property {Trade[]} data - Array of trades
+ * @property {number} totalCount - Total number of trades matching the filter criteria
+ * @property {number} nextTimestamp - Timestamp to use for the next page request
+ */
+
+/**
+ * TransactionsListResponse data model representing paginated list of transactions
+ *
+ * @typedef {Object} TransactionsListResponse
+ * @property {Transaction[]} data - Array of transactions
+ * @property {number} totalCount - Total number of transactions matching the filter criteria
+ * @property {number} nextTimestamp - Timestamp to use for the next page request
  */
