@@ -10,30 +10,28 @@ const FuturesApiClient = require('./client');
  */
 async function runExamples() {
   try {
-
-    // Choose which client to use for the examples
+    // Choose which client to use
     // You can use either JWT or API Key authentication based on your credentials
     let client;
 
     // Initialize client with JWT authentication
-    if(process.env.JWT_TOKEN) {
-        console.log('Initializing client with JWT authentication...');
-        if(process.env.JWT_TOKEN)
-        client = new FuturesApiClient({
-            jwt: process.env.JWT_TOKEN
-        });
-    }
-    else if(process.env.API_KEY && process.env.SECRET_KEY) {
-        // Initialize client with API Key authentication
-        console.log('Initializing client with API Key authentication...');
-        client = new FuturesApiClient({
-            apiKey: process.env.API_KEY,
-            secretKey: process.env.SECRET_KEY
-        });
-    }
-    else {
-        // throw error if credentials are insufficent
-        throw new Error('Credentials Insufficient. One of either JWT or Api Key & Secret Key is required');
+    if (process.env.JWT_TOKEN) {
+      console.log('Initializing client with JWT authentication...');
+      client = new FuturesApiClient({
+        jwt: process.env.JWT_TOKEN,
+        timeout: 20_000 // optional field to configure req timeout - default=30_000 ms
+      });
+    } else if (process.env.API_KEY && process.env.SECRET_KEY) {
+      // Initialize client with API Key authentication
+      console.log('Initializing client with API Key authentication...');
+      client = new FuturesApiClient({
+        apiKey: process.env.API_KEY,
+        secretKey: process.env.SECRET_KEY,
+        timeout: 20_000 // optional field to configure req timeout - default=30_000 ms
+      });
+    } else {
+      // Throw error if credentials are insufficient
+      throw new Error('Credentials Insufficient. One of either JWT or API Key & Secret Key is required');
     }
 
     // Example 1: Call a public endpoint (no authentication required)
@@ -76,4 +74,4 @@ async function runExamples() {
 }
 
 // Run the examples
-runExamples().catch(console.error);
+runExamples().catch((error) => console.error(error));

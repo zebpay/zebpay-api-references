@@ -6,9 +6,6 @@ const config = {
     // Base URL for API requests
     baseUrl: 'https://api.example.com',
 
-    // Default request timeout in milliseconds
-    timeout: 30000,
-
     // API endpoints
     endpoints: {
       // Public endpoints (no authentication required)
