@@ -62,7 +62,7 @@ This is the standard wrapper structure for most successful API responses. The ac
 
 ##### Example (Generic Structure)
 
-```json
+```js
 {
   "statusDescription": "Success",
   "data": {
@@ -94,7 +94,7 @@ Represents the market depth for a trading pair, returned within the `data` field
 
 ##### Example (`data` field content)
 
-```json
+```js
 {
   "symbol": "BTCUSDT",
   "bids": [
@@ -163,7 +163,7 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
 
 ##### Example (`data` field content)
 
-```json
+```js
 {
   "symbol": "BTCUSDT",
   "info": {
@@ -219,7 +219,7 @@ Represents high-level market information for a trading pair, potentially returne
 
 ##### Example (`data` field content - assuming map structure)
 
-```json
+```js
 {
   "BTCUSDT": {
     "lastPrice": "65150.50",
@@ -258,7 +258,7 @@ Represents combined trades at the same price level, returned as an array within 
 
 ##### Example (Single element in the `data` array)
 
-```json
+```js
 {
   "aggregateTradeId": 543210,
   "symbol": "BTCINR",
@@ -284,7 +284,7 @@ Represents the user's wallet balances, returned within the `data` field of `GET 
 
 ##### Example (`data` field content)
 
-```json
+```js
 {
   "USDT": {
     "total": 10000.50,
@@ -316,7 +316,7 @@ Represents the balance for a single asset, used within the `WalletBalance` objec
 
 ##### Example (Value part of the `WalletBalance` map)
 
-```json
+```js
 {
   "total": 10000.50,
   "free": 8500.25,
@@ -355,7 +355,7 @@ Represents a trading order, returned by `GET /api/v1/trade/order` and within lis
 
 ##### Example (`data` field content for `GET /api/v1/trade/order`)
 
-```json
+```js
 {
   "clientOrderId": "myLimitOrder456",
   "datetime": "2025-04-05T13:05:00.000Z",
@@ -405,7 +405,7 @@ Represents a futures trading position, returned within arrays from `GET /api/v1/
 
 ##### Example (Single element in the `data` array for `GET /api/v1/trade/positions`)
 
-```json
+```js
 {
   "id": "pos-btc-long-123",
   "symbol": "BTCUSDT",
@@ -443,7 +443,7 @@ Represents user leverage settings for a trading pair, returned by leverage-relat
 
 ##### Example (`data` field content for `GET /api/v1/trade/userLeverage`)
 
-```json
+```js
 {
   "symbol": "BTCUSDT",
   "marginMode": "isolated",
@@ -486,7 +486,7 @@ Represents a completed trade execution, returned in lists from `GET /api/v1/trad
 
 ##### Example (Single element in the `data` array for `GET /api/v1/trade/history`)
 
-```json
+```js
 {
   "id": "trade123",
   "timestamp": 1712240400500,
@@ -527,7 +527,7 @@ Represents a wallet transaction (e.g., fee, funding), returned in lists from `GE
 
 ##### Example (Single element in the `data` array for `GET /api/v1/trade/transaction/history`)
 
-```json
+```js
 {
   "txid": "txn-fee-abc",
   "timestamp": 1712154000000,
@@ -563,7 +563,7 @@ Represents detailed exchange configuration, returned within the `data` field of 
 
 ##### Example (`data` field content - highly truncated)
 
-```json
+```js
 {
   "pairs": [
     {
@@ -618,7 +618,7 @@ Explore all
 
 ##### Example (`data` field content - truncated)
 
-```json
+```js
 {
   "pairs": [
     {
@@ -668,7 +668,7 @@ Response from `POST /api/v1/trade/order`. This structure is also used as the bas
 
 ##### Example (`data` field content)
 
-```json
+```js
 {
   "clientOrderId": "myNewOrder123",
   "datetime": "2025-04-05T13:10:00.123Z",
@@ -723,7 +723,7 @@ Response from `DELETE /api/v1/trade/order`. This has a unique structure.
 
 ##### Example (`data` field content)
 
-```json
+```js
 {
   "clientOrderId": "myLimitOrder456",
   "status": "canceled",
@@ -757,7 +757,7 @@ Response from `POST /api/v1/trade/addMargin` and `POST /api/v1/trade/reduceMargi
 
 ##### Example (`data` field content for Add Margin)
 
-```json
+```js
 {
   "info": {
     "lockedBalance": 150.50,
@@ -797,7 +797,7 @@ Response from `GET /api/v1/trade/order/open-orders` and `GET /api/v1/trade/order
 
 ##### Example (`data` field content from `GET /api/v1/trade/order/history`)
 
-```json
+```js
 {
   "data": [
     {
@@ -835,7 +835,7 @@ Response from `GET /api/v1/trade/history`.
 
 ##### Example (`data` field content from `GET /api/v1/trade/history`)
 
-```json
+```js
 {
   "data": [
     {
@@ -870,7 +870,7 @@ Response from `GET /api/v1/trade/transaction/history`.
 
 ##### Example (`data` field content from `GET /api/v1/trade/transaction/history`)
 
-```json
+```js
 {
   "data": [
     {
@@ -914,7 +914,7 @@ Response from `GET /api/v1/trade/transaction/history`.
 
 ##### Example (Hypothetical Error within `ApiResponse.data` or as root object)
 
-```json
+```js
 // Example 1: Error details within ApiResponse.data
 {
   "statusDescription": "Client Error",
