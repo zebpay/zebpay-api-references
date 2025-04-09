@@ -38,7 +38,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 

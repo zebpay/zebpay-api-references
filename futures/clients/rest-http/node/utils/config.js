@@ -4,7 +4,7 @@
 
 const config = {
     // Base URL for API requests
-    baseUrl: 'https://api.example.com',
+    baseUrl: 'https://futuresbe.zebpay.com',
 
     // API endpoints
     endpoints: {
