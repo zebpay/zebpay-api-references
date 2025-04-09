@@ -4,7 +4,7 @@ These endpoints allow users to manage orders, positions, leverage, and view trad
 
 ---
 
-### Create Order
+### <a id="create-order"> </a> Create Order
 
 Places a new trading order.
 
@@ -61,11 +61,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure](../../api-reference/error-handling.md) for error formats.
 
 ---
 
-### Cancel Order
+### <a id="cancel-order"> Cancel Order
 
 Cancels an existing open order.
 
@@ -111,11 +111,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
-### Get Order Details
+### <a id="get-order"> Get Order Details
 
 Fetches details of a specific order using its client order ID.
 
@@ -161,11 +161,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Add TP/SL to Position
+### <a id="add-tpsl"> Add TP/SL to Position
 
 Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing position.
 
@@ -220,11 +220,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Add Margin to Position
+### <a id="add-margin"> Add Margin to Position
 
 Adds margin to an existing isolated margin position.
 
@@ -273,11 +273,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Reduce Margin from Position
+### <a id="reduce-margin"> Reduce Margin from Position
 
 Reduces margin from an existing isolated margin position.
 
@@ -326,11 +326,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Close Position
+### <a id="close-position"> Close Position
 
 Closes an existing open position using a market order.
 
@@ -380,11 +380,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Get Open Orders
+### <a id="get-open-orders"> Get Open Orders
 
 Retrieves a list of the user's currently open orders, optionally filtered by symbol.
 
@@ -443,11 +443,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure](../../error-response.md) for error formats.
 
 ---
 
-### Get Positions
+### <a id="get-open-orders">  Get Positions
 
 Retrieves a list of the user's current positions, optionally filtered by symbols or status.
 
@@ -500,7 +500,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
@@ -545,11 +545,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Get All User Leverages
+### <a id="get-user-leverages"> Get All User Leverages
 
 Retrieves the user's leverage settings for all symbols.
 
@@ -595,11 +595,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Update User Leverage
+### <a id="update-user-leverages"> Update User Leverage
 
 Updates the user's leverage setting for a specific symbol.
 
@@ -645,11 +645,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Get Order History
+### <a id="get-order-history"> Get Order History
 
 Retrieves the user's historical orders with pagination.
 
@@ -708,11 +708,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Get Trade History
+### <a id="get-trade-history"> Get Trade History
 
 Retrieves the user's historical trades with pagination.
 
@@ -769,11 +769,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
-### Get Transaction History
+### <a id="get-txn-history"> Get Transaction History
 
 Retrieves the user's historical wallet transactions (fees, funding, etc.) with pagination.
 
@@ -836,7 +836,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 ```
