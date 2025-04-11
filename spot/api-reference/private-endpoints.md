@@ -334,3 +334,36 @@ Get fills for a specific order.
     "statusDescription": "Success"
 }
 ``` 
+
+### Get Exchange fee
+Get Exchange fee details
+
+**Endpoint:** `GET /api/v2/ex/fee/{symbol}`
+
+**Headers:**
+| Header | Required | Description |
+|--------|----------|-------------|
+| Authorization | Yes | JWT token or API key authentication |
+| X-AUTH-APIKEY | Yes | Required for API key authentication |
+| X-AUTH-SIGNATURE | Yes | Required for API key authentication |
+
+**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| side | string | Yes | Order side (BUY,SELL) |
+
+**Response:**
+```json
+{
+    "data": {
+        "symbol": "BTC-INR",
+        "takerFeeRate": "0.5",
+        "makerFeeRate": "0.45",
+        "percentage": true,
+        "gst": "18",
+        "tds": "0"
+    },
+    "statusCode": 200,
+    "statusDescription": "Success"
+}
+``` 
