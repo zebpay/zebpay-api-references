@@ -23,6 +23,66 @@ class ApiResponse(TypedDict, Generic[T]):
 # ---------------------------
 # Market Data Types
 # ---------------------------
+class MarketSymbol(TypedDict):
+    """
+    Data model representing details for a single trading symbol.
+    Corresponds to elements within the `symbols` array of MarketsData.
+
+    Attributes:
+        symbol (str): The unique trading symbol identifier (e.g., "1000PEPEINR").
+        status (str): Current trading status (e.g., "Open").
+        maintMarginPercent (str): Maintenance margin percentage (as string).
+        requiredMarginPercent (str): Initial margin percentage (as string).
+        baseAsset (str): Base asset code.
+        quoteAsset (str): Quote asset code.
+        pricePrecision (int): Decimal places for price.
+        quantityPrecision (int): Decimal places for quantity.
+        baseAssetPrecision (int): Precision for base asset.
+        quotePrecision (int): Precision for quote asset.
+        orderTypes (List[str]): Supported order types (e.g., ["LIMIT", "MARKET"]).
+        timeInForce (List[str]): Supported time-in-force policies (e.g., ["GTC"]).
+        makerFee (float): Maker fee rate.
+        takerFee (float): Taker fee rate.
+        minLeverage (float): Minimum allowed leverage.
+        maxLeverage (float): Maximum allowed leverage.
+        filters (Optional[List[Dict[str, Any]]]): Optional: List of trading filters.
+    """
+    symbol: str
+    status: str
+    maintMarginPercent: str
+    requiredMarginPercent: str
+    baseAsset: str
+    quoteAsset: str
+    pricePrecision: int
+    quantityPrecision: int
+    baseAssetPrecision: int
+    quotePrecision: int
+    orderTypes: List[str]
+    timeInForce: List[str]
+    makerFee: float
+    takerFee: float
+    minLeverage: float
+    maxLeverage: float
+    filters: Optional[List[Dict[str, Any]]] # Use Optional for non-required fields
+
+class MarketsData(TypedDict):
+    """
+    Data model representing the response structure for fetching all markets.
+    Corresponds to the `data` field of the ApiResponse from GET /api/v1/market/markets.
+
+    Attributes:
+        timezone (str): Exchange timezone (e.g., "UTC").
+        serverTime (int): Current server time in Unix timestamp (ms).
+        rateLimits (List[Dict[str, Any]]): List of rate limit rules.
+        exchangeFilters (List[Dict[str, Any]]): List of global exchange filters.
+        symbols (List[MarketSymbol]): List of available trading symbols and their details.
+    """
+    timezone: str
+    serverTime: int
+    rateLimits: List[Dict[str, Any]]
+    exchangeFilters: List[Dict[str, Any]]
+    symbols: List[MarketSymbol] # Reference the MarketSymbol TypedDict
+
 class OrderBook(TypedDict):
     """
     OrderBook represents market depth for a trading pair.

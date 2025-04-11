@@ -9,6 +9,7 @@ This section describes the common JSON data structures returned by the API. Unde
 - [`ApiResponse<T>`](#apiresponse)
 
 ### 📈 Market Models
+- [`MarketSymbol`](#marketsymbol)
 - [`OrderBook`](#orderbook)
 - [`Ticker`](#ticker)
 - [`MarketInfo`](#marketinfo)
@@ -30,6 +31,7 @@ This section describes the common JSON data structures returned by the API. Unde
 - [`PairsInfo`](#pairsinfo)
 
 ### 🔁 Action Response Models
+- [`MarketsData`](#marketsdata)
 - [`CreateOrderResponseData`](#createorderresponsedata)
 - [`AddTPSLResponseData`](#addtpslresponsedata)
 - [`ClosePositionResponseData`](#closepositionresponsedata)
@@ -73,8 +75,58 @@ This is the standard wrapper structure for most successful API responses. The ac
 
 ---
 
-<a id="orderbook"></a>
-## `OrderBook`
+## <a id="marketsymbol"></a> `MarketSymbol`
+
+Represents details for a single trading symbol, returned within the `symbols` array of the `MarketsData` object from `GET /api/v1/market/markets`.
+
+**Fields:**
+
+| Field Name              | Type            | Description                                                           |
+|-------------------------|-----------------|-----------------------------------------------------------------------|
+| `symbol`                | `string`        | The unique trading symbol identifier (e.g., "1000PEPEINR").             |
+| `status`                | `string`        | Current trading status of the symbol (e.g., "Open").                  |
+| `maintMarginPercent`    | `string`        | Maintenance margin percentage required (as string).                   |
+| `requiredMarginPercent` | `string`        | Initial margin percentage required (as string, often "0").            |
+| `baseAsset`             | `string`        | The base asset code (e.g., "1000PEPE").                                |
+| `quoteAsset`            | `string`        | The quote asset code (e.g., "INR").                                   |
+| `pricePrecision`        | `number`        | Number of decimal places for price formatting/entry.                  |
+| `quantityPrecision`     | `number`        | Number of decimal places for quantity/amount formatting/entry.          |
+| `baseAssetPrecision`    | `number`        | Precision for the base asset itself.                                  |
+| `quotePrecision`        | `number`        | Precision for the quote asset itself.                                 |
+| `orderTypes`            | `Array<string>` | List of supported order types (e.g., ["LIMIT", "MARKET"]).            |
+| `timeInForce`           | `Array<string>` | List of supported time-in-force policies (e.g., ["GTC"]).             |
+| `makerFee`              | `number`        | Maker fee rate for this symbol.                                       |
+| `takerFee`              | `number`        | Taker fee rate for this symbol.                                       |
+| `minLeverage`           | `number`        | Minimum allowed leverage for this symbol.                             |
+| `maxLeverage`           | `number`        | Maximum allowed leverage for this symbol.                             |
+| `filters`               | `Array<object>` | *Optional*: List of specific trading filters applied to this symbol (e.g., LOT\_SIZE, PRICE\_FILTER). Not present in the example but common in similar APIs.\* |
+
+##### Example (Single element from the `symbols` array)
+
+```json
+{
+  "symbol": "1000PEPEINR",
+  "status": "Open",
+  "maintMarginPercent": "15",
+  "requiredMarginPercent": "0",
+  "baseAsset": "1000PEPE",
+  "quoteAsset": "INR",
+  "pricePrecision": 5,
+  "quantityPrecision": 0,
+  "baseAssetPrecision": 0,
+  "quotePrecision": 0,
+  "orderTypes": [ "LIMIT", "MARKET" ],
+  "timeInForce": [ "GTC" ],
+  "makerFee": 0.05,
+  "takerFee": 0.1,
+  "minLeverage": 1,
+  "maxLeverage": 10
+}
+```
+
+---
+
+## <a id="orderbook"></a> `OrderBook`
 
 Represents the market depth for a trading pair, returned within the `data` field of `GET /api/v1/market/orderBook`.
 
@@ -652,7 +704,40 @@ Explore all
 <a id="responsedatamodelsactions"></a>
 ## Response Data Models (Actions)
 
-These models describe the structure within the `data` field for specific POST/DELETE action responses.
+These models describe the structure within the `data` field for specific GET/POST/DELETE action responses.
+
+---
+
+<a id="marketsdata"></a>
+## `MarketsData`
+
+Represents the structure of the `data` field returned by `GET /api/v1/market/markets`. It contains exchange metadata and a list of symbols.
+
+**Fields:**
+
+| Field Name        | Type                   | Description                                                  |
+|-------------------|------------------------|--------------------------------------------------------------|
+| `timezone`        | `string`               | Exchange timezone (e.g., "UTC").                             |
+| `serverTime`      | `number`               | Current server time in Unix timestamp (ms).                  |
+| `rateLimits`      | `Array<object>`        | List of rate limit rules applied by the exchange.            |
+| `exchangeFilters` | `Array<object>`        | List of global exchange filters.                             |
+| `symbols`         | `Array<MarketSymbol>` | List of available trading symbols and their details. See [`MarketSymbol`](#marketsymbol)      |
+
+##### Example (`data` field content)
+
+```js
+{
+  "timezone": "UTC",
+  "serverTime": 1744364554387,
+  "rateLimits": [],
+  "exchangeFilters": [],
+  "symbols": [
+    { /* MarketSymbol object for 1000PEPEINR */ },
+    { /* MarketSymbol object for XRPINR */ }
+    // ... other MarketSymbol objects
+  ]
+}
+```
 
 ---
 

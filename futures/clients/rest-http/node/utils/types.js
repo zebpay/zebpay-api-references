@@ -16,6 +16,42 @@
  */
 
 /**
+ * MarketSymbol data model representing details for a single trading symbol.
+ * Returned within the `symbols` array of MarketsData.
+ *
+ * @typedef {Object} MarketSymbol
+ * @property {string} symbol - The unique trading symbol identifier (e.g., "1000PEPEINR")
+ * @property {string} status - Current trading status (e.g., "Open")
+ * @property {string} maintMarginPercent - Maintenance margin percentage (as string)
+ * @property {string} requiredMarginPercent - Initial margin percentage (as string)
+ * @property {string} baseAsset - Base asset code
+ * @property {string} quoteAsset - Quote asset code
+ * @property {number} pricePrecision - Decimal places for price
+ * @property {number} quantityPrecision - Decimal places for quantity
+ * @property {number} baseAssetPrecision - Precision for base asset
+ * @property {number} quotePrecision - Precision for quote asset
+ * @property {string[]} orderTypes - Supported order types (e.g., ["LIMIT", "MARKET"])
+ * @property {string[]} timeInForce - Supported time-in-force policies (e.g., ["GTC"])
+ * @property {number} makerFee - Maker fee rate
+ * @property {number} takerFee - Taker fee rate
+ * @property {number} minLeverage - Minimum allowed leverage
+ * @property {number} maxLeverage - Maximum allowed leverage
+ * @property {Array<Object>} [filters] - Optional: List of trading filters
+ */
+
+/**
+ * MarketsData data model representing the response structure for fetching all markets.
+ * Contained within the `data` field of the ApiResponse from GET /api/v1/market/markets.
+ *
+ * @typedef {Object} MarketsData
+ * @property {string} timezone - Exchange timezone (e.g., "UTC")
+ * @property {number} serverTime - Current server time in Unix timestamp (ms)
+ * @property {Array<Object>} rateLimits - List of rate limit rules
+ * @property {Array<Object>} exchangeFilters - List of global exchange filters
+ * @property {MarketSymbol[]} symbols - List of available trading symbols and their details
+ */
+
+/**
  * OrderBook data model representing market depth for a trading pair
  *
  * @typedef {Object} OrderBook
