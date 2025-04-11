@@ -107,6 +107,7 @@ class SpotApiClient {
       }
 
       const headers = this._getHeaders(method, endpoint, requestParams, requestData);
+      console.log(endpoint)
       console.log(headers); 
       console.log(requestParams);
       console.log(requestData);
