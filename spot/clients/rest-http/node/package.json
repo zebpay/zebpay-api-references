@@ -1,0 +1,22 @@
+{
+  "name": "zebpay-spot-api-rest-client",
+  "version": "1.0.0",
+  "description": "JavaScript REST Client for Zebpay Spot API",
+  "main": "client.js",
+  "scripts": {
+    "start": "node run.example.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "api",
+    "client",
+    "spot",
+    "trading"
+  ],
+  "author": "Zebpay",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7"
+  }
+} 
