@@ -19,17 +19,18 @@ Get 24-hour price and volume statistics for all trading pairs.
 [
   {
     "symbol": "BTC-INR",
-    "price": "5500000",
-    "priceChange": "100000",
-    "priceChangePercent": "1.85",
-    "high": "5600000",
-    "low": "5400000",
-    "volume": "10.5",
-    "quoteVolume": "57750000",
-    "lastPrice": "5500000",
-    "bidPrice": "5499000",
-    "askPrice": "5501000"
-  }
+    "bestBid": "7172080.69",
+    "bestBidQty": "0.15471",
+    "bestAsk": "7198376.05",
+    "bestAskQty": "0.00161248",
+    "priceChange": "-97725.008776",
+    "priceChangePercent": "-1.36",
+    "high": "7300000",
+    "low": "6965026.32",
+    "vol": "0.17943873",
+    "volValue": "1289432.45",
+    "last": "7185662.41"
+  },
 ]
 ```
 
@@ -47,16 +48,17 @@ Get 24-hour price and volume statistics for a specific trading pair.
 ```json
 {
   "symbol": "BTC-INR",
-  "price": "5500000",
-  "priceChange": "100000",
-  "priceChangePercent": "1.85",
-  "high": "5600000",
-  "low": "5400000",
-  "volume": "10.5",
-  "quoteVolume": "57750000",
-  "lastPrice": "5500000",
-  "bidPrice": "5499000",
-  "askPrice": "5501000"
+  "bestBid": "7172080.69",
+  "bestBidQty": "0.15471",
+  "bestAsk": "7198376.05",
+  "bestAskQty": "0.00161248",
+  "priceChange": "-97725.008776",
+  "priceChangePercent": "-1.36",
+  "high": "7300000",
+  "low": "6965026.32",
+  "vol": "0.17943873",
+  "volValue": "1289432.45",
+  "last": "7185662.41"
 }
 ```
 
@@ -173,8 +175,8 @@ Get the current system status.
 **Response:**
 ```json
 {
-  "status": "normal",
-  "message": "System is operating normally"
+    "remarks": "",
+    "status": "open"
 }
 ```
 
@@ -186,7 +188,7 @@ Get the current server time.
 **Response:**
 ```json
 {
-  "serverTime": 1612345678000
+  "time": 1744361888858
 }
 ```
 
@@ -200,23 +202,27 @@ Get information about all available trading pairs.
 **Response:**
 ```json
 {
-  "timezone": "UTC",
-  "serverTime": 1612345678000,
-  "symbols": [
-    {
-      "symbol": "BTC-INR",
-      "status": "TRADING",
-      "baseAsset": "BTC",
-      "quoteAsset": "INR",
-      "minPrice": "0.000001",
-      "maxPrice": "100000000",
-      "tickSize": "0.000001",
-      "minQty": "0.000001",
-      "maxQty": "100000000",
-      "stepSize": "0.000001",
-      "minNotional": "100"
-    }
-  ]
+  "data": {
+    "tradePairs": [
+      {
+        "symbol": "BTC-INR",
+        "name": "BTC-INR",
+        "baseCurrency": "BTC",
+        "quoteCurrency": "INR",
+        "feeCurrency": "INR",
+        "baseMinSize": "",
+        "quoteMinSize": "100",
+        "baseMaxSize": "",
+        "quoteMaxSize": "10000000",
+        "baseIncrement": "0.00000001",
+        "quoteIncrement": "0.01",
+        "priceIncrement": 0.01,
+        "enableTrading": true
+      }
+    ]
+  },
+  "statusCode": 200,
+  "statusDescription": "Success",
 }
 ```
 
@@ -227,14 +233,35 @@ Get information about all available currencies.
 
 **Response:**
 ```json
-[
-  {
-    "currency": "BTC",
-    "name": "Bitcoin",
-    "status": "TRADING",
-    "minWithdraw": "0.001",
-    "maxWithdraw": "100",
-    "withdrawFee": "0.0005"
-  }
-]
+{
+  "data": [
+    {
+      "currency": "BTC",
+      "name": "BTC",
+      "fullName": "Bitcoin",
+      "precision": "8",
+      "type": "crypto",
+      "isDebitEnabled": false,
+      "chains": [
+          {
+              "chainName": "Bitcoin",
+              "withdrawalMinSize": "0.000482",
+              "depositMinSize": "0.00000001",
+              "withdrawalFee": "0.00040000",
+              "isWithdrawEnabled": "true",
+              "isDepositEnabled": "true",
+              "contractAddress": "",
+              "withdrawPrecision": "8",
+              "maxWithdraw": "2.45060379000000",
+              "maxDeposit": "100.00000000",
+              "needTag": "false",
+              "chainId": "bitcoin",
+              "AddressRegex": "^(bc1([ac-hj-np-z02-9]{25,62}|[ac-hj-np-z02-9]{59})|1[a-km-zA-HJ-NP-Z1-9]{25,34}|3[a-km-zA-HJ-NP-Z1-9]{25,34})$"
+          }
+      ]
+    }
+  ],
+  "statusCode": 200,
+  "statusDescription": "Success",
+}
 ``` 
