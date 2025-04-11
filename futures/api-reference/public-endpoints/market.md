@@ -4,6 +4,84 @@ These endpoints provide public access to market data such as order books, price 
 
 ---
 
+---
+
+### Fetch Markets
+
+Retrieves details about all available trading symbols (markets), including their status, precision, fees, and leverage limits.
+
+#### Request
+
+| Attribute         | Value                      |
+|-------------------|----------------------------|
+| **HTTP Method** | `GET`                      |
+| **Endpoint Path** | `/api/v1/market/markets`  |
+| **Auth Required** | No                         |
+| **Query Params** | None                       |
+| **Request Body** | N/A                        |
+
+#### Success Response
+
+| Status Code | Description        |
+|-------------|--------------------|
+| `200 OK`    | Request succeeded. |
+
+The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+
+**`data`** ([MarketsData](../data-models.md#marketsdata) object):
+- Includes timezone, server time, rate limits, and a list of symbol details.
+
+##### Example (`data` field content)
+
+```js
+{
+  "timezone": "UTC",
+  "serverTime": 1744364554387,
+  "rateLimits": [],
+  "exchangeFilters": [],
+  "symbols": [
+    {
+      "symbol": "1000PEPEINR",
+      "status": "Open",
+      "maintMarginPercent": "15",
+      "requiredMarginPercent": "0",
+      "baseAsset": "1000PEPE",
+      "quoteAsset": "INR",
+      "pricePrecision": 5,
+      "quantityPrecision": 0,
+      "baseAssetPrecision": 0,
+      "quotePrecision": 0,
+      "orderTypes": [ "LIMIT", "MARKET" ],
+      "timeInForce": [ "GTC" ],
+      "makerFee": 0.05,
+      "takerFee": 0.1,
+      "minLeverage": 1,
+      "maxLeverage": 10
+    },
+    {
+      "symbol": "XRPINR",
+      "status": "Open",
+      "maintMarginPercent": "15",
+      "requiredMarginPercent": "0",
+      "baseAsset": "XRP",
+      "quoteAsset": "INR",
+      "pricePrecision": 2,
+      "quantityPrecision": 1,
+      // ... other fields ...
+      "makerFee": 0.05,
+      "takerFee": 0.1,
+      "minLeverage": 1,
+      "maxLeverage": 20
+    }
+    // ... other symbols
+  ]
+}
+```
+
+> See [Error Response Structure](../error-handling.md) for error formats.
+
+---
+
 ### Get Order Book
 
 Retrieves the current order book (bids and asks) for a specific trading symbol.
@@ -50,7 +128,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -119,7 +197,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -167,7 +245,7 @@ A mapping of symbols to their respective [MarketInfo](../../data-models.md#marke
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 

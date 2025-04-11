@@ -1,0 +1,17 @@
+{
+  "name": "zebpay-futures-ccxt-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "run.example.js",
+  "scripts": {
+    "start": "node run.example.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ccxt": "^4.4.73",
+    "dotenv": "^16.5.0"
+  }
+}

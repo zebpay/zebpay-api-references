@@ -2,13 +2,14 @@
 Configuration settings for the Zebpay futures API client.
 """
 # Base URL for API requests
-BASE_URL = 'https://api.example.com'
+BASE_URL = 'https://futuresbe.zebpay.com'
 
 # API endpoints
 ENDPOINTS = {
     # Public endpoints (no authentication required)
     'public': {
         'market': {
+            'markets': '/api/v1/market/markets',
             'order_book': '/api/v1/market/orderBook',
             'ticker_24hr': '/api/v1/market/ticker24Hr',
             'markets': '/api/v1/market/markets',

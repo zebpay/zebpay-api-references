@@ -11,6 +11,7 @@ from ..utils import config
 from ..utils.auth import AuthUtils
 from ..utils.types import (
     ApiResponse,
+    MarketsData,
     OrderBook,
     Ticker,
     AggregateTrade,
@@ -205,6 +206,24 @@ class FuturesApiClient:
         return value.upper() if isinstance(value, str) else value
 
     # ------------------- MARKET DATA ENDPOINTS (PUBLIC) -------------------
+    def fetch_markets(self) -> ApiResponse[MarketsData]:
+        """
+        Retrieve information about all available trading symbols and exchange metadata. [cite: User-provided Fetch Market Response]
+
+        Returns:
+            ApiResponse[MarketsData]: An object containing server time, rate limits,
+                                      and a list of MarketSymbol objects. [cite: futures/clients/rest-http/python/utils/types.py]
+
+        Example:
+            markets_response = client.fetch_markets()
+            if markets_response.get("statusCode") == 200:
+                symbols_list = markets_response.get("data", {}).get("symbols")
+                print(f"Found {len(symbols_list)} symbols.")
+        """
+        # The endpoint path is sourced from the config file
+        endpoint = config.get_endpoint(['public', 'market', 'markets']) # [cite: futures/clients/rest-http/python/utils/config.py]
+        return self._request('GET', endpoint)
+
     def get_order_book(self, symbol: str) -> ApiResponse[OrderBook]:
         """
         Retrieve the order book for a specified trading pair.

@@ -139,6 +139,18 @@ class FuturesApiClient {
    */
 
   /**
+   * Fetches information about all available markets (trading symbols) and exchange metadata.
+   *
+   * @returns {Promise<ApiResponse<MarketsData>>} Object containing server time, rate limits, and a list of symbol details. [cite: User-provided Fetch Market Response]
+   * @see {ApiResponse} For the overall response structure [cite: futures/api-reference/data-models.md]
+   * @see {MarketsData} For the structure of the data field [cite: futures/clients/rest-http/node/utils/types.js]
+   */
+  async fetchMarkets() {
+    // The endpoint path is sourced from the config file
+    return await this._request('GET', config.endpoints.public.market.markets); [cite: futures/clients/rest-http/node/utils/config.js]
+  }
+
+  /**
    * Fetches the order book for a trading pair
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
