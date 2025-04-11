@@ -41,9 +41,6 @@ This section describes the common JSON data structures returned by the API. Unde
 - [`TradesListResponse`](#tradeslistresponse)
 - [`TransactionsListResponse`](#transactionslistresponse)
 
-### 🚨 Error Handling
-- [`Error Response Structure`](#errorresponse)
-
 ---
 
 <a id="apiresponse"></a>
@@ -894,43 +891,5 @@ Response from `GET /api/v1/trade/transaction/history`.
   ],
   "totalCount": 35,
   "nextTimestamp": 1712067599999
-}
-```
-
----
-
-<a id="errorresponse"></a>
-## Error Response Structure
-
-*(This section defines the expected structure when an API call results in an error. Define based on your actual API implementation.)*
-
-**Common Fields (Example):**
-
-| Field Name | Type                | Description                                 |
-|------------|---------------------|---------------------------------------------|
-| `code`     | `string`\|`number`  | An internal error code.                     |
-| `message`  | `string`            | A human-readable error message.             |
-| `details`  | `object`\|`string`  | Additional error details (optional).        |
-
-##### Example (Hypothetical Error within `ApiResponse.data` or as root object)
-
-```js
-// Example 1: Error details within ApiResponse.data
-{
-  "statusDescription": "Client Error",
-  "data": {
-      "code": "INVALID_PARAMETER",
-      "message": "Symbol parameter is missing or invalid."
-  },
-  "statusCode": 400,
-  "customMessage": ["Bad Request: Check parameters."]
-}
-
-// Example 2: Root object as error structure (if ApiResponse is not used for errors)
-{
-  "error": {
-    "code": "AUTH_FAILURE",
-    "message": "Invalid API key or signature."
-  }
 }
 ```

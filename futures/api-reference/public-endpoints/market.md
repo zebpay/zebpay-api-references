@@ -50,7 +50,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
@@ -119,7 +119,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
@@ -167,7 +167,7 @@ A mapping of symbols to their respective [MarketInfo](../../data-models.md#marke
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.
 
 ---
 
@@ -213,4 +213,4 @@ A list of recent aggregate trades.
 ]
 ```
 
-> See [Error Response Structure](../../data-models.md#errorresponse) for error formats.
+> See [Error Response Structure]((../error-handling.md)) for error formats.

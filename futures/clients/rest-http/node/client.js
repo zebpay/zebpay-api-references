@@ -102,15 +102,11 @@ class FuturesApiClient {
     try {
       // Get authentication headers
       const headers = this._getHeaders(method, endpoint, params, data);
-
-      const response = await this.http.request({
-        method,
-        url: endpoint,
-        params,
-        data,
-        headers
-      });
-
+      const url =`${config.baseUrl}${endpoint}`;
+      const requestPayload = { method, url, headers }
+      if(method=='GET') requestPayload.params=params
+      else if(data) requestPayload.data=data;
+      const response = await this.http.request(requestPayload);
       return response.data;
     } catch (error) {
       // Preserve original error message and additional context if available
