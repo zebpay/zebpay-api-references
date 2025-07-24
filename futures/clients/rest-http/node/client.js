@@ -204,6 +204,25 @@ class FuturesApiClient {
   }
 
   /**
+   * Fetches k-line (candlestick) data for a symbol
+   *
+   * @param {Object} klineParams - K-line parameters
+   * @param {string} klineParams.symbol - Trading symbol (e.g., 'BTCINR')
+   * @param {string} klineParams.interval - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
+   * @param {number} [klineParams.startTime] - Start time in milliseconds
+   * @param {number} [klineParams.endTime] - End time in milliseconds
+   * @param {number} [klineParams.limit] - Maximum number of data points to return
+   * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
+   */
+  async getKlines(klineParams) {
+    if (!klineParams.symbol || !klineParams.interval) {
+      throw new Error('Symbol and interval are required');
+    }
+    klineParams.symbol = this._normalizeString(klineParams.symbol);
+    return await this._request('POST', config.endpoints.public.market.klines, {}, klineParams);
+  }
+
+  /**
    * SYSTEM ENDPOINTS (PUBLIC)
    */
 
@@ -349,6 +368,33 @@ class FuturesApiClient {
     }
     return await this._request('DELETE', config.endpoints.private.trade.order, {}, cancelParams);
   }
+
+  /**
+   * Edits an existing order
+   *
+   * @param {Object} orderParams - Order parameters
+   * @param {string} orderParams.clientOrderId - The unique identifier for the order you wish to edit.
+   * @param {number} [orderParams.price] - The new price for the order.
+   * @param {number} [orderParams.amount] - The new quantity for the order.
+   * @param {number} [orderParams.triggerPrice] - The new trigger price for stop or take-profit orders.
+   * @returns {Promise<ApiResponse<EditOrderResponseData>>} Edited order details
+   * @throws {Error} When clientOrderId is missing
+   */
+  async editOrder(orderParams) {
+    if (!orderParams.clientOrderId) {
+      throw new Error('Client order ID is required');
+    }
+    return await this._request('PATCH', config.endpoints.private.trade.order, {}, orderParams);
+  }
+
+    /**
+     * Cancels all open orders
+     *
+     * @returns {Promise<ApiResponse<CancelOrderResponseData[]>>} A list of all canceled orders
+     */
+    async cancelAllOrders() {
+        return await this._request('DELETE', config.endpoints.private.trade['order/all']);
+    }
 
   /**
    * Fetches details of a specific order

@@ -292,3 +292,55 @@ A list of recent aggregate trades.
 ```
 
 > See [Error Response Structure]((../error-handling.md)) for error formats.
+
+---
+
+### <a id="get-klines"> Get K-Lines (OHLCV Data)
+
+Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a specified trading symbol and timeframe.
+
+-   **Endpoint:** `POST /api/v1/market/klines`
+-   **Method:** `POST`
+-   **Handler:** `getKlines`
+
+**Request Body**
+
+The body must be a JSON object specifying the parameters for the k-line data.
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `symbol` | string | Yes | The trading pair symbol (e.g., 'BTCINR'). |
+| `interval` | string | Yes | The candlestick interval (e.g., '1m', '5m', '1h', '1d'). |
+| `startTime` | number | No | The start time in milliseconds to fetch data from. |
+| `endTime` | number | No | The end time in milliseconds to fetch data up to. |
+| `limit` | number | No | The maximum number of data points to return (Default is 500, max is 1000). |
+
+**Example Request:**
+
+```json
+{
+    "symbol": "BTCINR",
+    "interval": "1h",
+    "limit": 100
+}
+```
+
+**Successful Response (200 OK)**
+
+Returns an array of k-line data points. Each k-line is a sub-array containing `[open, high, low, close, volume]`.
+
+**Example Response:**
+
+```json
+{
+    "data": [
+      "5500000",  //open
+      "5600000",  //high,
+      "5400000",  //low
+      "5550000",  //close
+      "10.5",     //volume
+    ]
+}
+```
+
+---

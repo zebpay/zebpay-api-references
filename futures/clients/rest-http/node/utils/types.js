@@ -372,6 +372,21 @@
  */
 
 /**
+ * EditOrderResponseData data model representing the response from editing an order
+ *
+ * @typedef {Object} EditOrderResponseData
+ * @property {string} clientOrderId - The client-side ID of the edited order.
+ * @property {string} timeInForce - The time-in-force policy (e.g., 'GTC').
+ * @property {number} price - The updated price of the order.
+ * @property {number} amount - The updated amount of the order.
+ * @property {Object} info - An object containing additional details from the exchange.
+ * @property {number} info.availableBalance - The available balance.
+ * @property {string} info.status - A message confirming the request status.
+ * @property {number} info.lockedMargin - The locked margin.
+ * @property {number} info.lockedMarginInMarginAsset - The locked margin in the margin asset.
+ */
+
+/**
  * Response data model for TP/SL orders
  *
  * @typedef {CreateOrderResponseData} AddTPSLResponseData

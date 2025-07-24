@@ -12,9 +12,9 @@ ENDPOINTS = {
             'markets': '/api/v1/market/markets',
             'order_book': '/api/v1/market/orderBook',
             'ticker_24hr': '/api/v1/market/ticker24Hr',
-            'markets': '/api/v1/market/markets',
             'market_info': '/api/v1/market/marketInfo',
-            'agg_trade': '/api/v1/market/aggTrade'
+            'agg_trade': '/api/v1/market/aggTrade',
+            'klines': '/api/v1/market/klines'
         },
         'system': {
             'time': '/api/v1/system/time',
@@ -35,6 +35,7 @@ ENDPOINTS = {
         },
         'trade': {
             'order': '/api/v1/trade/order',
+            'order_all': '/api/v1/trade/order/all',
             'add_tpsl': '/api/v1/trade/order/addTPSL',
             'add_margin': '/api/v1/trade/addMargin',
             'reduce_margin': '/api/v1/trade/reduceMargin',

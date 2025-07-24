@@ -14,9 +14,9 @@ const config = {
           markets: 'api/v1/market/markets',
           orderBook: '/api/v1/market/orderBook',
           ticker24Hr: '/api/v1/market/ticker24Hr',
-          markets: '/api/v1/market/markets',
           marketInfo: '/api/v1/market/marketInfo',
-          aggTrade: '/api/v1/market/aggTrade'
+          aggTrade: '/api/v1/market/aggTrade',
+          klines: '/api/v1/market/klines'
         },
         system: {
           time: '/api/v1/system/time',
@@ -37,6 +37,7 @@ const config = {
         },
         trade: {
           order: '/api/v1/trade/order',
+          'order/all': '/api/v1/trade/order/all',
           addTPSL: '/api/v1/trade/order/addTPSL',
           addMargin: '/api/v1/trade/addMargin',
           reduceMargin: '/api/v1/trade/reduceMargin',

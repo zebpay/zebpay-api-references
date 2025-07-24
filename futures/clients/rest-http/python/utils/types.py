@@ -675,6 +675,25 @@ class CreateOrderResponseData(TypedDict):
 AddTPSLResponseData = CreateOrderResponseData
 ClosePositionResponseData = CreateOrderResponseData
 
+class EditOrderResponseInfo(TypedDict):
+    """
+    Contains additional edit order details.
+    """
+    availableBalance: float
+    status: str
+    lockedMargin: float
+    lockedMarginInMarginAsset: float
+
+class EditOrderResponseData(TypedDict):
+    """
+    Represents the response from editing an order.
+    """
+    clientOrderId: str
+    timeInForce: str
+    price: float
+    amount: float
+    info: EditOrderResponseInfo
+
 class CancelOrderResponseInfo(TypedDict):
     """
     Contains additional cancellation details.
