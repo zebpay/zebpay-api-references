@@ -515,7 +515,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "clientOrderId": "myOpenLimitOrder789",
       "datetime": "2025-04-05T13:18:00.000Z",
@@ -779,7 +779,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "clientOrderId": "myMarketOrder111",
       "datetime": "2025-04-04T10:00:00.000Z",
@@ -842,7 +842,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "id": "trade123",
       "timestamp": 1712240400500,
@@ -903,7 +903,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "txid": "txn-fee-abc",
       "timestamp": 1712154000000,

@@ -41,7 +41,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/transaction/history?pageSi
 {
   "statusDescription": "Success",
   "data": {
-    "data": [
+    "items": [
       {
         "txid": "txn-fee-abc",
         "timestamp": 1712154000000,
@@ -97,7 +97,7 @@ async function getTransactionHistoryExample(options = {}) {
     if (response && [200, 201].includes(response.statusCode)) {
       console.log("Transaction History Response Data:", response.data);
       // Access the list of transactions and pagination token:
-      // const transactions = response.data.data;
+      // const transactions = response.data.items;
       // const nextTimestamp = response.data.nextTimestamp;
       // console.log(`Workspaceed ${transactions.length} transactions. Next page timestamp: ${nextTimestamp}`);
       // if (nextTimestamp) {
@@ -128,7 +128,7 @@ getTransactionHistoryExample({ pageSize: 20 });
 Fetching transaction history...
 API Response: {
   "statusDescription": "Success",
-  "data": { // ... (data as shown in cURL example) ... },
+  "data": { // ... (items as shown in cURL example) ... },
   "statusCode": 200, "customMessage": ["OK"] }
 // Extracted data...
 Transaction History Response Data: { // ... (data as shown in cURL example) ... }
@@ -154,7 +154,7 @@ def get_transaction_history_example(page_size=None, timestamp=None):
             print(f"Transaction History Response Data: {response.get('data')}")
             # Access the list of transactions and pagination token:
             # transactions_data = response.get('data', {})
-            # transactions = transactions_data.get('data', [])
+            # transactions = transactions_data.get('items', [])
             # next_timestamp = transactions_data.get('nextTimestamp')
             # print(f"Fetched {len(transactions)} transactions. Next page timestamp: {next_timestamp}")
             # if next_timestamp:

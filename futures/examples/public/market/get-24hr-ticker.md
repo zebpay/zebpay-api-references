@@ -57,7 +57,11 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
     "percentage": 0.23,
     "average": 65075.25,
     "baseVolume": 1500.50,
-    "quoteVolume": 97682775.00
+    "quoteVolume": 97682775.00,
+    "bid": 65149.90,
+    "bidVolume": 0.8,
+    "ask": 65151.00,
+    "askVolume": 1.2
   },
   "statusCode": 200,
   "customMessage": ["OK"]
@@ -130,7 +134,7 @@ API Response: {
 // Followed by the extracted data
 Ticker Data for BTCUSDT: {
   "symbol": "BTCUSDT",
-  "info": { ... },
+  "info": {...},
   "timestamp": 1712345678905,
   // ... other fields ...
 }

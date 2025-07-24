@@ -99,6 +99,10 @@
  * @property {number} average - Average price
  * @property {number} baseVolume - Trading volume in base asset
  * @property {number} quoteVolume - Trading volume in quote asset
+ * @property {number} bid - Highest current bid price
+ * @property {number} bidVolume - Volume available at the highest bid price
+ * @property {number} ask - Lowest current ask price
+ * @property {number} askVolume - Volume available at the lowest ask price
  */
 
 /**
@@ -417,7 +421,7 @@
 /**
  * Paginated response for order listings
  * @typedef {Object} OrdersListResponse
- * @property {Order[]} data - List of orders
+ * @property {Order[]} items - List of orders
  * @property {number} totalCount - Total number of orders matching the query
  * @property {number} nextTimestamp - Timestamp for pagination to fetch next page
  */
@@ -426,7 +430,7 @@
  * TradesListResponse data model representing paginated list of trades
  *
  * @typedef {Object} TradesListResponse
- * @property {Trade[]} data - Array of trades
+ * @property {Trade[]} items - Array of trades
  * @property {number} totalCount - Total number of trades matching the filter criteria
  * @property {number} nextTimestamp - Timestamp to use for the next page request
  */
@@ -435,7 +439,7 @@
  * TransactionsListResponse data model representing paginated list of transactions
  *
  * @typedef {Object} TransactionsListResponse
- * @property {Transaction[]} data - Array of transactions
+ * @property {Transaction[]} items - Array of transactions
  * @property {number} totalCount - Total number of transactions matching the filter criteria
  * @property {number} nextTimestamp - Timestamp to use for the next page request
  */

@@ -163,6 +163,10 @@ class Ticker(TypedDict):
         average (float): Average price.
         baseVolume (float): Trading volume in base asset.
         quoteVolume (float): Trading volume in quote asset.
+        bid (float): Highest current bid price.
+        bidVolume (float): Volume available at the highest bid price.
+        ask (float): Lowest current ask price.
+        askVolume (float): Volume available at the lowest ask price.
     """
     symbol: str
     info: TickerInfo
@@ -179,6 +183,10 @@ class Ticker(TypedDict):
     average: float
     baseVolume: float
     quoteVolume: float
+    bid: float
+    bidVolume: float
+    ask: float
+    askVolume: float
 
 class MarketSymbol(TypedDict):
     """
@@ -732,11 +740,11 @@ class OrdersListResponse(TypedDict):
     Represents a paginated list of orders.
 
     Attributes:
-        data (List[Order])
+        items (List[Order])
         totalCount (int)
         nextTimestamp (int)
     """
-    data: List[Order]
+    items: List[Order]
     totalCount: int
     nextTimestamp: int
 
@@ -745,11 +753,11 @@ class TradesListResponse(TypedDict):
     Represents a paginated list of trades.
 
     Attributes:
-        data (List[Trade])
+        items (List[Trade])
         totalCount (int)
         nextTimestamp (int)
     """
-    data: List[Trade]
+    items: List[Trade]
     totalCount: int
     nextTimestamp: int
 
@@ -758,10 +766,10 @@ class TransactionsListResponse(TypedDict):
     Represents a paginated list of transactions.
 
     Attributes:
-        data (List[Transaction])
+        items (List[Transaction])
         totalCount (int)
         nextTimestamp (int)
     """
-    data: List[Transaction]
+    items: List[Transaction]
     totalCount: int
     nextTimestamp: int

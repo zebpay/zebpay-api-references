@@ -188,6 +188,10 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
 | `average`    | `number` | Average price.                                                    |
 | `baseVolume` | `number` | Trading volume in the base asset.                                 |
 | `quoteVolume`| `number` | Trading volume in the quote asset.                                |
+| `bid`        | `number` | Highest current bid price.                                         |
+| `bidVolume`  | `number` | Volume available at the highest bid price.                        |
+| `ask`        | `number` | Lowest current ask price.                                          |
+| `askVolume`  | `number` | Volume available at the lowest ask price.                         |
 
 **`info` Object Fields (Common Examples):**
 
@@ -246,7 +250,11 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
   "percentage": 0.23,
   "average": 65075.25,
   "baseVolume": 1500.50,
-  "quoteVolume": 97682775.00
+  "quoteVolume": 97682775.00,
+  "bid": 65149.90,
+  "bidVolume": 0.8,
+  "ask": 65151.00,
+  "askVolume": 1.2
 }
 ```
 
@@ -873,15 +881,15 @@ Response from `GET /api/v1/trade/order/open-orders` and `GET /api/v1/trade/order
 
 | Field Name      | Type             | Description                                                           |
 |-----------------|------------------|-----------------------------------------------------------------------|
-| `data`          | `Array<Order>`   | List of [Order](#order) objects.                                      |
+| `items`         | `Array<Order>`   | List of [Order](#order) objects.                                      |
 | `totalCount`    | `number`         | Total number of records matching the query (may not always be present/accurate). |
 | `nextTimestamp` | `number`\|`null`  | Timestamp for fetching the next page (pagination cursor).             |
 
-##### Example (`data` field content from `GET /api/v1/trade/order/history`)
+##### Example (`items` field content from `GET /api/v1/trade/order/history`)
 
 ```js
 {
-  "data": [
+  "items": [
     {
       "clientOrderId": "myMarketOrder111",
       "datetime": "2025-04-04T10:00:00.000Z",
@@ -911,15 +919,15 @@ Response from `GET /api/v1/trade/history`.
 
 | Field Name      | Type             | Description                                              |
 |-----------------|------------------|----------------------------------------------------------|
-| `data`          | `Array<Trade>`   | List of [Trade](#trade) objects.                         |
+| `items`         | `Array<Trade>`   | List of [Trade](#trade) objects.                         |
 | `totalCount`    | `number`         | Total number of records matching the query.            |
 | `nextTimestamp` | `number`\|`null`  | Timestamp for fetching the next page.                  |
 
-##### Example (`data` field content from `GET /api/v1/trade/history`)
+##### Example (`items` field content from `GET /api/v1/trade/history`)
 
 ```js
 {
-  "data": [
+  "items": [
     {
       "id": "trade123",
       "timestamp": 1712240400500,
@@ -946,15 +954,15 @@ Response from `GET /api/v1/trade/transaction/history`.
 
 | Field Name      | Type                  | Description                                               |
 |-----------------|-----------------------|-----------------------------------------------------------|
-| `data`          | `Array<Transaction>`  | List of [Transaction](#transaction) objects.              |
+| `items`         | `Array<Transaction>`  | List of [Transaction](#transaction) objects.              |
 | `totalCount`    | `number`              | Total number of records matching the query.             |
 | `nextTimestamp` | `number`\|`null`       | Timestamp for fetching the next page.                     |
 
-##### Example (`data` field content from `GET /api/v1/trade/transaction/history`)
+##### Example (`items` field content from `GET /api/v1/trade/transaction/history`)
 
 ```js
 {
-  "data": [
+  "items": [
     {
       "txid": "txn-fee-abc",
       "timestamp": 1712154000000,

@@ -193,7 +193,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
   "percentage": 0.23,
   "average": 65075.25,
   "baseVolume": 1500.50,
-  "quoteVolume": 97682775.00
+  "quoteVolume": 97682775.00,
+  "bid": 65149.90,
+  "bidVolume": 0.8,
+  "ask": 65151.00,
+  "askVolume": 1.2
 }
 ```
 
@@ -313,34 +317,4 @@ The body must be a JSON object specifying the parameters for the k-line data.
 | `interval` | string | Yes | The candlestick interval (e.g., '1m', '5m', '1h', '1d'). |
 | `startTime` | number | No | The start time in milliseconds to fetch data from. |
 | `endTime` | number | No | The end time in milliseconds to fetch data up to. |
-| `limit` | number | No | The maximum number of data points to return (Default is 500, max is 1000). |
-
-**Example Request:**
-
-```json
-{
-    "symbol": "BTCINR",
-    "interval": "1h",
-    "limit": 100
-}
-```
-
-**Successful Response (200 OK)**
-
-Returns an array of k-line data points. Each k-line is a sub-array containing `[open, high, low, close, volume]`.
-
-**Example Response:**
-
-```json
-{
-    "data": [
-      "5500000",  //open
-      "5600000",  //high,
-      "5400000",  //low
-      "5550000",  //close
-      "10.5",     //volume
-    ]
-}
-```
-
----
+| `
