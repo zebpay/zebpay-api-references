@@ -317,4 +317,43 @@ The body must be a JSON object specifying the parameters for the k-line data.
 | `interval` | string | Yes | The candlestick interval (e.g., '1m', '5m', '1h', '1d'). |
 | `startTime` | number | No | The start time in milliseconds to fetch data from. |
 | `endTime` | number | No | The end time in milliseconds to fetch data up to. |
-| `
+| `limit`   | number | No | The maximum number of data points to retrieve (e.g., 100). |
+
+#### Success Response
+
+| Status Code | Description        |
+|-------------|--------------------|
+| `200 OK`    | Request succeeded. |
+
+The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+
+**`data`** (Array of K-Line arrays):
+- A list of k-line/candlestick data points. Each inner array represents one k-line and contains the following values in order:
+
+| Index | Field       | Type   | Description                                           |
+| :---- | :---------- | :----- | :---------------------------------------------------- |
+| 0     | `startTime` | number | Start time of the interval (milliseconds since epoch).  |
+| 1     | `open`      | string | Opening price for the interval.                       |
+| 2     | `high`      | string | Highest price during the interval.                    |
+| 3     | `low`       | string | Lowest price during the interval.                     |
+| 4     | `close`     | string | Closing price for the interval.                       |
+| 5     | `volume`    | string | Trading volume during the interval.                   |
+| 6     | `endTime`   | number | End time of the interval (milliseconds since epoch).    |
+
+##### Example (`data` field content)
+
+```json
+[
+  [
+    1612345678000,
+    "5500000",
+    "5600000",
+    "5400000",
+    "5550000",
+    "10.5",
+    1612345738000
+  ]
+]
+```
+
+> See [Error Response Structure]((../error-handling.md)) for error formats.
