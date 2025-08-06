@@ -7,9 +7,9 @@ from typing import Any, Dict, List, Optional
 import requests
 import json
 
-from ..utils import config
-from ..utils.auth import AuthUtils
-from ..utils.types import (
+from utils import config
+from utils.auth import AuthUtils
+from utils.types import (
     ApiResponse,
     MarketsData,
     OrderBook,

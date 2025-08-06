@@ -9,3 +9,11 @@
 
 # Ignore all .env files under any subdirectory of "clients"
 **/clients/**/.env
+
+# Ignore Python byte-code files and cache directories
+*.py[cod]
+__pycache__/
+
+# Ignore all node_modules folders everywhere
+node_modules/
+**/node_modules/

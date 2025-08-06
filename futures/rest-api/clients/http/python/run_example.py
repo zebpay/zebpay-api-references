@@ -22,18 +22,18 @@ def run_examples():
         # Initialize client with JWT authentication
         if os.getenv("JWT_TOKEN"):
             print("Initializing client with JWT authentication...")
-            client = FuturesApiClient({
-                "jwt": os.getenv("JWT_TOKEN"),
-                "timeout": 20 # optional field to configure req timeout - default=30 secs
-            })
+            client = FuturesApiClient(
+                jwt=os.getenv("JWT_TOKEN"),
+                timeout=20  # optional field to configure req timeout - default=30 secs
+            )
         elif os.getenv("API_KEY") and os.getenv("SECRET_KEY"):
             # Initialize client with API Key authentication
             print("Initializing client with API Key authentication...")
-            client = FuturesApiClient({
-                "api_key": os.getenv("API_KEY"),
-                "secret_key": os.getenv("SECRET_KEY"),
-                "timeout": 20  # optional field to configure req timeout - default=30 secs
-            })
+            client = FuturesApiClient(
+                api_key=os.getenv("API_KEY"),
+                secret_key=os.getenv("SECRET_KEY"),
+                timeout=20  # optional field to configure req timeout - default=30 secs
+            )
         else:
             # Throw error if credentials are insufficient
             raise ValueError("Credentials Insufficient. One of either JWT or Api Key & Secret Key is required")

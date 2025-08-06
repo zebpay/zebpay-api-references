@@ -11,7 +11,7 @@ const config = {
       // Public endpoints (no authentication required)
       public: {
         market: {
-          markets: 'api/v1/market/markets',
+          markets: '/api/v1/market/markets',
           orderBook: '/api/v1/market/orderBook',
           ticker24Hr: '/api/v1/market/ticker24Hr',
           marketInfo: '/api/v1/market/marketInfo',

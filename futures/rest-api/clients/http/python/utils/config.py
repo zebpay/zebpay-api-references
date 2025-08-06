@@ -51,3 +51,49 @@ ENDPOINTS = {
         }
     }
 }
+
+# Utility ---------------------------------------------------------------------
+
+from typing import List
+
+
+def get_endpoint(path: List[str]) -> str:
+    """Return an endpoint string given a list path into the ENDPOINTS tree.
+
+    Parameters
+    ----------
+    path: List[str]
+        A list of keys representing the nesting (e.g. `["public", "market", "order_book"]`).
+
+    Returns
+    -------
+    str
+        The endpoint string (e.g. "/api/v1/market/orderBook").
+
+    Raises
+    ------
+    KeyError
+        If the supplied path is invalid.
+    """
+    current_level: dict = ENDPOINTS
+    for key in path:
+        if not isinstance(current_level, dict):
+            raise KeyError(
+                f"Path {'.'.join(path)} is invalid – reached a non-mapping object before the end."
+            )
+        if key not in current_level:
+            raise KeyError(
+                f"Key '{key}' not found while traversing ENDPOINTS for path {'.'.join(path)}."
+            )
+        current_level = current_level[key]
+
+    if not isinstance(current_level, str):
+        raise KeyError(
+            f"Path {'.'.join(path)} did not resolve to a string endpoint; got {type(current_level).__name__}."
+        )
+
+    return current_level
+
+
+# Expose only what should be imported when using `from utils.config import *`
+__all__ = ["BASE_URL", "ENDPOINTS", "get_endpoint"]
