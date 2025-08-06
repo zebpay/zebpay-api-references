@@ -10,7 +10,7 @@ Welcome to the official documentation repository for the Zebpay Spot and Futures
 * **Spot API Base URL:** `https://api.zebpay.com` (version: v2)
 * **Futures API Base URL:** `https://futuresbe.zebpay.com` (version: v1)
 * **Getting Started (Spot):** [Spot Getting Started Guide](./spot/api-reference/getting-started.md)
-* **Getting Started (Futures):** [Futures Getting Started Guide](./futures/api-reference/getting-started.md)
+* **Getting Started (Futures):** [Futures Getting Started Guide](./futures/rest-api/reference-docs/getting-started.md)
 
 
 ## 📚 Documentation Sections
@@ -25,11 +25,11 @@ This repository is organized into two main product areas:
     * **[Examples](./spot/examples)**: *(In Progress)* Will include examples similar to the Futures section.
 
 2.  **[Futures API](./futures/README.md)**:
-    * **[API Reference](./futures/api-reference)**: Detailed explanations of core concepts like [Authentication](./futures/api-reference/authentication.md), [Data Models](./futures/api-reference/data-models.md), [Error Handling](./futures/api-reference/error-handling.md), and [Rate Limits](./futures/api-reference/rate-limits.md). Complete reference for all [Public Endpoints](./futures/api-reference/public-endpoints) (Market, System, Exchange) and [Private Endpoints](./futures/api-reference/private-endpoints) (Trade, Wallet).
-    * **[Client Libraries](./futures/clients)**: Ready-to-use client libraries:
-        * **REST/HTTP Clients**: [Node.js](./futures/clients/rest-http/node/README.md), [Python](./futures/clients/rest-http/python/README.md)
-        * **CCXT Integration**: [Node.js (via CCXT)](./futures/clients/ccxt/node/README.md) - *Note: Integration is pending CCXT approval under the `zebpayfutures` identifier* .
-    * **[Examples](./futures/examples)**: Practical code examples using `cURL`, Node.js, and Python for various [Public](./futures/examples/public) and [Private](./futures/examples/private) endpoints.
+    * **[API Reference](./futures/rest-api/reference-docs)**: Detailed explanations of core concepts like [Authentication](./futures/rest-api/reference-docs/authentication.md), [Data Models](./futures/rest-api/reference-docs/data-models.md), [Error Handling](./futures/rest-api/reference-docs/error-handling.md), and [Rate Limits](./futures/rest-api/reference-docs/rate-limits.md). Complete reference for all [Public Endpoints](./futures/rest-api/reference-docs/public-endpoints) (Market, System, Exchange) and [Private Endpoints](./futures/rest-api/reference-docs/private-endpoints) (Trade, Wallet).
+    * **[Client Libraries](./futures/rest-api/clients)**: Ready-to-use client libraries:
+        * **REST/HTTP Clients**: [Node.js](./futures/rest-api/clients/http/node/README.md), [Python](./futures/rest-api/clients/http/python/README.md)
+        * **CCXT Integration**: [Node.js (via CCXT)](./futures/rest-api/clients/ccxt/node/README.md) - *Note: Integration is pending CCXT approval under the `zebpayfutures` identifier* .
+    * **[Examples](./futures/rest-api/examples)**: Practical code examples using `cURL`, Node.js, and Python for various [Public](./futures/rest-api/examples/public) and [Private](./futures/rest-api/examples/private) endpoints.
 
 
 ## 📜 License
