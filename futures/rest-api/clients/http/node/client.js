@@ -147,7 +147,7 @@ class FuturesApiClient {
    */
   async fetchMarkets() {
     // The endpoint path is sourced from the config file
-    return await this._request('GET', config.endpoints.public.market.markets); [cite: futures/clients/rest-http/node/utils/config.js]
+    return await this._request('GET', config.endpoints.public.market.markets);  //[cite: futures/clients/rest-http/node/utils/config.js]
   }
 
   /**
