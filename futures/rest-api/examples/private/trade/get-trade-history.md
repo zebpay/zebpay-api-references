@@ -1,0 +1,180 @@
+# Example: Get Trade History
+
+Retrieves the user's historical trade executions with pagination support.
+
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get Trade History](../../../reference-docs/private-endpoints/trade.md#get-trade-history).
+
+**Endpoint:** `GET /api/v1/trade/history`
+**Authentication:** Required (JWT or API Key/Secret)
+**Query Parameters:**
+
+* `pageSize` (`number`, optional): Number of trades to return per page .
+* `timestamp` (`number`, optional): Fetch trades executed before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+
+-----
+
+### 1. cURL Example
+
+> **💡 Tip:** See the [Authentication Guide](../../../reference-docs/authentication.md) for details on generating headers.
+
+#### Using JWT Authentication (First Page)
+
+```bash
+curl -X GET https://futuresbe.zebpay.com/api/v1/trade/history?pageSize=20 \
+  -H "Accept: application/json" \
+  -H "Authorization: Bearer <your_jwt_token>"
+````
+
+#### Using API Key + Secret Authentication
+
+```bash
+curl -X GET https://futuresbe.zebpay.com/api/v1/trade/history?pageSize=20 \
+  -H "Accept: application/json" \
+  -H "x-auth-apikey: YOUR_API_KEY" \
+  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+```
+
+#### Success Response (Example)
+
+```json
+{
+  "statusDescription": "Success",
+  "data": {
+    "items": [
+      {
+        "id": "trade123",
+        "timestamp": 1712240400500,
+        "datetime": "2025-04-04T10:00:00.500Z",
+        "symbol": "BTCUSDT",
+        "order": "orderLink111",
+        "type": "market",
+        "side": "buy",
+        "takerOrMaker": "taker",
+        "price": 65050.00,
+        "amount": 0.01,
+        "cost": 650.50,
+        "fee": {
+          "cost": 0.6505,
+          "currency": "USDT"
+        },
+        "info": {
+          /* raw exchange data */
+        }
+      }
+      // ... more trades up to pageSize
+    ],
+    "totalCount": 120,
+    "nextTimestamp": 1712240400499 // Use this timestamp to query the next page
+  },
+  "statusCode": 200,
+  "customMessage": ["OK"]
+}
+```
+
+*Note: See [TradesListResponse model](../../../reference-docs/data-models.md#tradeslistresponse) and [Trade model](../../../reference-docs/data-models.md#trade) for field details.*
+
+-----
+
+### 2\. Node.js Client Example
+
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/http/node/README.md) .
+
+```javascript
+async function getTradeHistoryExample(options = {}) {
+  try {
+    console.log(`Workspaceing trade history...`);
+    // Client handles authentication headers automatically
+    const response = await client.getTradeHistory(options); //
+    console.log("API Response:", JSON.stringify(response, null, 2));
+
+    if (response && [200, 201].includes(response.statusCode)) {
+      console.log("Trade History Response Data:", response.data);
+      // Access the list of trades and pagination token:
+      // const trades = response.data.items;
+      // const nextTimestamp = response.data.nextTimestamp;
+      // console.log(`Workspaceed ${trades.length} trades. Next page timestamp: ${nextTimestamp}`);
+      // if (nextTimestamp) {
+      //   // Fetch next page: await getTradeHistoryExample({ pageSize: options.pageSize, timestamp: nextTimestamp });
+      // }
+    } else {
+      console.error("Failed to fetch trade history:", response.statusDescription);
+    }
+  } catch (error) {
+    console.error("Error fetching trade history:", error.message);
+     if (error.cause && error.cause.response) {
+        console.error("API Error Details:", error.cause.response.data);
+    }
+  }
+}
+
+// Example usage: Get first page with 20 items
+getTradeHistoryExample({ pageSize: 20 });
+
+// To fetch the next page, you would use the 'nextTimestamp' from the first response:
+// getTradeHistoryExample({ pageSize: 20, timestamp: 1712240400499 }); // Example timestamp
+```
+
+**Output (Example):**
+
+```js
+// Full API response first...
+Fetching trade history...
+API Response: {
+  "statusDescription": "Success",
+  "data": { // ... (items as shown in cURL example) ... },
+  "statusCode": 200, "customMessage": ["OK"] }
+// Extracted data...
+Trade History Response Data: { // ... (data as shown in cURL example) ... }
+```
+
+-----
+
+### 3\. Python Client Example
+
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/http/python/README.md) .
+
+```python
+import json
+
+def get_trade_history_example(page_size=None, timestamp=None):
+    try:
+        print(f"Fetching trade history...")
+        # Client handles authentication headers automatically
+        response = client.get_trade_history(page_size=page_size, timestamp=timestamp) #
+        print(f"API Response: {json.dumps(response, indent=2)}")
+
+        if response and response.get("statusCode") in [200, 201]:
+            print(f"Trade History Response Data: {response.get('data')}")
+            # Access the list of trades and pagination token:
+            # trades_data = response.get('data', {})
+            # trades = trades_data.get('items', [])
+            # next_timestamp = trades_data.get('nextTimestamp')
+            # print(f"Fetched {len(trades)} trades. Next page timestamp: {next_timestamp}")
+            # if next_timestamp:
+            #   # Fetch next page: get_trade_history_example(page_size=page_size, timestamp=next_timestamp)
+        else:
+            print(f"Failed to fetch trade history: {response.get('statusDescription')}")
+            if response: print(f"Status Code: {response.get('statusCode')}")
+
+    except Exception as e:
+        print(f"Error fetching trade history: {e}")
+
+# Example usage: Get first page with 20 items
+get_trade_history_example(page_size=20)
+
+# To fetch the next page, you would use the 'nextTimestamp' from the first response:
+# get_trade_history_example(page_size=20, timestamp=1712240400499) # Example timestamp
+```
+
+**Output (Example):**
+
+```js
+// Full API response first...
+Fetching trade history...
+API Response: {
+  "statusDescription": "Success",
+  "data": { // ... (data as shown in cURL example, Python format) ... },
+  "statusCode": 200, "customMessage": ["OK"] }
+// Extracted data...
+Trade History Response Data: { // ... (data as shown in cURL example, Python format) ... }
+```
