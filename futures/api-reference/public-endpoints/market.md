@@ -193,7 +193,11 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
   "percentage": 0.23,
   "average": 65075.25,
   "baseVolume": 1500.50,
-  "quoteVolume": 97682775.00
+  "quoteVolume": 97682775.00,
+  "bid": 65149.90,
+  "bidVolume": 0.8,
+  "ask": 65151.00,
+  "askVolume": 1.2
 }
 ```
 
@@ -288,6 +292,67 @@ A list of recent aggregate trades.
     "tradeTime": 1712345000123,
     "isBuyerMarketMaker": false
   }
+]
+```
+
+> See [Error Response Structure]((../error-handling.md)) for error formats.
+
+---
+
+### <a id="get-klines"> Get K-Lines (OHLCV Data)
+
+Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a specified trading symbol and timeframe.
+
+-   **Endpoint:** `POST /api/v1/market/klines`
+-   **Method:** `POST`
+-   **Handler:** `getKlines`
+
+**Request Body**
+
+The body must be a JSON object specifying the parameters for the k-line data.
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `symbol` | string | Yes | The trading pair symbol (e.g., 'BTCINR'). |
+| `interval` | string | Yes | The candlestick interval (e.g., '1m', '5m', '1h', '1d'). |
+| `startTime` | number | No | The start time in milliseconds to fetch data from. |
+| `endTime` | number | No | The end time in milliseconds to fetch data up to. |
+| `limit`   | number | No | The maximum number of data points to retrieve (e.g., 100). |
+
+#### Success Response
+
+| Status Code | Description        |
+|-------------|--------------------|
+| `200 OK`    | Request succeeded. |
+
+The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+
+**`data`** (Array of K-Line arrays):
+- A list of k-line/candlestick data points. Each inner array represents one k-line and contains the following values in order:
+
+| Index | Field       | Type   | Description                                           |
+| :---- | :---------- | :----- | :---------------------------------------------------- |
+| 0     | `startTime` | number | Start time of the interval (milliseconds since epoch).  |
+| 1     | `open`      | string | Opening price for the interval.                       |
+| 2     | `high`      | string | Highest price during the interval.                    |
+| 3     | `low`       | string | Lowest price during the interval.                     |
+| 4     | `close`     | string | Closing price for the interval.                       |
+| 5     | `volume`    | string | Trading volume during the interval.                   |
+| 6     | `endTime`   | number | End time of the interval (milliseconds since epoch).    |
+
+##### Example (`data` field content)
+
+```json
+[
+  [
+    1612345678000,
+    "5500000",
+    "5600000",
+    "5400000",
+    "5550000",
+    "10.5",
+    1612345738000
+  ]
 ]
 ```
 

@@ -40,7 +40,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/history?pageSize=20 \
 {
   "statusDescription": "Success",
   "data": {
-    "data": [
+    "items": [
       {
         "id": "trade123",
         "timestamp": 1712240400500,
@@ -90,7 +90,7 @@ async function getTradeHistoryExample(options = {}) {
     if (response && [200, 201].includes(response.statusCode)) {
       console.log("Trade History Response Data:", response.data);
       // Access the list of trades and pagination token:
-      // const trades = response.data.data;
+      // const trades = response.data.items;
       // const nextTimestamp = response.data.nextTimestamp;
       // console.log(`Workspaceed ${trades.length} trades. Next page timestamp: ${nextTimestamp}`);
       // if (nextTimestamp) {
@@ -121,7 +121,7 @@ getTradeHistoryExample({ pageSize: 20 });
 Fetching trade history...
 API Response: {
   "statusDescription": "Success",
-  "data": { // ... (data as shown in cURL example) ... },
+  "data": { // ... (items as shown in cURL example) ... },
   "statusCode": 200, "customMessage": ["OK"] }
 // Extracted data...
 Trade History Response Data: { // ... (data as shown in cURL example) ... }
@@ -147,7 +147,7 @@ def get_trade_history_example(page_size=None, timestamp=None):
             print(f"Trade History Response Data: {response.get('data')}")
             # Access the list of trades and pagination token:
             # trades_data = response.get('data', {})
-            # trades = trades_data.get('data', [])
+            # trades = trades_data.get('items', [])
             # next_timestamp = trades_data.get('nextTimestamp')
             # print(f"Fetched {len(trades)} trades. Next page timestamp: {next_timestamp}")
             # if next_timestamp:

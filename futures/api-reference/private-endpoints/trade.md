@@ -115,6 +115,47 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ---
 
+### <a id="cancel-all-orders"> </a> Cancel All Orders
+
+Cancels all open (unfilled) orders for the authenticated user.
+
+#### Request
+
+| Attribute       | Value                         |
+| :-------------- | :---------------------------- |
+| **HTTP Method** | `DELETE`                      |
+| **Endpoint Path**| `/api/v1/trade/order/all`     |
+| **Auth Required**| Yes                           |
+| **Query Params** | None                          |
+| **Request Body** | N/A                           |
+
+#### Success Response
+
+| Status Code | Description      |
+| :---------- | :--------------- |
+| `200 OK`    | Request succeeded. |
+
+The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+
+**`data`** (array of objects) :
+- A list of all orders that were successfully canceled. The `data` field will be an empty array `[]` if there were no open orders to cancel.
+
+##### Example (`data` field content)
+
+```json
+[
+    {
+        "clientOrderId": "598d3bda315afed6f07f-370-zeb",
+        "status": "canceled",
+        "symbol": "BTCUSDT"
+    }
+]
+```
+
+> See [Error Response Structure](../error-handling.md) for error formats.
+
+---
+
 ### <a id="get-order"> Get Order Details
 
 Fetches details of a specific order using its client order ID.
@@ -158,6 +199,61 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
   "status": "canceled", // Status updated after cancellation
   "reduceOnly": false,
   "postOnly": false
+}
+```
+
+> See [Error Response Structure]((../error-handling.md)) for error formats.
+
+---
+
+### <a id="edit-order"> </a> Edit Order
+
+Edits an existing open order. This can be used to change the price or amount of a pending order.
+
+#### Request
+
+| Attribute       | Value                       |
+| :-------------- | :-------------------------- |
+| **HTTP Method** | `PATCH`                     |
+| **Endpoint Path**| `/api/v1/trade/order`       |
+| **Auth Required**| Yes                         |
+| **Query Params** | None                        |
+| **Request Body** | (object, required) See below |
+
+**Request Body Parameters:**
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `clientOrderId` | string | Yes | The unique identifier for the order you wish to edit. |
+| `price` | number | No | The new price for the order. |
+| `amount` | number | No | The new quantity for the order. |
+| `triggerPrice`| number | No | The new trigger price for stop or take-profit orders. |
+
+#### Success Response
+
+| Status Code | Description      |
+| :---------- | :--------------- |
+| `200 OK`    | Request succeeded. |
+
+The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+
+**`data`** ([EditOrderResponseData](../../data-models.md#editorderresponsedata) object) :
+- Details of the edited order.
+
+##### Example (`data` field content)
+
+```json
+{
+    "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+    "timeInForce": "GTC",
+    "price": 7100000,
+    "amount": 0.001,
+    "info": {
+        "availableBalance": 150.00,
+        "status": "Edit request submitted successfully",
+        "lockedMargin": 0,
+        "lockedMarginInMarginAsset": 0
+    }
 }
 ```
 
@@ -419,7 +515,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "clientOrderId": "myOpenLimitOrder789",
       "datetime": "2025-04-05T13:18:00.000Z",
@@ -683,7 +779,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "clientOrderId": "myMarketOrder111",
       "datetime": "2025-04-04T10:00:00.000Z",
@@ -746,7 +842,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "id": "trade123",
       "timestamp": 1712240400500,
@@ -807,7 +903,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 
 ```json
 {
-  "data": [
+  "items": [
     {
       "txid": "txn-fee-abc",
       "timestamp": 1712154000000,

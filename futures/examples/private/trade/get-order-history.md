@@ -39,7 +39,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/history?pageSize=20 
 {
   "statusDescription": "Success",
   "data": {
-    "data": [
+    "items": [
       {
         "clientOrderId": "myMarketOrder111",
         "datetime": "2025-04-04T10:00:00.000Z",
@@ -104,7 +104,7 @@ async function getOrderHistoryExample(options = {}) {
     if (response && [200, 201].includes(response.statusCode)) {
       console.log("Order History Response Data:", response.data);
       // Access the list of orders and pagination token:
-      // const orders = response.data.data;
+      // const orders = response.data.items;
       // const nextTimestamp = response.data.nextTimestamp;
       // console.log(`Workspaceed ${orders.length} orders. Next page timestamp: ${nextTimestamp}`);
       // if (nextTimestamp) {
@@ -161,7 +161,7 @@ def get_order_history_example(page_size=None, timestamp=None):
             print(f"Order History Response Data: {response.get('data')}")
             # Access the list of orders and pagination token:
             # orders_data = response.get('data', {})
-            # orders = orders_data.get('data', [])
+            # orders = orders_data.get('items', [])
             # next_timestamp = orders_data.get('nextTimestamp')
             # print(f"Fetched {len(orders)} orders. Next page timestamp: {next_timestamp}")
             # if next_timestamp:

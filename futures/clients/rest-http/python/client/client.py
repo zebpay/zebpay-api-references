@@ -303,6 +303,40 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['public', 'market', 'agg_trade'])
         return self._request('GET', endpoint, params={'symbol': symbol})
 
+    def get_klines(self, kline_params: Dict[str, Any]) -> ApiResponse[List[List[Any]]]:
+        """
+        Retrieve historical candlestick data (K-lines) for a specific trading symbol and interval.
+
+        Args:
+            kline_params (Dict[str, Any]): Dictionary containing k-line parameters.
+                Must include:
+                  - symbol: Trading symbol (e.g., 'BTCINR').
+                  - interval: Candlestick interval (e.g., '1m', '5m', '1h').
+                Optionally include:
+                  - startTime: Start time in milliseconds.
+                  - endTime: End time in milliseconds.
+                  - limit: Maximum number of data points to return.
+
+        Returns:
+            ApiResponse[List[List[Any]]]: A list of K-line data points.
+
+        Raises:
+            ValueError: If required parameters are missing.
+
+        Example:
+            klines = client.get_klines({
+                "symbol": "BTCINR",
+                "interval": "1h",
+                "limit": 100
+            })
+        """
+        required_keys = ['symbol', 'interval']
+        if not all(key in kline_params for key in required_keys):
+            raise ValueError(f"Required k-line parameters missing. Needed: {required_keys}")
+        kline_params['symbol'] = self._normalize_string(kline_params['symbol'])
+        endpoint = config.get_endpoint(['public', 'market', 'klines'])
+        return self._request('POST', endpoint, data=kline_params)
+
     # ------------------- SYSTEM ENDPOINTS (PUBLIC) -------------------
     def get_system_time(self) -> ApiResponse[Dict[str, Any]]:
         """
@@ -482,6 +516,50 @@ class FuturesApiClient:
             cancel_params['symbol'] = self._normalize_string(cancel_params['symbol'])
         endpoint = config.get_endpoint(['private', 'trade', 'order'])
         return self._request('DELETE', endpoint, data=cancel_params)
+
+    def edit_order(self, order_params: Dict[str, Any]) -> ApiResponse[Any]:
+        """
+        Edit an existing open order.
+
+        Args:
+            order_params (Dict[str, Any]): Dictionary containing the edit parameters.
+                Must include:
+                  - clientOrderId: The unique identifier for the order to edit.
+                Optionally include:
+                  - price: The new price for the order.
+                  - amount: The new quantity for the order.
+                  - triggerPrice: The new trigger price for stop or take-profit orders.
+
+        Returns:
+            ApiResponse[Any]: Confirmation of the edit request.
+
+        Raises:
+            ValueError: If clientOrderId is missing.
+
+        Example:
+            edit_response = client.edit_order({
+                "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+                "price": 7100000,
+                "amount": 0.001
+            })
+        """
+        if 'clientOrderId' not in order_params:
+            raise ValueError('Client order ID (clientOrderId) is required')
+        endpoint = config.get_endpoint(['private', 'trade', 'order'])
+        return self._request('PATCH', endpoint, data=order_params)
+
+    def cancel_all_orders(self) -> ApiResponse[List[CancelOrderResponseData]]:
+        """
+        Cancel all open (unfilled) orders for the authenticated user.
+
+        Returns:
+            ApiResponse[List[CancelOrderResponseData]]: A list of all orders that were successfully canceled.
+
+        Example:
+            cancel_response = client.cancel_all_orders()
+        """
+        endpoint = config.get_endpoint(['private', 'trade', 'order_all'])
+        return self._request('DELETE', endpoint)
 
     def get_order(self, client_order_id: str) -> ApiResponse[Order]:
         """
