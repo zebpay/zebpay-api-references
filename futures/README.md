@@ -1,35 +1,32 @@
-# Zebpay Futures API Documentation
+# Zebpay Futures — Developer Documentation
 
-Welcome to the official documentation repository for the Zebpay Futures REST API. This repository provides comprehensive resources to help you integrate with our futures trading platform.
+The **Zebpay Futures** product offers two complementary integration surfaces:
 
-## 📚 Documentation Sections
+1. **REST API** – programmatic access for placing orders, querying account information and retrieving market data.
+2. **Webhooks** – push-style notifications to automate trading strategies triggered by external events.
 
-This repository is organized into the following main sections:
+This directory contains documentation, client libraries and examples for both surfaces.
 
-1.  **[API Reference](rest-api/reference-docs)**:
-    * Detailed explanations of core concepts like [Authentication](rest-api/reference-docs/authentication.md) , [Data Models](rest-api/reference-docs/data-models.md) , [Error Handling](rest-api/reference-docs/error-handling.md) , and [Rate Limits](rest-api/reference-docs/rate-limits.md) .
-    * Complete reference for all [Public Endpoints](rest-api/reference-docs/public-endpoints) (Market, System, Exchange) and [Private Endpoints](rest-api/reference-docs/private-endpoints) (Trade, Wallet) .
-    * Includes information on request parameters, response structures, and authentication requirements .
-    * Start here: [Getting Started Guide](rest-api/reference-docs/getting-started.md) .
+## 📚 Documentation Map
 
-2.  **[Client Libraries](rest-api/clients)**:
-    * Ready-to-use client libraries to simplify interaction with the API.
-    * **REST/HTTP Clients**:
-        * [Node.js Client](rest-api/clients/http/node/README.md)
-        * [Python Client](rest-api/clients/http/python/README.md)
-    * **CCXT Integration**:
-        * [Node.js (via CCXT)](rest-api/clients/ccxt/node/README.md)  - *Note: Integration pending CCXT approval under `zebpayfutures` identifier.*
+| Surface | Location | Docs | Clients | Examples |
+|---------|----------|------|---------|----------|
+| **REST API** | `./rest-api` | [Reference](./rest-api/reference-docs) | [Node.js](./rest-api/clients/http/node/README.md) / [Python](./rest-api/clients/http/python/README.md) / [CCXT](./rest-api/clients/ccxt/node/README.md) | [Examples](./rest-api/examples) |
+| **Webhooks** | `./webhooks` | [Reference](./webhooks/reference-docs) | — | [Examples](./webhooks/examples) |
 
-3.  **[Examples](rest-api/examples)**:
-    * Practical code examples demonstrating how to use various API endpoints.
-    * Examples are provided for:
-        * `cURL`
-        * Node.js (using the REST client)
-        * Python (using the REST client)
-    * Covers both [Public Examples](rest-api/examples/public) and [Private Examples](rest-api/examples/private).
+### REST API Highlights
+* Covers **public** (Market, Exchange, System) and **private** (Trade, Wallet) endpoints.
+* Auth with JWT, industry-standard rate limits and error semantics.
+* Start with the [Getting Started guide](./rest-api/reference-docs/getting-started.md).
+
+### Webhooks Highlights
+* Subscribe to order-lifecycle events, position changes and more.
+* Two parts:
+  * **Management Endpoints** (create, list, pause …) – authenticated REST calls.
+  * **Event Listener** – HTTPS callback on your infrastructure signed with a shared secret.
+* Begin with [Authentication](./webhooks/reference-docs/authentication.md) and the [Event Listener guide](./webhooks/reference-docs/event-listener.md).
 
 ## 🤝 Contributing & Support
+Please open an issue for questions or suggestions. Pull requests are welcome!
 
-Please refer to the contribution guidelines if you wish to contribute. For issues or questions, please open an issue in this repository.
-
-Happy Trading!
+Happy trading!
