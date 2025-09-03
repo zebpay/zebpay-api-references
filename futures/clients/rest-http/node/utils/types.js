@@ -379,15 +379,20 @@
  * EditOrderResponseData data model representing the response from editing an order
  *
  * @typedef {Object} EditOrderResponseData
- * @property {string} clientOrderId - The client-side ID of the edited order.
- * @property {string} timeInForce - The time-in-force policy (e.g., 'GTC').
- * @property {number} price - The updated price of the order.
- * @property {number} amount - The updated amount of the order.
- * @property {Object} info - An object containing additional details from the exchange.
- * @property {number} info.availableBalance - The available balance.
- * @property {string} info.status - A message confirming the request status.
- * @property {number} info.lockedMargin - The locked margin.
- * @property {number} info.lockedMarginInMarginAsset - The locked margin in the margin asset.
+ * @property {undefined} id - Order ID (undefined in edit response)
+ * @property {string} clientOrderId - The client-generated unique order identifier that was edited
+ * @property {null} lastTradeTimestamp - Last trade timestamp (null in edit response)
+ * @property {string} timeInForce - Time in force policy (typically "GTC")
+ * @property {number} price - The new/updated price for the order
+ * @property {null} average - Average fill price (null in edit response)
+ * @property {number} amount - The new/updated amount for the order
+ * @property {Array<Object>} trades - List of trades (empty array in edit response)
+ * @property {null} fee - Fee information (null in edit response)
+ * @property {Object} info - Raw response data from the exchange containing edit status details
+ * @property {string} info.status - Edit operation status message
+ * @property {number} info.availableBalance - Available balance after the edit operation
+ * @property {number} info.lockedMargin - Amount of margin locked for positions
+ * @property {number} info.lockedMarginInMarginAsset - Locked margin amount in the margin asset
  */
 
 /**

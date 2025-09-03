@@ -57,7 +57,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR \
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](futures/clients/rest-http/node/README.md) for setup instructions [cite: futures/clients/rest-http/node/README.md].
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions [cite: ../../../clients/rest-http/node/README.md].
 
 Assumes you have initialized the `FuturesApiClient` as `client`. [cite: futures/clients/rest-http/node/run.example.js]
 
@@ -129,7 +129,7 @@ Aggregate Trades Data for BTCINR: [
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](futures/clients/rest-http/python/README.md) for setup instructions [cite: futures/clients/rest-http/python/README.md].
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions [cite: ../../../clients/rest-http/python/README.md].
 
 Assumes you have initialized the `FuturesApiClient` as `client`. [cite: futures/clients/rest-http/python/run_example.py]
 

@@ -10,7 +10,7 @@ Retrieves the user's balances for all assets in their futures wallet.
 
 ### 1. cURL Example
 
-> **💡 Tip:** Manual authentication requires careful construction of headers. For detailed steps on obtaining a JWT or generating an API Key signature, please refer to the [Authentication Guide](../../api-reference/authentication.md) .
+> **💡 Tip:** Manual authentication requires careful construction of headers. For detailed steps on obtaining a JWT or generating an API Key signature, please refer to the [Authentication Guide](../../../api-reference/authentication.md) .
 
 #### Method 1: Using JWT Authentication
 
@@ -63,7 +63,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/wallet/balance \
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and **initialized the client with valid authentication credentials** (JWT or API Key/Secret) first. See the [Node.js Client README](futures/clients/rest-http/node/README.md) and the [Authentication Guide](../../api-reference/authentication.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and **initialized the client with valid authentication credentials** (JWT or API Key/Secret) first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) and the [Authentication Guide](../../../api-reference/authentication.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client` with proper authentication.
 
@@ -137,7 +137,7 @@ Wallet Balance Data: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and **initialized the client with valid authentication credentials** (JWT or API Key/Secret) first. See the [Python Client README](futures/clients/rest-http/python/README.md) and the [Authentication Guide](../../api-reference/authentication.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and **initialized the client with valid authentication credentials** (JWT or API Key/Secret) first. See the [Python Client README](../../../clients/rest-http/python/README.md) and the [Authentication Guide](../../../api-reference/authentication.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client` with proper authentication.
 

@@ -1,6 +1,6 @@
 # API Reference: Private Wallet Endpoints
 
-These endpoints interact with the user's wallet and require **Authentication (JWT or API Key/Secret)**. See the [Authentication Guide](../../concepts/authentication.md) for details on how to authenticate requests. All successful responses follow the standard [ApiResponse](../../data-models.md#apiresponse) structure.
+These endpoints interact with the user's wallet and require **Authentication (JWT or API Key/Secret)**. See the [Authentication Guide](../authentication.md) for details on how to authenticate requests. All successful responses follow the standard [ApiResponse](../data-models.md#apiresponse) structure.
 
 ---
 
@@ -24,10 +24,10 @@ Retrieves the user's balances for all assets in their wallet.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([WalletBalance](../../data-models.md#walletbalance) object):
-- A mapping of asset symbols (e.g., "USDT", "BTC") to their respective [AssetBalance](../../data-models.md#assetbalance) objects detailing total, free, and used amounts.
+**`data`** ([WalletBalance](../data-models.md#walletbalance) object):
+- A mapping of asset symbols (e.g., "USDT", "BTC") to their respective [AssetBalance](../data-models.md#assetbalance) objects detailing total, free, and used amounts.
 
 ##### Example (`data` field content)
 
@@ -46,4 +46,4 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.

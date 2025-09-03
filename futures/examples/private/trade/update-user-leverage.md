@@ -2,7 +2,7 @@
 
 Updates the user's leverage setting for a specific trading symbol.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Update User Leverage](../../../../api-reference/private-endpoints/trade.md/#update-user-leverage).
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Update User Leverage](../../../api-reference/private-endpoints/trade.md#update-user-leverage).
 
 **Endpoint:** `POST /api/v1/trade/update/userLeverage`
 **Authentication:** Required (JWT or API Key/Secret)
@@ -15,7 +15,7 @@ Updates the user's leverage setting for a specific trading symbol.
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../../../api-reference/authentication.md) for details on generating headers . The request body (including `timestamp` for API key auth) is used for signature generation.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers . The request body (including `timestamp` for API key auth) is used for signature generation.
 
 #### Using JWT Authentication
 
@@ -67,13 +67,13 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/update/userLeverage \
 }
 ```
 
-*Note: See [Leverage model](../../../..//api-reference/data-models.md#leverage) for field details. Response reflects the newly set leverage.*
+*Note: See [Leverage model](../../../api-reference/data-models.md#leverage) for field details. Response reflects the newly set leverage.*
 
 -----
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../../clients/rest-http/node/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/rest-http/node/README.md) .
 
 ```javascript
 async function updateUserLeverageExample(leverageParams) {
@@ -121,7 +121,7 @@ Update User Leverage Response Data: { // ... (data as shown in cURL example) ...
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../../clients/rest-http/python/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/rest-http/python/README.md) .
 
 ```python
 import json

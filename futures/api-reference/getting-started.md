@@ -11,7 +11,7 @@ This guide walks you through the first steps of integrating with the API—wheth
 While direct HTTP access is supported, **the fastest and most reliable way to get started is by using one of our sample client libraries** for supported languages:
 
 - [Node.js Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)
-- [Python Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)
+- [Python Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/python)
 
 > ### ✅ Why use a client?
 >
@@ -97,7 +97,7 @@ x-auth-signature: <signature>
 Accept: application/json
 ```
 
-> 🧠 Full instructions: [Manual Authentication Guide](https://github.com/zebpay/zebpay-api-references/blob/main/futures/api-reference/authentication.md#manual-api-key--seecret-authentication)
+> 🧠 Full instructions: [Manual Authentication Guide](https://github.com/zebpay/zebpay-api-references/blob/main/futures/api-reference/authentication.md#manual-api-key--secret-authentication)
 
 #### Example `curl` for API Key auth
 
@@ -116,7 +116,7 @@ If you're using direct HTTP:
 
 - 📚 **Explore the [API Reference](../api-reference)** for all endpoints.
 - 🔍 **Review [Data Models](../api-reference/data-models.md)** to understand request/response shapes.
-- 🚨 **Handle errors gracefully** with our [Error Handling Guide](../concepts/error-handling.md).
+- 🚨 **Handle errors gracefully** with our [Error Handling Guide](./error-handling.md).
 
 Or…
 

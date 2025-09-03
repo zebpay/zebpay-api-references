@@ -15,7 +15,7 @@ This limit generally applies per user account or API key for authenticated (priv
 If your application exceeds the rate limit, the API will respond with:
 
 * **HTTP Status Code:** `429 Too Many Requests`
-* **Response Body:** Typically contains an error message indicating the rate limit has been exceeded, following the standard [Error Response Structure](#errorresponse).
+* **Response Body:** Typically contains an error message indicating the rate limit has been exceeded, following the standard [Error Response Structure](./error-handling.md#errorresponse).
 * **`Retry-After` Header (Optional):** The response *may* include a `Retry-After` header indicating how many seconds you should wait before attempting another request.
 
 Your application should be designed to handle `429` responses gracefully, typically by implementing an exponential backoff strategy (waiting for the duration specified in `Retry-After` or a default period before retrying). Continuously hitting the rate limit may lead to temporary IP or key blocking.

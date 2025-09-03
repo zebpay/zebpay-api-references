@@ -71,7 +71,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/positions \
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../clients/rest-http/node/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/rest-http/node/README.md) .
 
 ```javascript
 async function getPositionsExample(symbols = [], status = undefined) {
@@ -125,7 +125,7 @@ Get Positions Response Data: [ // ... (data array as shown in cURL example) ... 
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../clients/rest-http/python/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/rest-http/python/README.md) .
 
 ```python
 import json
