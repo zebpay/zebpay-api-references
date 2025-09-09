@@ -24,7 +24,7 @@ Retrieves trading fee details (maker/taker) for a specific trading symbol.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (object):
 - **`symbol`** (`string`): The trading symbol queried.
@@ -41,7 +41,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -65,7 +65,7 @@ Retrieves trading fee details for all supported trading pairs.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (Array<object>):
 - A list where each object contains `symbol` (`string`), `makerFee` (`number`), and `takerFee` (`number`) for a trading pair.
@@ -87,7 +87,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -111,9 +111,9 @@ Retrieves comprehensive exchange configuration information, including trading ru
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([ExchangeInfo](../../data-models.md#exchangeinfo) object) :
+**`data`** ([ExchangeInfo](../data-models.md#exchangeinfo) object) :
 - Detailed configuration including available pairs, filters, fees, leverage options, supported currencies, conversion rates, etc. Refer to the Data Models section for the full structure.
 
 ##### Example (`data` field content - highly truncated)
@@ -144,7 +144,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -168,9 +168,9 @@ Retrieves information about all available trading pairs, including status, asset
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([PairsInfo](../../data-models.md#pairsinfo) object):
+**`data`** ([PairsInfo](../data-models.md#pairsinfo) object):
 - Includes list of pairs with basic info (name, symbol, status, icon, assets), transaction types, quote currencies, categories, and conversion rates. Refer to the Data Models section for the full structure.
 
 ##### Example (`data` field content - highly truncated)
@@ -182,7 +182,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
       "name": "Bitcoin",
       "pair": "BTCUSDT",
       "isActive": true,
-      "iconURL": "[https://example.com/btc.png](https://www.google.com/search?q=https://example.com/btc.png)",
+      "iconURL": "https://example.com/btc.png",
       "baseAsset": "BTC",
       "quoteAsset": "USDT",
       "marginAsset": "USDT"
@@ -196,4 +196,4 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.

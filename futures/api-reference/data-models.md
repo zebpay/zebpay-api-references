@@ -33,6 +33,7 @@ This section describes the common JSON data structures returned by the API. Unde
 ### 🔁 Action Response Models
 - [`MarketsData`](#marketsdata)
 - [`CreateOrderResponseData`](#createorderresponsedata)
+- [`EditOrderResponseData`](#editorderresponsedata)
 - [`AddTPSLResponseData`](#addtpslresponsedata)
 - [`ClosePositionResponseData`](#closepositionresponsedata)
 - [`CancelOrderResponseData`](#cancelorderresponsedata)
@@ -774,6 +775,59 @@ Response from `POST /api/v1/trade/order`. This structure is also used as the bas
   "reduceOnly": false,
   "postOnly": false,
   "status": "filled"
+}
+```
+
+---
+
+<a id="editorderresponsedata"></a>
+### `EditOrderResponseData`
+
+Response from `PATCH /api/v1/trade/order`. This structure represents the response when editing an existing order.
+
+**Fields:**
+
+| Field Name              | Type             | Description                                                           |
+|-------------------------|------------------|-----------------------------------------------------------------------|
+| `id`                    | `undefined`      | Order ID (undefined in edit response).                               |
+| `clientOrderId`         | `string`         | The client-generated unique order identifier that was edited.        |
+| `lastTradeTimestamp`    | `null`           | Last trade timestamp (null in edit response).                        |
+| `timeInForce`           | `string`         | Time in force policy (typically "GTC").                              |
+| `price`                 | `number`         | The new/updated price for the order.                                 |
+| `average`               | `null`           | Average fill price (null in edit response).                          |
+| `amount`                | `number`         | The new/updated amount for the order.                                |
+| `trades`                | `Array<object>`  | List of trades (empty array in edit response).                       |
+| `fee`                   | `null`           | Fee information (null in edit response).                             |
+| `info`                  | `object`         | Raw response data from the exchange containing edit status details.  |
+
+**`info` Object Fields:**
+
+| Field Name                    | Type     | Description                                      |
+|-------------------------------|----------|--------------------------------------------------|
+| `status`                      | `string` | Edit operation status message.                   |
+| `availableBalance`            | `number` | Available balance after the edit operation.     |
+| `lockedMargin`                | `number` | Amount of margin locked for positions.          |
+| `lockedMarginInMarginAsset`   | `number` | Locked margin amount in the margin asset.       |
+
+##### Example (`data` field content)
+
+```js
+{
+  "id": undefined,
+  "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+  "lastTradeTimestamp": null,
+  "timeInForce": "GTC",
+  "price": 7100000,
+  "average": null,
+  "amount": 0.001,
+  "trades": [],
+  "fee": null,
+  "info": {
+    "status": "Edit request submitted successfully",
+    "availableBalance": 700,
+    "lockedMargin": 200,
+    "lockedMarginInMarginAsset": 200
+  }
 }
 ```
 

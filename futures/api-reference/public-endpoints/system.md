@@ -25,7 +25,7 @@ Retrieves the current API server time. Useful for synchronizing clocks or valida
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (object):
 - **`timestamp`** (`number`): Current server time in Unix timestamp (ms).
@@ -38,7 +38,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -62,7 +62,7 @@ Checks the operational status of the API system.
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (object):
 - **`status`** (`string`): Current system status. Possible values include `"ok"`, `"error"`.
@@ -75,4 +75,4 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../data-models.md#error-response) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.

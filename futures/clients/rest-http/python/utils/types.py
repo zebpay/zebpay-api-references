@@ -685,21 +685,44 @@ ClosePositionResponseData = CreateOrderResponseData
 
 class EditOrderResponseInfo(TypedDict):
     """
-    Contains additional edit order details.
+    Contains additional edit order details from the raw exchange response.
+
+    Attributes:
+        status (str): Edit operation status message.
+        availableBalance (float): Available balance after the edit operation.
+        lockedMargin (float): Amount of margin locked for positions.
+        lockedMarginInMarginAsset (float): Locked margin amount in the margin asset.
     """
-    availableBalance: float
     status: str
+    availableBalance: float
     lockedMargin: float
     lockedMarginInMarginAsset: float
 
 class EditOrderResponseData(TypedDict):
     """
-    Represents the response from editing an order.
+    Represents the response from editing an order via PATCH /api/v1/trade/order.
+
+    Attributes:
+        id: Order ID (undefined/None in edit response).
+        clientOrderId (str): The client-generated unique order identifier that was edited.
+        lastTradeTimestamp: Last trade timestamp (None in edit response).
+        timeInForce (str): Time in force policy (typically "GTC").
+        price (float): The new/updated price for the order.
+        average: Average fill price (None in edit response).
+        amount (float): The new/updated amount for the order.
+        trades (List[Dict[str, Any]]): List of trades (empty list in edit response).
+        fee: Fee information (None in edit response).
+        info (EditOrderResponseInfo): Raw response data from the exchange containing edit status details.
     """
+    id: None
     clientOrderId: str
+    lastTradeTimestamp: None
     timeInForce: str
     price: float
+    average: None
     amount: float
+    trades: List[Dict[str, Any]]
+    fee: None
     info: EditOrderResponseInfo
 
 class CancelOrderResponseInfo(TypedDict):

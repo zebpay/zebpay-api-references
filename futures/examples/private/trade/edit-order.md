@@ -50,21 +50,26 @@ curl -X PATCH https://futuresbe.zebpay.com/api/v1/trade/order \
 
 ```json
 {
-    "statusDescription": "OK",
-    "data": {
-        "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-        "timeInForce": "GTC",
-        "price": 7100000,
-        "amount": 0.001,
-        "info": {
-            "availableBalance": 150.00,
-            "status": "Edit request submitted successfully",
-            "lockedMargin": 0,
-            "lockedMarginInMarginAsset": 0
-        }
-    },
-    "statusCode": 200,
-    "customMessage": ["OK"]
+  "statusDescription": "OK",
+  "data": {
+    "id": undefined,
+    "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+    "lastTradeTimestamp": null,
+    "timeInForce": "GTC",
+    "price": 7100000,
+    "average": null,
+    "amount": 0.001,
+    "trades": [],
+    "fee": null,
+    "info": {
+      "status": "Edit request submitted successfully",
+      "availableBalance": 700,
+      "lockedMargin": 200,
+      "lockedMarginInMarginAsset": 200
+    }
+  },
+  "statusCode": 200,
+  "customMessage": ["OK"]
 }
 ```
 
@@ -74,7 +79,7 @@ curl -X PATCH https://futuresbe.zebpay.com/api/v1/trade/order \
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../clients/rest-http/node/README.md).
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/rest-http/node/README.md).
 
 ```javascript
 async function editOrderExample(orderParams) {
@@ -102,7 +107,7 @@ const editOrderParams = {
   clientOrderId: "7a5be049213ad0fb5e17-370-zeb",
   price: 7100000,
   amount: 0.001,
-  triggerPrice": 7050000
+  triggerPrice: 7050000
 };
 editOrderExample(editOrderParams);
 ```
@@ -124,7 +129,7 @@ Edit Order Response Data: { // ... (data as shown in cURL example) ... }
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../clients/rest-http/python/README.md).
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/rest-http/python/README.md).
 
 ```python
 import json

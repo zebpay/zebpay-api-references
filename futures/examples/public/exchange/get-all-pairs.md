@@ -28,7 +28,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/pairs \
         "name": "Bitcoin",
         "pair": "BTCUSDT",
         "isActive": true,
-        "iconURL": "[https://example.com/btc.png](https://example.com/btc.png)",
+        "iconURL": "https://example.com/btc.png",
         "baseAsset": "BTC",
         "quoteAsset": "USDT",
         "marginAsset": "USDT"
@@ -37,7 +37,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/pairs \
         "name": "Ethereum",
         "pair": "ETHUSDT",
         "isActive": true,
-        "iconURL": "[https://example.com/eth.png](https://example.com/eth.png)",
+        "iconURL": "https://example.com/eth.png",
         "baseAsset": "ETH",
         "quoteAsset": "USDT",
         "marginAsset": "USDT"
@@ -59,7 +59,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/pairs \
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](futures/clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -109,7 +109,7 @@ Pairs Info Data received.
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](futures/clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 

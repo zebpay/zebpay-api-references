@@ -75,13 +75,13 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order \
 }
 ```
 
-*Note: See [CreateOrderResponseData model](https://www.google.com/search?q=futures/api-reference/data-models.md%23createorderresponsedata) for field details.*
+*Note: See [CreateOrderResponseData model](../../api-reference/data-models.md#createorderresponsedata) for field details.*
 
 -----
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](https://www.google.com/search?q=futures/clients/rest-http/node/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/rest-http/node/README.md) .
 
 ```javascript
 async function createOrderExample(orderParams) {
@@ -133,7 +133,7 @@ Create Order Response Data: { // ... (data as shown in cURL example) ... }
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](https://www.google.com/search?q=futures/clients/rest-http/python/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/rest-http/python/README.md) .
 
 ```python
 import json

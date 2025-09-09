@@ -1,6 +1,6 @@
 # API Reference: Private Trade Endpoints
 
-These endpoints allow users to manage orders, positions, leverage, and view trade-related history. **Authentication (JWT or API Key/Secret) is required.** See the [Authentication Guide](../../concepts/authentication.md) for details on how to authenticate requests.
+These endpoints allow users to manage orders, positions, leverage, and view trade-related history. **Authentication (JWT or API Key/Secret) is required.** See the [Authentication Guide](../authentication.md) for details on how to authenticate requests.
 
 ---
 
@@ -35,9 +35,9 @@ Places a new trading order.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. | *(Note: Some APIs might return 201 Created)* |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([CreateOrderResponseData](../../data-models.md#createorderresponsedata) object) :
+**`data`** ([CreateOrderResponseData](../data-models.md#createorderresponsedata) object) :
 - Details of the created order, typically including fields like `clientOrderId`, `timestamp`, `status`, etc.
 
 ##### Example (`data` field content)
@@ -61,7 +61,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../api-reference/error-handling.md) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -90,9 +90,9 @@ Cancels an existing open order.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([CancelOrderResponseData](../../data-models.md#cancelorderresponsedata) object) :
+**`data`** ([CancelOrderResponseData](../data-models.md#cancelorderresponsedata) object) :
 - Details confirming the cancellation attempt.
 
 ##### Example (`data` field content)
@@ -135,7 +135,7 @@ Cancels all open (unfilled) orders for the authenticated user.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (array of objects) :
 - A list of all orders that were successfully canceled. The `data` field will be an empty array `[]` if there were no open orders to cancel.
@@ -176,9 +176,9 @@ Fetches details of a specific order using its client order ID.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([Order](../../data-models.md#order) object) :
+**`data`** ([Order](../data-models.md#order) object) :
 - Detailed information about the requested order.
 
 ##### Example (`data` field content)
@@ -202,7 +202,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -235,29 +235,34 @@ Edits an existing open order. This can be used to change the price or amount of 
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([EditOrderResponseData](../../data-models.md#editorderresponsedata) object) :
+**`data`** ([EditOrderResponseData](../data-models.md#editorderresponsedata) object) :
 - Details of the edited order.
 
 ##### Example (`data` field content)
 
 ```json
 {
-    "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-    "timeInForce": "GTC",
-    "price": 7100000,
-    "amount": 0.001,
-    "info": {
-        "availableBalance": 150.00,
-        "status": "Edit request submitted successfully",
-        "lockedMargin": 0,
-        "lockedMarginInMarginAsset": 0
-    }
+  "id": undefined,
+  "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+  "lastTradeTimestamp": null,
+  "timeInForce": "GTC",
+  "price": 7100000,
+  "average": null,
+  "amount": 0.001,
+  "trades": [],
+  "fee": null,
+  "info": {
+    "status": "Edit request submitted successfully",
+    "availableBalance": 700,
+    "lockedMargin": 200,
+    "lockedMarginInMarginAsset": 200
+  }
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -290,9 +295,9 @@ Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing position.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([AddTPSLResponseData](../../data-models.md#addtpslresponsedata) object) :
+**`data`** ([AddTPSLResponseData](../data-models.md#addtpslresponsedata) object) :
 - Details of the created TP/SL order (similar structure to `CreateOrderResponseData`).
 
 ##### Example (`data` field content - Take Profit order)
@@ -316,7 +321,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -346,9 +351,9 @@ Adds margin to an existing isolated margin position.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([MarginResponse](../../data-models.md#marginresponse) object) :
+**`data`** ([MarginResponse](../data-models.md#marginresponse) object) :
 - Details confirming the margin addition and potentially updated balances.
 
 ##### Example (`data` field content)
@@ -369,7 +374,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -399,9 +404,9 @@ Reduces margin from an existing isolated margin position.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([MarginResponse](../../data-models.md#marginresponse) object) :
+**`data`** ([MarginResponse](../data-models.md#marginresponse) object) :
 - Details confirming the margin reduction and potentially updated balances.
 
 ##### Example (`data` field content)
@@ -422,7 +427,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -450,9 +455,9 @@ Closes an existing open position using a market order.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([ClosePositionResponseData](../../data-models.md#closepositionresponsedata) object) :
+**`data`** ([ClosePositionResponseData](../data-models.md#closepositionresponsedata) object) :
 - Details of the market order created to close the position (similar structure to `CreateOrderResponseData`).
 
 ##### Example (`data` field content)
@@ -476,7 +481,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -506,10 +511,10 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([OrdersListResponse](../../data-models.md#orderslistresponse) object) :
-- A list of open [Order](../../data-models.md#order) objects, potentially with pagination info.
+**`data`** ([OrdersListResponse](../data-models.md#orderslistresponse) object) :
+- A list of open [Order](../data-models.md#order) objects, potentially with pagination info.
 
 ##### Example (`data` field content)
 
@@ -539,7 +544,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure](../../error-response.md) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -568,9 +573,9 @@ Retrieves a list of the user's current positions, optionally filtered by symbols
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** (Array<[Position](../../data-models.md#position)> object) :
+**`data`** (Array<[Position](../data-models.md#position)> object) :
 - A list of the user's positions matching the filters.
 
 ##### Example (`data` field content - single open position)
@@ -596,7 +601,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -620,9 +625,9 @@ Retrieves the user's leverage setting for a specific trading symbol.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([Leverage](../../data-models.md#leverage) object) :
+**`data`** ([Leverage](../data-models.md#leverage) object) :
 - Leverage settings for the specified symbol.
 
 ##### Example (`data` field content)
@@ -641,7 +646,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -665,9 +670,9 @@ Retrieves the user's leverage settings for all symbols.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** (Array<[Leverage](../../data-models.md#leverage)> object) :
+**`data`** (Array<[Leverage](../data-models.md#leverage)> object) :
 - A list of leverage settings for all symbols configured by the user.
 
 ##### Example (`data` field content - excerpt)
@@ -691,7 +696,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -720,9 +725,9 @@ Updates the user's leverage setting for a specific symbol.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([Leverage](../../data-models.md#leverage) object) :
+**`data`** ([Leverage](../data-models.md#leverage) object) :
 - The updated leverage settings for the symbol.
 
 ##### Example (`data` field content)
@@ -741,7 +746,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -770,10 +775,10 @@ Retrieves the user's historical orders with pagination.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([OrdersListResponse](../../data-models.md#orderslistresponse) object) :
-- A list of historical [Order](../../data-models.md#order) objects, potentially with pagination info.
+**`data`** ([OrdersListResponse](../data-models.md#orderslistresponse) object) :
+- A list of historical [Order](../data-models.md#order) objects, potentially with pagination info.
 
 ##### Example (`data` field content)
 
@@ -804,7 +809,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -833,10 +838,10 @@ Retrieves the user's historical trades with pagination.
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([TradesListResponse](../../data-models.md#tradeslistresponse) object) :
-- A list of historical [Trade](../../data-models.md#trade) objects, potentially with pagination info.
+**`data`** ([TradesListResponse](../data-models.md#tradeslistresponse) object) :
+- A list of historical [Trade](../data-models.md#trade) objects, potentially with pagination info.
 
 ##### Example (`data` field content)
 
@@ -865,7 +870,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -894,10 +899,10 @@ Retrieves the user's historical wallet transactions (fees, funding, etc.) with p
 | :---------- | :--------------- |
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([TransactionsListResponse](../../data-models.md#transactionslistresponse) object) :
-- A list of historical [Transaction](../../data-models.md#transaction) objects, potentially with pagination info.
+**`data`** ([TransactionsListResponse](../data-models.md#transactionslistresponse) object) :
+- A list of historical [Transaction](../data-models.md#transaction) objects, potentially with pagination info.
 
 ##### Example (`data` field content)
 
@@ -932,7 +937,7 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 }
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 ```

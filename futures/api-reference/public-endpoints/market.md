@@ -26,7 +26,7 @@ Retrieves details about all available trading symbols (markets), including their
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** ([MarketsData](../data-models.md#marketsdata) object):
 - Includes timezone, server time, rate limits, and a list of symbol details.
@@ -102,9 +102,9 @@ Retrieves the current order book (bids and asks) for a specific trading symbol.
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([OrderBook](../../data-models.md#orderbook) object):
+**`data`** ([OrderBook](../data-models.md#orderbook) object):
 - Includes arrays of bids and asks with price/quantity pairs.
 
 ##### Example (`data` field content)
@@ -152,9 +152,9 @@ Retrieves price change statistics for a specific trading symbol over the last 24
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([Ticker](../../data-models.md#ticker) object):
+**`data`** ([Ticker](../data-models.md#ticker) object):
 24-hour statistics including price change, high/low, volume, etc.
 
 ##### Example (`data` field content)
@@ -225,10 +225,10 @@ Retrieves high-level market information, potentially including metrics for multi
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (object):
-A mapping of symbols to their respective [MarketInfo](../../data-models.md#marketinfo) objects.
+A mapping of symbols to their respective [MarketInfo](../data-models.md#marketinfo) objects.
 
 ##### Example (`data` field content)
 
@@ -273,9 +273,9 @@ Retrieves recent aggregate trades for a specific trading symbol.
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** (Array<[AggregateTrade](../../data-models.md#aggregatetrade)> objects):
+**`data`** (Array<[AggregateTrade](../data-models.md#aggregatetrade)> objects):
 A list of recent aggregate trades.
 
 ##### Example (`data` field content — single item shown)
@@ -295,7 +295,7 @@ A list of recent aggregate trades.
 ]
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
 
@@ -325,7 +325,7 @@ The body must be a JSON object specifying the parameters for the k-line data.
 |-------------|--------------------|
 | `200 OK`    | Request succeeded. |
 
-The response follows the standard [ApiResponse](../../data-models.md#apiresponse) structure. The `data` field contains:
+The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (Array of K-Line arrays):
 - A list of k-line/candlestick data points. Each inner array represents one k-line and contains the following values in order:
@@ -356,4 +356,4 @@ The response follows the standard [ApiResponse](../../data-models.md#apiresponse
 ]
 ```
 
-> See [Error Response Structure]((../error-handling.md)) for error formats.
+> See [Error Response Structure](../error-handling.md) for error formats.

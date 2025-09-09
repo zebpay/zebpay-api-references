@@ -73,7 +73,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](futures/clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -82,7 +82,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 ```javascript
 async function getTicker24hrExample(symbol) {
   try {
-    console.log(`Workspaceing 24hr ticker for ${symbol}...`);
+    console.log(`Fetching 24hr ticker for ${symbol}...`);
     // Ensure symbol is passed to the method
     const response = await client.getTicker24Hr(symbol); //
     console.log("API Response:", JSON.stringify(response, null, 2));
@@ -144,7 +144,7 @@ Ticker Data for BTCUSDT: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](futures/clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 

@@ -55,7 +55,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/exchangeInfo \
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](futures/clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -108,7 +108,7 @@ Exchange Info Data received (structure is complex).
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](futures/clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 

@@ -2,7 +2,7 @@
 
 Retrieves the user's leverage settings for all trading symbols where leverage has been configured.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get All User Leverages](../../../../api-reference/private-endpoints/trade.md#get-user-leverages)
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get All User Leverages](../../../api-reference/private-endpoints/trade.md#get-user-leverages)
 
 **Endpoint:** `GET /api/v1/trade/userLeverages`
 **Authentication:** Required (JWT or API Key/Secret)
@@ -12,7 +12,7 @@ Retrieves the user's leverage settings for all trading symbols where leverage ha
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
@@ -65,13 +65,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/userLeverages \
 }
 ```
 
-*Note: The response is an array of [Leverage objects](../../../../api-reference/data-models.md#leverage) for each symbol configured.*
+*Note: The response is an array of [Leverage objects](../../../api-reference/data-models.md#leverage) for each symbol configured.*
 
 -----
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../../clients/rest-http/node/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Node.js Client README](../../../clients/rest-http/node/README.md) .
 
 ```javascript
 async function getUserLeveragesExample() {
@@ -120,7 +120,7 @@ Get All User Leverages Response Data: [ // ... (data array as shown in cURL exam
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../../clients/rest-http/python/README.md) .
+> **💡 Tip:** Ensure the client is initialized with authentication. See [Python Client README](../../../clients/rest-http/python/README.md) .
 
 ```python
 import json
