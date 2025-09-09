@@ -213,8 +213,8 @@ Get historical klines/candlesticks for a trading pair.
 |-----------|------|----------|-------------|
 | symbol | string | Yes | Trading pair symbol |
 | interval | string | Yes | Kline interval (1m, 5m, 15m, 1h, 4h, 1d) |
-| startTime | number | No | Start time in milliseconds |
-| endTime | number | No | End time in milliseconds |
+| startTime | number | Yes | Start time in milliseconds |
+| endTime | number | Yes | End time in milliseconds |
 
 **Response:**
 ```json
@@ -262,7 +262,7 @@ Get the current system status.
 ### Get Server Time
 Get the current server time.
 
-**Endpoint:** `GET /api/v2/status/time`
+**Endpoint:** `GET /api/v2/system/time`
 
 **Response:**
 ```json

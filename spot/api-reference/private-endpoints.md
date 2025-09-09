@@ -80,7 +80,7 @@ Place a new order.
 | symbol | string | Yes | Trading pair symbol |
 | side | string | Yes | Order side (BUY/SELL) |
 | type | string | Yes | Order type (LIMIT/MARKET/STOP_LIMIT)|
-| price | string | No | Order price |
+| price | string | Yes | Order price |
 | amount | string | No | Order quantity |
 | quoteOrderAmount | string | No | Quote order quantity |
 | stopLossPrice | string | No | Stop price |
