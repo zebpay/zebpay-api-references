@@ -249,7 +249,7 @@ Get historical klines/candlesticks for a trading pair.
 ### Get Service Status
 Get the current system status.
 
-**Endpoint:** `GET /api/v2/status`
+**Endpoint:** `GET /api/v2/system/status`
 
 **Response:**
 ```json
@@ -262,7 +262,7 @@ Get the current system status.
 ### Get Server Time
 Get the current server time.
 
-**Endpoint:** `GET /api/v2/time`
+**Endpoint:** `GET /api/v2/status/time`
 
 **Response:**
 ```json
