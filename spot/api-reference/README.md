@@ -5,7 +5,7 @@ This document provides detailed information about the Zebpay Spot Trading API en
 ## Base URL
 
 ```
-https://api.zebpay.com
+https://sapi.zebpay.com
 ```
 
 ## Market Data APIs (Public)
