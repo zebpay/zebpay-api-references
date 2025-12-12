@@ -7,7 +7,7 @@ Welcome to the official documentation repository for the Zebpay Spot and Futures
 **Note:** The Spot API documentation is currently under development. It will eventually mirror the structure of the Futures documentation.
 
 ## Key Information & Quick Links
-* **Spot API Base URL:** `https://api.zebpay.com` (version: v2)
+* **Spot API Base URL:** `https://sapi.zebpay.com` (version: v2)
 * **Futures API Base URL:** `https://futuresbe.zebpay.com` (version: v1)
 * **Getting Started (Spot):** [Spot Getting Started Guide](./spot/api-reference/getting-started.md)
 * **Getting Started (Futures):** [Futures Getting Started Guide](./futures/api-reference/getting-started.md)

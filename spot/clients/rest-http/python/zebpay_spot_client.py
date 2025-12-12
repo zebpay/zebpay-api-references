@@ -9,7 +9,7 @@ class ZebpayAPIError(Exception):
         super().__init__(f"API Error {code}: {message}")
 
 class SpotClient:
-    def __init__(self, api_key: str, api_secret: str, base_url: str = "https://api.zebpay.com"):
+    def __init__(self, api_key: str, api_secret: str, base_url: str = "https://sapi.zebpay.com"):
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = base_url
