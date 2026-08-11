@@ -1,0 +1,22 @@
+{
+  "name": "zebpay-futures-api-rest-client",
+  "version": "1.0.0",
+  "description": "JavaScript REST Client for Zebpay Futures API",
+  "main": "client.js",
+  "scripts": {
+    "start": "node run.example.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "api",
+    "client",
+    "futures",
+    "trading"
+  ],
+  "author": "pawankumargali",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.19.0",
+    "dotenv": "^17.4.2"
+  }
+}
