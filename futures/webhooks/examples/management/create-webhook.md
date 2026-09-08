@@ -30,7 +30,7 @@ curl -X POST https://futuresbe.zebpay.com/webhooks \
 {
   "statusDescription": "Success",
   "data": {
-    "webhookUrl": "https://futuresbe.zebpay.com/webhook/5a51b5ca-2998-4c16-8351-8b4d2584127f",
+    "webhookUrl": "https://futuresbe.zebpay.com/webhooks/5a51b5ca-2998-4c16-8351-8b4d2584127f",
     "secret": "ab12cd34ef567890ab12cd34ef567890ab12cd34ef567890ab12cd34ef567890",
     "message": "Secret is shared one time only. Please save and send in future requests."
   },

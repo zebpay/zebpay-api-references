@@ -1,6 +1,6 @@
 # API Reference: Webhook Management
 
-These **private** endpoints let you create, view and maintain webhooks that will later receive trading-signal callbacks.
+These **private** endpoints let you create, view and maintain webhooks that later receive trading-signal callbacks.
 
 > 🔑 **Authentication:** Bearer JWT
 > 🖥️ **UI note:** The Futures UI will surface these operations soon; until then you can call them programmatically.
@@ -28,8 +28,8 @@ Body parameters:
 
 | Field | Type | Rules |
 |-------|------|-------|
-| `webhookName` | string | Human-readable label |
-| `allowedActions` | array<string> | ≥ 1 item – values: `NEW_ORDER` `CANCEL_ORDER` `CLOSE_POSITION` |
+| `webhookName` | string | Required. Length 1–50. The slugified name must be unique among non-deleted webhooks. |
+| `allowedActions` | array<string> | Required. At least one of `NEW_ORDER`, `CANCEL_ORDER`, `CLOSE_POSITION`. |
 
 #### Success Response
 
@@ -58,7 +58,7 @@ Returns all webhooks belonging to the authenticated account.
 | Attribute | Value |
 |-----------|-------|
 | **HTTP Method** | `GET` |
-| **Endpoint Path** | `//webhooks` |
+| **Endpoint Path** | `/webhooks` |
 | **Auth Required** | Yes |
 
 #### Success Response
@@ -72,21 +72,29 @@ Returns all webhooks belonging to the authenticated account.
 ```json
 [
   {
+    "accountId": "12345",
     "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
     "webhookName": "TradingView Signals",
     "allowedActions": ["NEW_ORDER", "CANCEL_ORDER"],
     "isPaused": false,
     "createdAt": "2025-08-05T06:00:41.000Z",
-    "updatedAt": "2025-08-05T06:00:41.000Z"
+    "updatedAt": "2025-08-05T06:00:41.000Z",
+    "stats": {
+      "NEW_ORDER": { "totalCount": 12, "successCount": 11 },
+      "CANCEL_ORDER": { "totalCount": 2, "successCount": 2 },
+      "CLOSE_POSITION": { "totalCount": 0, "successCount": 0 }
+    }
   }
 ]
 ```
+
+`stats` always includes every action, defaulting to zeros when no events have been recorded.
 
 ---
 
 ### <a id="update-webhook"></a> Update Webhook
 
-Renames a webhook and/or merges additional actions.
+Renames a webhook and merges additional actions into the existing allow-list.
 
 #### Request
 
@@ -96,18 +104,31 @@ Renames a webhook and/or merges additional actions.
 | **Endpoint Path** | `/webhooks/:uuid` |
 | **Auth Required** | Yes |
 
-Body parameters (all optional):
+Body parameters (**both required**):
 
-- `webhookName` (`string`)
-- `allowedActions` (`array<string>`)
+| Field | Type | Rules |
+|-------|------|-------|
+| `webhookName` | string | Required. Length 1–50. Must remain unique after slugify. |
+| `allowedActions` | array<string> | Required. Non-empty. Unioned with the webhook's current actions; sending a subset does not remove existing actions. |
 
 #### Success Response
 
 | Status | Description |
 |--------|-------------|
-| `200`  | Success |
+| `201`  | Webhook updated |
 
-`data` example omitted for brevity (see *Create Webhook* response shape).
+`data` example:
+
+```json
+{
+  "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
+  "accountId": "12345",
+  "webhookName": "TradingView + Telegram",
+  "allowedActions": ["NEW_ORDER", "CANCEL_ORDER", "CLOSE_POSITION"],
+  "createdAt": "2025-08-05T06:00:41.000Z",
+  "updatedAt": "2025-08-05T06:30:12.000Z"
+}
+```
 
 ---
 
@@ -121,7 +142,15 @@ Disables a webhook without deleting it. Disabled webhooks ignore received callba
 | **Endpoint Path** | `/webhooks/:uuid/pause` |
 | **Auth Required** | Yes |
 
-Success response: `200` with `data = null`.
+Success response: **`201 Created`**.
+
+```json
+{
+  "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
+  "accountId": "12345",
+  "isPaused": true
+}
+```
 
 ---
 
@@ -135,8 +164,15 @@ Re-enables a paused webhook.
 | **Endpoint Path** | `/webhooks/:uuid/resume` |
 | **Auth Required** | Yes |
 
-Success response: `200` with `data = null`.
+Success response: **`201 Created`**.
 
+```json
+{
+  "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
+  "accountId": "12345",
+  "isPaused": false
+}
+```
 
 ---
 
@@ -147,22 +183,33 @@ Deletes a webhook. Deleted webhooks no longer receive callbacks.
 | Attribute | Value |
 |-----------|-------|
 | **HTTP Method** | `DELETE` |
-| **Endpoint Path** | `/:uuid` |
+| **Endpoint Path** | `/webhooks/:uuid` |
 | **Auth Required** | Yes |
 
-Success response: `200` with `data = null`.
+Success response: **`200 OK`**.
+
+```json
+{
+  "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
+  "accountId": "12345",
+  "success": true
+}
+```
 
 ---
 
 ## Error Responses
 
-Errors follow the format:
+Errors use the standard API envelope:
 
 ```json
 {
-  "statusCode": 422,
-  "message": "allowedActions_empty",
-  "error": "Unprocessable Entity"
+  "statusDescription": "Forbidden action",
+  "data": {},
+  "statusCode": 403,
+  "customMessage": [
+    "Forbidden action"
+  ]
 }
 ```
 
@@ -170,6 +217,11 @@ Common cases:
 
 | HTTP | Message |
 |------|---------|
-| 401  | `Unauthorized` |
-| 403  | `Forbidden` (invalid JWT or webhook not owned by account) |
-| 422  | `allowedActions_empty` (validation) |
+| 401 | `Unauthorized` |
+| 400 | `allowedActions_empty` |
+| 400 | `Webhook with name ... exists. Please try a different name` |
+| 400 | `Webhook with a similar name ... exists. Please try a different name` |
+| 403 | `Forbidden action` (webhook not found or not owned by the account) |
+| 403 | `Account is blocked. Please contact customer support` |
+| 403 | `User Account Inactive. Please contact customer support` |
+| 403 | `Trading disabled for account. Please contact customer support` |

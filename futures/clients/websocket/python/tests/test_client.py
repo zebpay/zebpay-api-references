@@ -85,7 +85,7 @@ class FuturesPrivateWebSocketClientTest(unittest.TestCase):
         second = fake.connect_calls[1][1]['auth']
         self.assertEqual(
             fake.connect_calls[0][0],
-            'https://futuresws.zebpay.com',
+            'https://sp-futuresws.zebpay.com',
         )
         self.assertEqual(
             fake.connect_calls[0][1]['namespaces'],

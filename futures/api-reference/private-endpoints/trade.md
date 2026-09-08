@@ -49,7 +49,7 @@ Places a new trading order.
 - `STOP_LIMIT` requires both `triggerPrice` and `price`.
 - For a BUY `STOP_LIMIT`, `price` must be greater than or equal to `triggerPrice`.
 - For a SELL `STOP_LIMIT`, `price` must be less than or equal to `triggerPrice`.
-- A symbol can only accept order types listed in its `orderTypes` field from [Exchange Info](../public-endpoints/exchange.md#get-exchange-info).
+- Create-order accepts `MARKET`, `LIMIT`, `STOP_MARKET`, and `STOP_LIMIT` globally. It does not currently reject against a pair's stored `orderTypes` / `enabledOrderTypes` list from [Exchange Info](../public-endpoints/exchange.md#get-exchange-info).
 
 **Bracket-on-entry rules:**
 
@@ -381,7 +381,8 @@ Adds margin to an existing isolated margin position.
 
 -   **`positionId`** (`string`, required): Identifier of the position .
 -   **`amount`** (`number`, required): Amount of margin to add .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -435,7 +436,8 @@ Reduces margin from an existing isolated margin position.
 
 -   **`positionId`** (`string`, required): Identifier of the position .
 -   **`amount`** (`number`, required): Amount of margin to reduce .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -488,7 +490,8 @@ Closes an existing open position using a market order.
 **Request Body Parameters:**
 
 -   **`positionId`** (`string`, required): Identifier of the position to close .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 | Status Code | Description      |
@@ -543,7 +546,7 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 **Query Parameters:**
 
 -   **`symbol`** (`string`, required): Trading symbol .
--   `limit` (`number`, optional): Maximum number of orders to return .
+-   `limit` (`number`, optional): Maximum number of orders to return. Defaults to **100**.
 -   `since` (`number`, optional): Fetch orders created after this Unix timestamp (ms) .
 
 #### Success Response
@@ -554,14 +557,14 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([OrdersListResponse](../data-models.md#orderslistresponse) object) :
-- A list of open [Order](../data-models.md#order) objects, potentially with pagination info.
+**`data`** ([OpenOrdersListResponse](../data-models.md#openorderslistresponse) object) :
+- Nested `data` array of open [Order](../data-models.md#order) objects, plus `totalCount` and `nextTimestamp`. This envelope is not the history `items` shape.
 
 ##### Example (`data` field content)
 
 ```json
 {
-  "items": [
+  "data": [
     {
       "clientOrderId": "myOpenLimitOrder789",
       "datetime": "2025-04-05T13:18:00.000Z",
@@ -578,10 +581,9 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
       "reduceOnly": false,
       "postOnly": false
     }
-    // ... potentially more open orders
   ],
-  "totalCount": 1, // Example count
-  "nextTimestamp": null // Example if no more pages
+  "totalCount": 1,
+  "nextTimestamp": null
 }
 ```
 
@@ -606,8 +608,8 @@ Retrieves a list of the user's current positions, optionally filtered by symbols
 
 **Query Parameters:**
 
--   `symbols` (`Array<string>`, optional): List of trading symbols to filter by .
--   `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`) .
+-   `symbols` (`Array<string>`, optional): List of trading symbols to filter by. When provided it must be an array (repeat the query key: `symbols=BTCUSDT&symbols=ETHUSDT`). A single string is rejected.
+-   `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`). Defaults to **`OPEN`** when omitted.
 
 #### Success Response
 
@@ -763,6 +765,7 @@ Updates the user's leverage setting for a specific symbol.
 
 -   **`symbol`** (`string`, required): Trading symbol .
 -   **`leverage`** (`number`, required): The new desired leverage value .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -812,8 +815,12 @@ Retrieves the user's historical orders with pagination.
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of orders per page .
--   `timestamp` (`number`, optional): Fetch orders created before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of orders per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch orders created before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on order time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on order time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
 
 #### Success Response
 
@@ -876,8 +883,12 @@ Retrieves the user's historical trades with pagination.
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of trades per page .
--   `timestamp` (`number`, optional): Fetch trades executed before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of trades per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch trades executed before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on trade time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on trade time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
 
 #### Success Response
 
@@ -938,8 +949,13 @@ Retrieves the user's historical wallet transactions (fees, funding, etc.) with p
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of transactions per page .
--   `timestamp` (`number`, optional): Fetch transactions before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of transactions per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch transactions before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on transaction time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on transaction time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
+-   `tradeId` (`number`, optional): Filter transactions belonging to a specific trade.
 
 #### Success Response
 

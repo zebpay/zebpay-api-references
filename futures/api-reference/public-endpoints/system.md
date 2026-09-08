@@ -65,13 +65,13 @@ Checks the operational status of the API system.
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (object):
-- **`status`** (`string`): Current system status. Possible values include `"ok"`, `"error"`.
+- **`systemStatus`** (`string`): Current system status. Possible values include `"ok"`, `"error"`.
 
 ##### Example
 
 ```json
 {
-  "status": "ok"
+  "systemStatus": "ok"
 }
 ```
 

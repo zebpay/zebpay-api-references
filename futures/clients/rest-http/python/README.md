@@ -169,15 +169,15 @@ client = FuturesApiClient(
 | `cancel_all_orders()` | Cancel all open orders |
 | `edit_order(order_params)` | Edit an open order |
 | `get_order(client_order_id)` | Get order details |
-| `get_open_orders(symbol, limit=None, since=None)` | Open orders for a symbol |
-| `get_order_history(page_size=None, timestamp=None)` | Historical orders |
-| `get_trade_history(page_size=None, timestamp=None)` | Historical trades |
-| `get_transaction_history(page_size=None, timestamp=None)` | Wallet activity (deposits, withdrawals, fees) |
+| `get_open_orders(symbol, limit=None, since=None)` | Open orders for a symbol (`data` nested array; `limit` default 100) |
+| `get_order_history(...)` | Historical orders (`page_size` default 10; supports start/end timestamps, `sort_order`, `symbol`) |
+| `get_trade_history(...)` | Historical trades (same pagination filters as order history) |
+| `get_transaction_history(...)` | Wallet activity (same filters plus `trade_id`) |
 | `add_tpsl_order(tpsl_params)` | Add one take-profit or stop-loss; requires `symbol` and exactly one trigger |
 | `add_margin(margin_params)` | Add margin to position |
 | `reduce_margin(margin_params)` | Reduce margin from position |
-| `close_position(close_params)` | Close position by `positionId` |
-| `get_positions(symbols=None, status=None)` | Filter by symbols and status (OPEN/CLOSED) |
+| `close_position(close_params)` | Close position by `positionId` and `symbol` |
+| `get_positions(symbols=None, status=None)` | Filter by symbols array and status (OPEN/CLOSED/LIQUIDATED; default OPEN) |
 | `get_user_leverage(symbol)` | Leverage for a symbol |
 | `get_user_leverages()` | All user leverages |
 | `update_leverage(leverage_params)` | Set leverage for a symbol |
@@ -289,7 +289,7 @@ python/
 
 ## 🔗 Helpful Links
 
-- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://dev-futuresbe.zebstage.com/api/docs)
+- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://futuresbe.zebpay.com/api/docs)
 - 🛠 [Submit an Issue](https://github.com/zebpay/zebpay-api-references/issues)
 - 🧪 [Python Client Code](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/python)
 - 🗃️ [ZebPay API GitHub Monorepo (Root)](https://github.com/zebpay/zebpay-api-references/)

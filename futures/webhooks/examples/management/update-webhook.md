@@ -1,6 +1,6 @@
 # Example: Update Webhook
 
-Updates the name and/or allowed actions of an existing webhook.
+Updates the webhook name and merges additional allowed actions. Both `webhookName` and `allowedActions` are required; supplied actions are unioned with the existing list.
 
 > **💡 Tip:** See the [API Reference for Update Webhook](../../reference-docs/management.md#update-webhook).
 
@@ -26,15 +26,17 @@ curl -X PATCH https://futuresbe.zebpay.com/webhooks/<uuid> \
 
 ```json
 {
-  "statusDescription": "Success",
+  "statusDescription": "Updated Webhook Successfully",
   "data": {
     "webhookId": "<uuid>",
+    "accountId": "12345",
     "webhookName": "TradingView + Telegram",
     "allowedActions": ["NEW_ORDER", "CANCEL_ORDER", "CLOSE_POSITION"],
+    "createdAt": "2025-08-05T06:00:41.000Z",
     "updatedAt": "2025-08-05T06:30:12.000Z"
   },
-  "statusCode": 200,
-  "customMessage": ["OK"]
+  "statusCode": 201,
+  "customMessage": ["Updated Webhook Successfully"]
 }
 ```
 

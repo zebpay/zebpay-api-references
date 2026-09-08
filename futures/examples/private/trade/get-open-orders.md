@@ -9,7 +9,7 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 **Query Parameters:**
 
 * `symbol` (`string`, required): Trading symbol to filter orders by (e.g., "BTCUSDT") .
-* `limit` (`number`, optional): Maximum number of orders to return .
+* `limit` (`number`, optional): Maximum number of orders to return. Defaults to **100**.
 * `since` (`number`, optional): Fetch orders created after this Unix timestamp (ms) .
 
 -----
@@ -77,7 +77,7 @@ The signature is generated from the exact query string sent after `?`.
 }
 ```
 
-*Note: See [OrdersListResponse model](../../../api-reference/data-models.md#orderslistresponse) and [Order model](../../../api-reference/data-models.md#order) for field details.*
+*Note: See [OpenOrdersListResponse model](../../../api-reference/data-models.md#openorderslistresponse) and [Order model](../../../api-reference/data-models.md#order) for field details.*
 
 -----
 

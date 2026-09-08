@@ -13,7 +13,7 @@ if auth_method not in {'api_key', 'jwt'}:
 common_options = {
     'base_url': os.getenv(
         'WEBSOCKET_BASE_URL',
-        'https://futuresws.zebpay.com',
+        'https://sp-futuresws.zebpay.com',
     ),
     'subaccount_id': os.getenv('SUBACCOUNT_ID') or None,
 }

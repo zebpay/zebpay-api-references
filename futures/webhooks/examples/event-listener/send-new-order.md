@@ -33,7 +33,7 @@ curl -X POST https://futuresbe.zebpay.com/webhooks/<uuid> \
       }'
 ```
 
-*If your shell does not support `date -u +%Y-%m-%dT%H:%M:%SZ`, replace the timestamp with an ISO-8601 UTC string generated in your application.*
+HTTP **`201 Created`** means the callback was accepted, not that the order filled.
 
 #### Success Response (Example)
 

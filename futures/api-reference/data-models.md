@@ -39,6 +39,7 @@ This section describes the common JSON data structures returned by the API. Unde
 - [`MarginResponse`](#marginresponse)
 
 ### 📄 Paginated List Response Models
+- [`OpenOrdersListResponse`](#openorderslistresponse)
 - [`OrdersListResponse`](#orderslistresponse)
 - [`TradesListResponse`](#tradeslistresponse)
 - [`TransactionsListResponse`](#transactionslistresponse)
@@ -137,9 +138,9 @@ Represents the market depth for a trading pair, returned within the `data` field
 | `symbol`   | `string`                  | Trading pair symbol (e.g., "BTCUSDT").                           |
 | `bids`     | `Array<[number, number]>` | Array of buy orders `[price, amount]`, sorted by price descending.|
 | `asks`     | `Array<[number, number]>` | Array of sell orders `[price, amount]`, sorted by price ascending.|
-| `timestamp`| `number` \| `null`        | Unix timestamp (ms) when the order book was generated.           |
-| `datetime` | `string` \| `null`        | ISO8601 formatted datetime string.                               |
-| `nonce`    | `number` \| `null`        | Exchange-provided sequence number, if available.                 |
+| `timestamp`| `number`                  | Unix timestamp (ms). Set to `Date.now()` when the book is transformed. |
+| `datetime` | `null`                    | Always `null` in the current implementation.                     |
+| `nonce`    | `number`                  | Set to `Date.now()` when the book is transformed (not an exchange sequence). |
 
 ##### Example (`data` field content)
 
@@ -157,8 +158,8 @@ Represents the market depth for a trading pair, returned within the `data` field
     [65002.00, 0.7]
   ],
   "timestamp": 1712345678901,
-  "datetime": "2025-04-05T11:59:38.901Z",
-  "nonce": 123456789
+  "datetime": null,
+  "nonce": 1712345678901
 }
 ```
 
@@ -574,6 +575,7 @@ Represents a wallet transaction (e.g., fee, funding), returned in lists from `GE
 | Field Name | Type     | Description                                                     |
 |------------|----------|-----------------------------------------------------------------|
 | `txid`     | `string` | Unique transaction identifier.                                   |
+| `tradeId`  | `string` \| `null` | Associated trade identifier when the transaction is tied to a fill. |
 | `timestamp`| `number` | Unix timestamp in milliseconds.                                  |
 | `datetime` | `string` | ISO8601 formatted datetime string.                                 |
 | `type`     | `string` | Type of transaction (e.g., 'COMMISSION', 'FUNDING_FEE').           |
@@ -890,14 +892,45 @@ Response from `POST /api/v1/trade/addMargin` and `POST /api/v1/trade/reduceMargi
 <a id="paginatedlistresponsemodels"></a>
 ## Paginated List Response Models
 
-These models describe the structure within the `data` field when fetching lists of historical data.
+These models describe the structure within the `data` field when fetching lists of orders, trades, or transactions.
+
+---
+
+<a id="openorderslistresponse"></a>
+### `OpenOrdersListResponse`
+
+Response from `GET /api/v1/trade/order/open-orders`. The list lives on a nested `data` array, not `items`.
+
+**Fields:**
+
+| Field Name      | Type             | Description                                                           |
+|-----------------|------------------|-----------------------------------------------------------------------|
+| `data`          | `Array<Order>`   | List of open [Order](#order) objects.                                 |
+| `totalCount`    | `number`         | Number of orders returned.                                            |
+| `nextTimestamp` | `number`\|`null`  | Timestamp for fetching the next page, if any.                         |
+
+##### Example (`data` field content from `GET /api/v1/trade/order/open-orders`)
+
+```js
+{
+  "data": [
+    {
+      "clientOrderId": "myOpenLimitOrder789",
+      "datetime": "2025-04-05T13:18:00.000Z",
+      "status": "new"
+    }
+  ],
+  "totalCount": 1,
+  "nextTimestamp": null
+}
+```
 
 ---
 
 <a id="orderslistresponse"></a>
 ### `OrdersListResponse`
 
-Response from `GET /api/v1/trade/order/open-orders` and `GET /api/v1/trade/order/history`.
+Response from `GET /api/v1/trade/order/history`.
 
 **Fields:**
 

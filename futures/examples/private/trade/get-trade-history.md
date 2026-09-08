@@ -8,8 +8,12 @@ Retrieves the user's historical trade executions with pagination support.
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `pageSize` (`number`, optional): Number of trades to return per page .
-* `timestamp` (`number`, optional): Fetch trades executed before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+* `pageSize` (`number`, optional): Number of trades to return per page. Defaults to **10**.
+* `timestamp` (`number`, optional): Pagination cursor: fetch trades executed before this Unix timestamp (ms). Use `nextTimestamp` from a previous response for the next page.
+* `startTimestamp` (`number`, optional): Inclusive lower bound on trade time (ms).
+* `endTimestamp` (`number`, optional): Inclusive upper bound on trade time (ms).
+* `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+* `symbol` (`string`, optional): Filter to a single trading symbol.
 
 -----
 

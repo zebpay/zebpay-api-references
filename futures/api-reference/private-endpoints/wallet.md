@@ -21,7 +21,7 @@ Retrieves the user's balances for all assets in their wallet.
 | **Query Params** | None                        |
 | **Request Body** | N/A                         |
 
-This endpoint is throttled to one request per second.
+This endpoint uses the same IP-based `/api` rate limit as other REST routes.
 
 #### Success Response
 

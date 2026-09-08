@@ -22,7 +22,22 @@ curl -X GET https://futuresbe.zebpay.com/webhooks \
 ```json
 {
   "statusDescription": "Success",
-  "data": [],
+  "data": [
+    {
+      "accountId": "12345",
+      "webhookId": "5a51b5ca-2998-4c16-8351-8b4d2584127f",
+      "webhookName": "TradingView Signals",
+      "allowedActions": ["NEW_ORDER", "CANCEL_ORDER"],
+      "isPaused": false,
+      "createdAt": "2025-08-05T06:00:41.000Z",
+      "updatedAt": "2025-08-05T06:00:41.000Z",
+      "stats": {
+        "NEW_ORDER": { "totalCount": 12, "successCount": 11 },
+        "CANCEL_ORDER": { "totalCount": 2, "successCount": 2 },
+        "CLOSE_POSITION": { "totalCount": 0, "successCount": 0 }
+      }
+    }
+  ],
   "statusCode": 200,
   "customMessage": ["OK"]
 }

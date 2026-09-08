@@ -21,10 +21,14 @@ curl -X PATCH https://futuresbe.zebpay.com/webhooks/<uuid>/pause \
 
 ```json
 {
-  "statusDescription": "Success",
-  "data": null,
-  "statusCode": 200,
-  "customMessage": ["OK"]
+  "statusDescription": "Paused Webhook Successfully",
+  "data": {
+    "webhookId": "<uuid>",
+    "accountId": "12345",
+    "isPaused": true
+  },
+  "statusCode": 201,
+  "customMessage": ["Paused Webhook Successfully"]
 }
 ```
 

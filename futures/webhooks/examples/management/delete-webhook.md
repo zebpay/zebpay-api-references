@@ -21,10 +21,14 @@ curl -X DELETE https://futuresbe.zebpay.com/webhooks/<uuid> \
 
 ```json
 {
-  "statusDescription": "Success",
-  "data": null,
+  "statusDescription": "Deleted Webhook Successfully",
+  "data": {
+    "webhookId": "<uuid>",
+    "accountId": "12345",
+    "success": true
+  },
   "statusCode": 200,
-  "customMessage": ["OK"]
+  "customMessage": ["Deleted Webhook Successfully"]
 }
 ```
 

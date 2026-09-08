@@ -35,7 +35,7 @@ class FuturesPrivateWebSocketClient:
         api_key: Optional[str] = None,
         secret_key: Optional[str] = None,
         subaccount_id: Any = None,
-        base_url: str = 'https://futuresws.zebpay.com',
+        base_url: str = 'https://sp-futuresws.zebpay.com',
         namespace: str = '/auth-stream',
         socketio_path: str = 'socket.io',
         connect_timeout: float = 20.0,

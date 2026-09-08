@@ -10,7 +10,7 @@ Welcome to the official documentation repository for the Zebpay Spot and Futures
 
 * **Spot REST API Base URL:** `https://api.zebpay.com` (version: v2)
 * **Futures REST API Base URL:** `https://futuresbe.zebpay.com` (version: v1)
-* **Futures Private WebSocket URL:** `https://futuresws.zebpay.com/auth-stream` (Socket.IO)
+* **Futures Private WebSocket URL:** `https://sp-futuresws.zebpay.com/auth-stream` (Socket.IO)
 * **Futures Webhooks – Management Base URL:** `https://futuresbe.zebpay.com` (version: v1)
 * **Futures Webhooks – Event Delivery URL:** Your own HTTPS endpoint configured when creating a webhook.
 * **Getting Started – Spot:** [Quickstart](./spot/api-reference/getting-started.md)

@@ -15,7 +15,7 @@ Your application should be prepared to handle the following common HTTP status c
 | `401 Unauthorized`          | Client Error | Authentication failed (missing/invalid/expired JWT or API Key/Secret signature). Verify credentials/auth logic.                                   |
 | `403 Forbidden`             | Client Error | Authentication succeeded, but the user/key lacks permission for the requested action/resource.                                                    |
 | `404 Not Found`             | Client Error | The requested resource or endpoint path could not be found.                                                                                       |
-| `429 Too Many Requests`     | Client Error | Rate limit exceeded. Check the `Retry-After` header (if present) and implement backoff. See [Rate Limits](./rate-limits.md).                      |
+| `429 Too Many Requests`     | Client Error | Rate limit exceeded. The response does not include `Retry-After`. Back off before retrying. See [Rate Limits](./rate-limits.md).                      |
 | `500 Internal Server Error` | Server Error | An unexpected error occurred on the server side. Retrying later might resolve temporary issues.                                                   |
 | `502 Bad Gateway`           | Server Error | Server received an invalid response from an upstream server while acting as a gateway/proxy. Issue is likely upstream. Retrying later might help. |
 | `503 Service Unavailable`   | Server Error | Server is temporarily unable to handle the request (maintenance, overload). Retrying later is recommended.                                        |
@@ -68,14 +68,15 @@ When the API encounters an error it can handle (including validation errors, aut
 
 | Status | Message pattern                               | Meaning                                                        |
 | ------ | --------------------------------------------- | -------------------------------------------------------------- |
-| `400`  | `Order must be of type ... for symbol`        | The pair does not enable the requested order type              |
+| `400`  | `Order must be of type MARKET,LIMIT,STOP_MARKET,STOP_LIMIT` | The order `type` is not one of the globally supported types |
 | `400`  | `triggerPrice is required...`                 | A stop order is missing its trigger price                      |
 | `400`  | `Invalid or expired timestamp`                | API-key timestamp is missing, stale, or not in milliseconds    |
 | `400`  | `Invalid signature`                           | The HMAC does not match the exact transmitted query or body    |
 | `403`  | `You do not have the required scope...`       | API key is missing `fetch:details` or `futures:trading`        |
 | `403`  | `Forbidden request` or `forbidden request`    | Subaccount access, ownership, or resource authorization failed |
 | `403`  | `You are not allowed API access from this ip` | The caller IP is not allowed by the API key                    |
-| `403`  | `Account is pending KYC/Bank verification...` | A new entry order failed its KYC or bank-verification gate     |
+| `403`  | `Account is pending KYC verification. Please contact support for assitance.` | A new entry order failed the KYC gate |
+| `403`  | `Account is pending Bank verification. Please contact support for assitance.` | A new entry order failed the bank-verification gate |
 | `403`  | Account access or permission message          | Frozen-subaccount, or Futures permission requirement failed    |
 
 

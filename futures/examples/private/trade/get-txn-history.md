@@ -8,8 +8,13 @@ Retrieves the user's historical transactions (e.g., commissions, funding fees) w
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `pageSize` (`number`, optional): Number of transactions to return per page .
-* `timestamp` (`number`, optional): Fetch transactions created before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+* `pageSize` (`number`, optional): Number of transactions to return per page. Defaults to **10**.
+* `timestamp` (`number`, optional): Pagination cursor: fetch transactions created before this Unix timestamp (ms). Use `nextTimestamp` from a previous response for the next page.
+* `startTimestamp` (`number`, optional): Inclusive lower bound on transaction time (ms).
+* `endTimestamp` (`number`, optional): Inclusive upper bound on transaction time (ms).
+* `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+* `symbol` (`string`, optional): Filter to a single trading symbol.
+* `tradeId` (`number`, optional): Filter transactions belonging to a specific trade.
 
 -----
 

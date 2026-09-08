@@ -1,6 +1,6 @@
 # Example: Send CLOSE_POSITION Signal
 
-Closes an existing position via the webhook listener.
+Closes the first open position for a symbol via the webhook listener.
 
 > **💡 Tip:** See the [Webhook Callback section](../../reference-docs/event-listener.md#close-position) for the payload schema.
 
@@ -17,7 +17,7 @@ curl -X POST https://futuresbe.zebpay.com/webhooks/<uuid> \
   -H "Content-Type: application/json" \
   -d '{
         "action": "CLOSE_POSITION",
-        "payload": { "positionId": "pos-123" },
+        "payload": { "symbol": "BTCUSDT" },
         "secret": "<secret>",
         "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       }'
@@ -33,7 +33,7 @@ const axios = require('axios');
 async function sendClosePositionSignal(callbackUrl, secret) {
   const body = {
     action: 'CLOSE_POSITION',
-    payload: { positionId: 'pos-123' },
+    payload: { symbol: 'BTCUSDT' },
     secret,
     timestamp: new Date().toISOString(),
   };
@@ -52,7 +52,7 @@ import requests, json, datetime
 def send_close_position(callback_url, secret):
     body = {
         'action': 'CLOSE_POSITION',
-        'payload': { 'positionId': 'pos-123' },
+        'payload': { 'symbol': 'BTCUSDT' },
         'secret': secret,
         'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
     }

@@ -30,7 +30,7 @@ class FuturesPrivateWebSocketClient extends EventEmitter {
       apiKey,
       secretKey,
       subaccountId,
-      baseUrl = 'https://futuresws.zebpay.com',
+      baseUrl = 'https://sp-futuresws.zebpay.com',
       namespace = '/auth-stream',
       path = '/socket.io',
       timeout = 20000,

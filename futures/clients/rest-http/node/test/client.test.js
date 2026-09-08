@@ -164,3 +164,55 @@ test('addTPSLOrder requires a symbol and exactly one trigger', async () => {
     /symbol/
   );
 });
+
+test('getKlines maps aliases and omits unsupported body fields', async () => {
+  const { client, getCaptured } = createCapturedClient();
+
+  await client.getKlines({
+    symbol: 'btcusdt',
+    interval: '1h',
+    startTime: 1712345678000,
+    endTime: 1712349278000,
+    limit: 50,
+    priceType: 'MARK_PRICE'
+  });
+
+  const captured = getCaptured();
+  assert.equal(captured.method, 'POST');
+  assert.match(captured.url, /\/api\/v1\/market\/klines$/);
+  assert.deepEqual(captured.params, { priceType: 'MARK_PRICE' });
+  assert.deepEqual(captured.data, {
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    since: 1712345678000,
+    limit: 50
+  });
+
+  await assert.rejects(
+    client.getKlines({ symbol: 'BTCUSDT' }),
+    /timeframe/
+  );
+});
+
+test('history methods forward extra filters as query params', async () => {
+  const { client, getCaptured } = createCapturedClient();
+
+  await client.getOrderHistory({
+    pageSize: 10,
+    startTimestamp: 1,
+    endTimestamp: 2,
+    sortOrder: 'asc',
+    symbol: 'btcusdt'
+  });
+
+  let captured = getCaptured();
+  assert.equal(captured.params.pageSize, 10);
+  assert.equal(captured.params.startTimestamp, 1);
+  assert.equal(captured.params.endTimestamp, 2);
+  assert.equal(captured.params.sortOrder, 'asc');
+  assert.equal(captured.params.symbol, 'BTCUSDT');
+
+  await client.getTransactionHistory({ tradeId: 17909 });
+  captured = getCaptured();
+  assert.equal(captured.params.tradeId, 17909);
+});

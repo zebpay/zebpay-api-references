@@ -8,8 +8,12 @@ Retrieves the user's historical orders (filled, canceled, etc.) with pagination 
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `pageSize` (`number`, optional): Number of orders to return per page .
-* `timestamp` (`number`, optional): Fetch orders created before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+* `pageSize` (`number`, optional): Number of orders to return per page. Defaults to **10**.
+* `timestamp` (`number`, optional): Pagination cursor: fetch orders created before this Unix timestamp (ms). Use `nextTimestamp` from a previous response for the next page.
+* `startTimestamp` (`number`, optional): Inclusive lower bound on order time (ms).
+* `endTimestamp` (`number`, optional): Inclusive upper bound on order time (ms).
+* `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+* `symbol` (`string`, optional): Filter to a single trading symbol.
 
 -----
 

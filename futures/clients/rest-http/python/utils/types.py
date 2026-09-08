@@ -92,8 +92,8 @@ class OrderBook(TypedDict):
         bids (List[Tuple[float, float]]): Buy orders as [price, amount] pairs.
         asks (List[Tuple[float, float]]): Sell orders as [price, amount] pairs.
         timestamp (Optional[int]): Unix timestamp in milliseconds.
-        datetime (Optional[str]): ISO8601 datetime string.
-        nonce (Optional[int]): Exchange-provided sequence number.
+        datetime (Optional[str]): Always `None` in the current implementation.
+        nonce (Optional[int]): Set to `Date.now()` when the book is transformed.
     """
     symbol: str
     bids: List[Tuple[float, float]]
@@ -487,6 +487,7 @@ class Transaction(TypedDict):
 
     Attributes:
         txid (str)
+        tradeId (Optional[str])
         timestamp (int)
         datetime (str)
         type (str)
@@ -497,6 +498,7 @@ class Transaction(TypedDict):
         info (Dict[str, Any])
     """
     txid: str
+    tradeId: Optional[str]
     timestamp: int
     datetime: str
     type: str
@@ -746,6 +748,19 @@ class CancelOrderResponseData(TypedDict):
 # ---------------------------
 # Paginated Response Types
 # ---------------------------
+class OpenOrdersListResponse(TypedDict):
+    """
+    Represents the open-orders envelope.
+
+    Attributes:
+        data (List[Order]): Nested list of open orders.
+        totalCount (int)
+        nextTimestamp (int)
+    """
+    data: List[Order]
+    totalCount: int
+    nextTimestamp: int
+
 class OrdersListResponse(TypedDict):
     """
     Represents a paginated list of orders.

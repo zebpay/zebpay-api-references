@@ -25,7 +25,7 @@ The callback endpoint (`POST /webhooks/:uuid`) does **not** rely on HTTP headers
 | Field       | Type                | Purpose                                                      |
 |-------------|---------------------|--------------------------------------------------------------|
 | `secret`    | 64-char **hex**     | Raw secret returned **once** during webhook creation.        |
-| `timestamp` | ISO-8601 UTC string | Must be within ±5 minutes of server time (replay protection). |
+| `timestamp` | ISO-8601 UTC string | Must fall within the configured timestamp window (typically ±5 minutes; `webhookTimestampTolearanceMS`). |
 
 Requests failing either check are rejected with `403 Forbidden`.
 

@@ -163,15 +163,15 @@ const client = new FuturesApiClient({
 | `cancelAllOrders()` | Cancel all open orders |
 | `editOrder(orderParams)` | Edit an open order |
 | `getOrder(clientOrderId)` | Get order details |
-| `getOpenOrders(symbol, options)` | Open orders for a symbol |
-| `getOrderHistory(options)` | Historical orders |
-| `getTradeHistory(options)` | Historical trades |
-| `getTransactionHistory(options)` | Wallet activity (deposits, withdrawals, fees) |
+| `getOpenOrders(symbol, options)` | Open orders for a symbol (`data.data`; `limit` default 100) |
+| `getOrderHistory(options)` | Historical orders (`pageSize` default 10; supports `startTimestamp`, `endTimestamp`, `sortOrder`, `symbol`) |
+| `getTradeHistory(options)` | Historical trades (same pagination filters as order history) |
+| `getTransactionHistory(options)` | Wallet activity (same filters plus `tradeId`) |
 | `addTPSLOrder(tpslParams)` | Add one take-profit or stop-loss; requires `symbol` and exactly one trigger |
 | `addMargin(marginParams)` | Add margin to position |
 | `reduceMargin(marginParams)` | Reduce margin from position |
-| `closePosition(closeParams)` | Close position by `positionId` |
-| `getPositions(symbols, status)` | Filter by symbols and status (OPEN/CLOSED) |
+| `closePosition(closeParams)` | Close position by `positionId` and `symbol` |
+| `getPositions(symbols, status)` | Filter by symbols array and status (OPEN/CLOSED/LIQUIDATED; default OPEN) |
 | `getUserLeverage(symbol)` | Leverage for a symbol |
 | `getUserLeverages()` | All user leverages |
 | `updateLeverage(leverageParams)` | Set leverage for a symbol |
@@ -285,7 +285,7 @@ if ([200, 201].includes(response.statusCode)) {
 
 ## 🔗 Helpful Links
 
-- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://dev-futuresbe.zebstage.com/api/docs)
+- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://futuresbe.zebpay.com/api/docs)
 - 🛠 [Submit an Issue](https://github.com/zebpay/zebpay-api-references/issues)
 - 🧪 [Node.js Client Code](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)
 - 🗃️ [ZebPay API GitHub Monorepo (Root)](https://github.com/zebpay/zebpay-api-references/)

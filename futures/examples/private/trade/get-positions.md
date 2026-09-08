@@ -8,8 +8,8 @@ Retrieves a list of the user's current and/or historical positions, optionally f
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `symbols` (`Array<string>`, optional): List of trading symbols to filter by (e.g., `symbols=BTCUSDT&symbols=ETHUSDT`) . If omitted, positions for all symbols are returned.
-* `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`) . If omitted, positions with any status might be returned (check API behavior).
+* `symbols` (`Array<string>`, optional): List of trading symbols to filter by (e.g., `symbols=BTCUSDT&symbols=ETHUSDT`). When provided it must be an array. If omitted, positions for all symbols are returned.
+* `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`). Defaults to **`OPEN`**.
 
 -----
 

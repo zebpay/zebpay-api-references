@@ -234,7 +234,7 @@ For a complete runnable example, see [`run.example.js`](./run.example.js).
 ---
 
 ## 🔗 Helpful Links
-- [Zebpay Futures REST API Reference](https://dev-futuresbe.zebstage.com/api/docs)
+- [Zebpay Futures REST API Reference](https://futuresbe.zebpay.com/api/docs)
 - [ccxt GitHub Repository](https://github.com/ccxt/ccxt)
 - [ccxt Zebpay Futures Official Documentation](https://docs.ccxt.com/#/exchanges/zebpayfutures)
 - [Native Node.js Client Repository](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)

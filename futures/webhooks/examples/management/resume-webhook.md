@@ -19,7 +19,18 @@ curl -X PATCH https://futuresbe.zebpay.com/webhooks/<uuid>/resume \
 
 ##### Success Response (Example)
 
-Same as *Pause Webhook* (`200` with `data=null`).
+```json
+{
+  "statusDescription": "Resumed Webhook Successfully",
+  "data": {
+    "webhookId": "<uuid>",
+    "accountId": "12345",
+    "isPaused": false
+  },
+  "statusCode": 201,
+  "customMessage": ["Resumed Webhook Successfully"]
+}
+```
 
 -----
 

@@ -4,11 +4,11 @@ The private Futures WebSocket delivers account-specific order, position, balance
 
 ## Connection Contract
 
-- **Service URL:** `https://futuresws.zebpay.com`
+- **Service URL:** `https://sp-futuresws.zebpay.com`
 - **Namespace:** `/auth-stream`
 - **Socket.IO path:** `/socket.io`
 - **Transport:** WebSocket
-- **Recommended Node.js namespace URL:** `https://futuresws.zebpay.com/auth-stream`
+- **Recommended Node.js namespace URL:** `https://sp-futuresws.zebpay.com/auth-stream`
 - **Protocol:** Socket.IO, not a raw WebSocket connection
 
 Use a Socket.IO 4 client configured for Engine.IO 4 (`EIO=4`). The service source snapshot does not include a dependency manifest that pins an exact deployed patch version, so applications should not depend on version-specific behavior beyond the documented contract.

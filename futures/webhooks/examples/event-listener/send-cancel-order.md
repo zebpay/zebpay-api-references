@@ -1,6 +1,6 @@
 # Example: Send CANCEL_ORDER Signal
 
-Cancels an existing client order via the webhook listener.
+Cancels all open orders for a symbol via the webhook listener.
 
 > **💡 Tip:** See the [Webhook Callback section](../../reference-docs/event-listener.md#cancel-order) for the payload schema.
 
@@ -17,7 +17,7 @@ curl -X POST https://futuresbe.zebpay.com/webhooks/<uuid> \
   -H "Content-Type: application/json" \
   -d '{
         "action": "CANCEL_ORDER",
-        "payload": { "clientOrderId": "tv-1703" },
+        "payload": { "symbol": "BTCUSDT" },
         "secret": "<secret>",
         "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
       }'
@@ -33,7 +33,7 @@ const axios = require('axios');
 async function sendCancelOrderSignal(callbackUrl, secret) {
   const body = {
     action: 'CANCEL_ORDER',
-    payload: { clientOrderId: 'tv-1703' },
+    payload: { symbol: 'BTCUSDT' },
     secret,
     timestamp: new Date().toISOString(),
   };
@@ -52,7 +52,7 @@ import requests, json, datetime
 def send_cancel_order(callback_url, secret):
     body = {
         'action': 'CANCEL_ORDER',
-        'payload': { 'clientOrderId': 'tv-1703' },
+        'payload': { 'symbol': 'BTCUSDT' },
         'secret': secret,
         'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
     }

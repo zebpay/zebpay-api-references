@@ -58,9 +58,9 @@
  * @property {string} symbol - Trading pair symbol (e.g., "BTCUSDT")
  * @property {Array<[number, number]>} bids - Buy orders as array of [price, amount] pairs, sorted by price in descending order
  * @property {Array<[number, number]>} asks - Sell orders as array of [price, amount] pairs, sorted by price in ascending order
- * @property {number|null} timestamp - Unix timestamp in milliseconds (if available)
- * @property {string|null} datetime - ISO8601 datetime string (if available)
- * @property {number|null} nonce - Exchange-provided sequence number (if available)
+ * @property {number} timestamp - Unix timestamp in milliseconds from `Date.now()`
+ * @property {null} datetime - Always `null` in the current implementation
+ * @property {number} nonce - Set to `Date.now()` when the book is transformed
  */
 
 /**
@@ -260,6 +260,7 @@
  *
  * @typedef {Object} Transaction
  * @property {string} txid - Transaction identifier
+ * @property {string|null} [tradeId] - Associated trade identifier when present
  * @property {number} timestamp - Unix timestamp in milliseconds
  * @property {string} datetime - ISO8601 datetime string
  * @property {string} type - Transaction type (COMMISSION, FUNDING_FEE, etc.)
@@ -422,7 +423,15 @@
  */
 
 /**
- * Paginated response for order listings
+ * Paginated response for open orders (`GET /api/v1/trade/order/open-orders`)
+ * @typedef {Object} OpenOrdersListResponse
+ * @property {Order[]} data - List of open orders
+ * @property {number} totalCount - Number of orders returned
+ * @property {number|null} nextTimestamp - Timestamp for pagination to fetch next page
+ */
+
+/**
+ * Paginated response for order history (`GET /api/v1/trade/order/history`)
  * @typedef {Object} OrdersListResponse
  * @property {Order[]} items - List of orders
  * @property {number} totalCount - Total number of orders matching the query

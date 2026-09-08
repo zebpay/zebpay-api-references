@@ -15,9 +15,9 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -d '{
+      -d '{
         "symbol": "BTCINR",
-        "interval": "1h",
+        "timeframe": "1h",
         "limit": 100
       }'
 ```
@@ -69,7 +69,7 @@ async function getKlinesExample(klineParams) {
 // Example usage:
 const klineParams = {
   symbol: "BTCINR",
-  interval: "1h",
+  timeframe: "1h",
   limit: 100
 };
 getKlinesExample(klineParams);
@@ -114,7 +114,7 @@ def get_klines_example(kline_params):
 # Example usage:
 kline_params = {
   "symbol": "BTCINR",
-  "interval": "1h",
+  "timeframe": "1h",
   "limit": 100
 }
 get_klines_example(kline_params)

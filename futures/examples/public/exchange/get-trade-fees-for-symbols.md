@@ -25,13 +25,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/tradefees \
   "data": [
     {
       "symbol": "BTCUSDT",
-      "makerFee": 0.001,
-      "takerFee": 0.002
+      "makerFee": "0.001",
+      "takerFee": "0.002"
     },
     {
       "symbol": "ETHUSDT",
-      "makerFee": 0.0012,
-      "takerFee": 0.0022
+      "makerFee": "0.0012",
+      "takerFee": "0.002"2
     }
     // ... more symbols
   ],
@@ -87,13 +87,13 @@ API Response: {
   "data": [
     {
       "symbol": "BTCUSDT",
-      "makerFee": 0.001,
-      "takerFee": 0.002
+      "makerFee": "0.001",
+      "takerFee": "0.002"
     },
     {
       "symbol": "ETHUSDT",
-      "makerFee": 0.0012,
-      "takerFee": 0.0022
+      "makerFee": "0.0012",
+      "takerFee": "0.002"2
     }
     // ...
   ],
@@ -106,8 +106,8 @@ API Response: {
 Trade Fees Data (list): [
   {
     "symbol": "BTCUSDT",
-    "makerFee": 0.001,
-    "takerFee": 0.002
+    "makerFee": "0.001",
+    "takerFee": "0.002"
   },
   // ...
 ]
@@ -159,13 +159,13 @@ API Response: {
   "data": [
     {
       "symbol": "BTCUSDT",
-      "makerFee": 0.001,
-      "takerFee": 0.002
+      "makerFee": "0.001",
+      "takerFee": "0.002"
     },
     {
       "symbol": "ETHUSDT",
-      "makerFee": 0.0012,
-      "takerFee": 0.0022
+      "makerFee": "0.0012",
+      "takerFee": "0.002"2
     }
     // ...
   ],
@@ -175,5 +175,5 @@ API Response: {
   ]
 }
 // Followed by the extracted data
-Trade Fees Data (list): [{'symbol': 'BTCUSDT', 'makerFee': 0.001, 'takerFee': 0.002}, ...]
+Trade Fees Data (list): [{'symbol': 'BTCUSDT', 'makerFee': '0.001', 'takerFee': '0.002'}, ...]
 ```

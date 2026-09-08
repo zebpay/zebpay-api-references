@@ -4,6 +4,11 @@ This sample client connects to the Socket.IO `/auth-stream` namespace and relays
 
 This is a Socket.IO client over WebSocket transport, not a raw WebSocket or Server-Sent Events client.
 
+**Service URL:** `https://sp-futuresws.zebpay.com`  
+**Namespace URL:** `https://sp-futuresws.zebpay.com/auth-stream`
+
+The client uses that host by default. Override it with `baseUrl` or `WEBSOCKET_BASE_URL`.
+
 ## Requirements
 
 - Node.js 18 or newer

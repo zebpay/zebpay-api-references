@@ -54,7 +54,7 @@ function buildAuth() {
   };
 }
 
-const socket = io("https://futuresws.zebpay.com/auth-stream", {
+const socket = io("https://sp-futuresws.zebpay.com/auth-stream", {
   path: "/socket.io",
   transports: ["websocket"],
   autoConnect: false,
@@ -112,7 +112,7 @@ import time
 
 import socketio
 
-BASE_URL = "https://futuresws.zebpay.com"
+BASE_URL = "https://sp-futuresws.zebpay.com"
 NAMESPACE = "/auth-stream"
 
 api_key = os.environ["API_KEY"]

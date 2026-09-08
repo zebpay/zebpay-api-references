@@ -152,6 +152,7 @@ Common failures include:
 | `Invalid API key`                             | API key was not found or has no account                             |
 | `You do not have the required scope...`       | API key lacks `fetch:details`                                       |
 | `You are not allowed API access from this ip` | Caller IP is not on the key allowlist                               |
+| `invalid subaccountId`                        | `subaccountId` was supplied but is not numeric                  |
 | `Account is pending KYC...`                   | Root account has not completed KYC                                  |
 | `Forbidden`                                   | Requested subaccount does not belong to the root account            |
 | `Sub-account is frozen...`                    | Selected subaccount is frozen                                       |

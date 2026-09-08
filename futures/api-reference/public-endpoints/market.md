@@ -123,8 +123,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     [65002.00, 0.7]
   ],
   "timestamp": 1712345678901,
-  "datetime": "2025-04-05T11:59:38.901Z",
-  "nonce": 123456789
+  "datetime": null,
+  "nonce": 1712345678901
 }
 ```
 
@@ -309,15 +309,22 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 
 **Request Body**
 
-The body must be a JSON object specifying the parameters for the k-line data.
+The body must be a JSON object specifying the parameters for the k-line data. Unknown body fields are stripped; send `timeframe` and `since`, not `interval`, `startTime`, or `endTime`.
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `symbol` | string | Yes | The trading pair symbol (e.g., 'BTCINR'). |
-| `interval` | string | Yes | The candlestick interval (e.g., '1m', '5m', '1h', '1d'). |
-| `startTime` | number | No | The start time in milliseconds to fetch data from. |
-| `endTime` | number | No | The end time in milliseconds to fetch data up to. |
-| `limit`   | number | No | The maximum number of data points to retrieve (e.g., 100). |
+| `timeframe` | string | Yes | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. If omitted after validation, the server defaults to `1m`. |
+| `since` | number | No | Start time in milliseconds since epoch. |
+| `limit` | number | No | Maximum number of data points to retrieve (e.g., 100). |
+
+There is no request `endTime`. Candle start and end times appear only in the response arrays below.
+
+**Query Parameters**
+
+| Field | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `priceType` | string | No | Price series to use. `LTP` (default) or `MARK_PRICE`. |
 
 #### Success Response
 

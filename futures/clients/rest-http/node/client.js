@@ -132,14 +132,15 @@ class FuturesApiClient {
       }
       const url =`${config.baseUrl}${endpoint}`;
       const requestPayload = { method: requestMethod, url, headers };
-      if (requestMethod === 'GET') {
+      if (Object.keys(requestParams).length > 0) {
         requestPayload.params = requestParams;
-        if (isApiKeyRequest) {
+        if (isApiKeyRequest && requestMethod === 'GET') {
           requestPayload.paramsSerializer = {
             serialize: AuthUtils.serializeQueryParams
           };
         }
-      } else if (requestData !== null) {
+      }
+      if (requestMethod !== 'GET' && requestData !== null) {
         requestPayload.data = requestData;
       }
       const response = await this.http.request(requestPayload);
@@ -244,18 +245,38 @@ class FuturesApiClient {
    *
    * @param {Object} klineParams - K-line parameters
    * @param {string} klineParams.symbol - Trading symbol (e.g., 'BTCINR')
-   * @param {string} klineParams.interval - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
-   * @param {number} [klineParams.startTime] - Start time in milliseconds
-   * @param {number} [klineParams.endTime] - End time in milliseconds
+   * @param {string} [klineParams.timeframe] - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
+   * @param {string} [klineParams.interval] - Alias for `timeframe`
+   * @param {number} [klineParams.since] - Start time in milliseconds
+   * @param {number} [klineParams.startTime] - Alias for `since`
    * @param {number} [klineParams.limit] - Maximum number of data points to return
+   * @param {string} [klineParams.priceType] - `LTP` (default) or `MARK_PRICE`
    * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
    */
   async getKlines(klineParams) {
-    if (!klineParams.symbol || !klineParams.interval) {
-      throw new Error('Symbol and interval are required');
+    if (!klineParams || !klineParams.symbol) {
+      throw new Error('Symbol is required');
     }
-    klineParams.symbol = this._normalizeString(klineParams.symbol);
-    return await this._request('POST', config.endpoints.public.market.klines, {}, klineParams);
+    const timeframe = klineParams.timeframe || klineParams.interval;
+    if (!timeframe) {
+      throw new Error('timeframe (or interval) is required');
+    }
+    const body = {
+      symbol: this._normalizeString(klineParams.symbol),
+      timeframe
+    };
+    const since = klineParams.since ?? klineParams.startTime;
+    if (since != null) {
+      body.since = since;
+    }
+    if (klineParams.limit != null) {
+      body.limit = klineParams.limit;
+    }
+    const query = {};
+    if (klineParams.priceType != null) {
+      query.priceType = klineParams.priceType;
+    }
+    return await this._request('POST', config.endpoints.public.market.klines, query, body);
   }
 
   /**
@@ -274,7 +295,7 @@ class FuturesApiClient {
   /**
    * Fetches the current system status
    *
-   * @returns {Promise<ApiResponse<{status: "ok" | "error"}>>} Current system status
+   * @returns {Promise<ApiResponse<{systemStatus: "ok" | "error"}>>} Current system status
    */
   async getSystemStatus() {
     return await this._request('GET', config.endpoints.public.system.status);
@@ -288,7 +309,7 @@ class FuturesApiClient {
    * Fetches trading fee for a specific symbol
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
-   * @returns {Promise<ApiResponse<{symbol: string, makerFee: number, takerFee: number}>>} Trading fee information
+   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: string, takerFee: string}>>>} One-element array of trading fee information (fees as strings)
    */
   async getTradeFee(symbol) {
     if (!symbol) {
@@ -301,7 +322,7 @@ class FuturesApiClient {
   /**
    * Fetches trading fees for all supported trading pairs
    *
-   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: number, takerFee: number}>>>} Trading fees for all pairs
+   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: string, takerFee: string}>>>} Trading fees for all pairs (fees as strings)
    */
   async getTradeFees() {
     return await this._request('GET', config.endpoints.public.exchange.tradefees);
@@ -524,19 +545,16 @@ class FuturesApiClient {
    * Adds margin to a position
    *
    * @param {Object} marginParams - Add margin parameters
-   * @param {string} [marginParams.symbol] - Trading symbol (Optional)
+   * @param {string} marginParams.symbol - Trading symbol
    * @param {string} marginParams.positionId - Position ID
    * @param {number} marginParams.amount - Margin amount to add
    * @returns {Promise<ApiResponse<MarginResponse>>} Updated position details
    */
   async addMargin(marginParams) {
-    if (!marginParams.positionId || !marginParams.amount) {
-      throw new Error('positionId and amount are required parameters');
+    if (!marginParams.positionId || !marginParams.amount || !marginParams.symbol) {
+      throw new Error('positionId, amount, and symbol are required parameters');
     }
-    // Normalize symbol if provided
-    if (marginParams.symbol) {
-      marginParams.symbol = this._normalizeString(marginParams.symbol);
-    }
+    marginParams.symbol = this._normalizeString(marginParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.addMargin, {}, marginParams);
   }
 
@@ -544,19 +562,16 @@ class FuturesApiClient {
    * Reduces margin from a position
    *
    * @param {Object} marginParams - Reduce margin parameters
-   * @param {string} [marginParams.symbol] - Trading symbol (Optional)
+   * @param {string} marginParams.symbol - Trading symbol
    * @param {string} marginParams.positionId - Position ID
    * @param {number} marginParams.amount - Margin amount to reduce
    * @returns {Promise<ApiResponse<MarginResponse>>} Updated position details
    */
   async reduceMargin(marginParams) {
-    if (!marginParams.positionId || !marginParams.amount) {
-      throw new Error('positionId and amount are required parameters');
+    if (!marginParams.positionId || !marginParams.amount || !marginParams.symbol) {
+      throw new Error('positionId, amount, and symbol are required parameters');
     }
-    // Normalize symbol if provided
-    if (marginParams.symbol) {
-      marginParams.symbol = this._normalizeString(marginParams.symbol);
-    }
+    marginParams.symbol = this._normalizeString(marginParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.reduceMargin, {}, marginParams);
   }
 
@@ -564,7 +579,7 @@ class FuturesApiClient {
    * Closes a position at MARKET
    *
    * @param {Object} closeParams - Close position parameters
-   * @param {string} [closeParams.symbol] - Trading symbol (e.g., 'BTCUSDT') (optional)
+   * @param {string} closeParams.symbol - Trading symbol (e.g., 'BTCUSDT')
    * @param {string} closeParams.positionId - Position ID
    * @returns {Promise<ApiResponse<ClosePositionResponseData>>} Closed position details including execution details
    *
@@ -576,13 +591,10 @@ class FuturesApiClient {
    * });
    */
   async closePosition(closeParams) {
-    if (!closeParams.positionId) {
-      throw new Error('positionId is required');
+    if (!closeParams.positionId || !closeParams.symbol) {
+      throw new Error('positionId and symbol are required');
     }
-    // Normalize symbol if provided
-    if (closeParams.symbol) {
-      closeParams.symbol = this._normalizeString(closeParams.symbol);
-    }
+    closeParams.symbol = this._normalizeString(closeParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.closePosition, {}, closeParams);
   }
 
@@ -591,9 +603,9 @@ class FuturesApiClient {
    *
    * @param {string} symbol - Trading symbol
    * @param {Object} [options] - Additional options
-   * @param {number} [options.limit] - Maximum number of orders to return
+   * @param {number} [options.limit] - Maximum number of orders to return (server default 100)
    * @param {number} [options.since] - Timestamp to fetch orders placed after this time
-   * @returns {Promise<ApiResponse<OrdersListResponse>>} Open orders
+   * @returns {Promise<ApiResponse<OpenOrdersListResponse>>} Open orders (`data.data` array)
    */
   async getOpenOrders(symbol, options = {}) {
     if (!symbol) {
@@ -610,8 +622,8 @@ class FuturesApiClient {
   /**
    * Fetches positions
    *
-   * @param {string[]} [symbols] - Array of trading symbols; if empty or not provided all positions will be returned
-   * @param {string} [status] - Filter positions by status (OPEN, CLOSED, LIQUIDATED)
+   * @param {string[]} [symbols] - Array of trading symbols; must be an array when provided
+   * @param {string} [status] - Filter by status (OPEN, CLOSED, LIQUIDATED). Server default is OPEN.
    * @returns {Promise<ApiResponse<Position[]>>} Positions
    */
   async getPositions(symbols = [], status=undefined) {
@@ -669,36 +681,61 @@ class FuturesApiClient {
    * Fetches order history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of orders to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch orders before this time
+   * @param {number} [options.pageSize] - Number of orders to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch orders before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on order time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on order time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
    * @returns {Promise<ApiResponse<OrdersListResponse>>} Paginated order history
    */
   async getOrderHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.orderHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.orderHistory, params);
   }
 
   /**
    * Fetches trade history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of trades to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch trades before this time
+   * @param {number} [options.pageSize] - Number of trades to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch trades before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on trade time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on trade time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
    * @returns {Promise<ApiResponse<TradesListResponse>>} Paginated trade history
    */
   async getTradeHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.tradeHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.tradeHistory, params);
   }
 
   /**
    * Fetches transaction history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of transactions to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch transactions before this time
+   * @param {number} [options.pageSize] - Number of transactions to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch transactions before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on transaction time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on transaction time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
+   * @param {number} [options.tradeId] - Filter transactions belonging to a specific trade
    * @returns {Promise<ApiResponse<TransactionsListResponse>>} Paginated transaction history
    */
   async getTransactionHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.transactionHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.transactionHistory, params);
   }
 }
 

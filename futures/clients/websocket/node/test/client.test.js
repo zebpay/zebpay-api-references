@@ -83,7 +83,7 @@ test('API-key auth callback generates fresh credentials per explicit connection'
   const first = await resolveAuth(calls[0].options.auth);
   const second = await resolveAuth(calls[0].options.auth);
 
-  assert.equal(calls[0].url, 'https://futuresws.zebpay.com/auth-stream');
+  assert.equal(calls[0].url, 'https://sp-futuresws.zebpay.com/auth-stream');
   assert.equal(calls[0].options.path, '/socket.io');
   assert.deepEqual(calls[0].options.transports, ['websocket']);
   assert.equal(calls[0].options.reconnection, false);

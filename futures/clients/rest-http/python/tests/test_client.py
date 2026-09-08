@@ -178,6 +178,47 @@ class FuturesApiClientTest(unittest.TestCase):
                 'stopLossPrice': 62000
             })
 
+    def test_get_klines_maps_aliases_and_omits_unsupported_body_fields(self):
+        self.client.get_klines({
+            'symbol': 'btcusdt',
+            'interval': '1h',
+            'startTime': 1712345678000,
+            'endTime': 1712349278000,
+            'limit': 50,
+            'priceType': 'MARK_PRICE'
+        })
+        request = self.request_kwargs()
+        self.assertEqual(request['method'], 'POST')
+        self.assertTrue(request['url'].endswith('/api/v1/market/klines'))
+        self.assertEqual(request['params'], {'priceType': 'MARK_PRICE'})
+        self.assertEqual(request['json'], {
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'since': 1712345678000,
+            'limit': 50
+        })
+        with self.assertRaisesRegex(ValueError, 'timeframe'):
+            self.client.get_klines({'symbol': 'BTCUSDT'})
+
+    def test_history_methods_forward_extra_filters(self):
+        self.client.get_order_history(
+            page_size=10,
+            start_timestamp=1,
+            end_timestamp=2,
+            sort_order='asc',
+            symbol='btcusdt'
+        )
+        request = self.request_kwargs()
+        self.assertEqual(request['params']['pageSize'], 10)
+        self.assertEqual(request['params']['startTimestamp'], 1)
+        self.assertEqual(request['params']['endTimestamp'], 2)
+        self.assertEqual(request['params']['sortOrder'], 'asc')
+        self.assertEqual(request['params']['symbol'], 'BTCUSDT')
+
+        self.client.get_transaction_history(trade_id=17909)
+        txn_request = self.request_kwargs()
+        self.assertEqual(txn_request['params']['tradeId'], 17909)
+
 
 if __name__ == '__main__':
     unittest.main()
