@@ -30,7 +30,7 @@ For detailed authentication information, see [Authentication Guide](./authentica
 
 The base URL for the Spot API is:
 ```
-https://api.zebpay.com
+https://sapi.zebpay.com
 ```
 
 ## Rate Limits

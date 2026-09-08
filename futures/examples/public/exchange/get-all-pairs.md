@@ -28,7 +28,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/pairs \
         "name": "Bitcoin",
         "pair": "BTCUSDT",
         "isActive": true,
-        "iconURL": "[https://example.com/btc.png](https://example.com/btc.png)",
+        "iconURL": "https://example.com/btc.png",
         "baseAsset": "BTC",
         "quoteAsset": "USDT",
         "marginAsset": "USDT"
@@ -37,7 +37,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/pairs \
         "name": "Ethereum",
         "pair": "ETHUSDT",
         "isActive": true,
-        "iconURL": "[https://example.com/eth.png](https://example.com/eth.png)",
+        "iconURL": "https://example.com/eth.png",
         "baseAsset": "ETH",
         "quoteAsset": "USDT",
         "marginAsset": "USDT"

@@ -186,7 +186,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
       "name": "Bitcoin",
       "pair": "BTCUSDT",
       "isActive": true,
-      "iconURL": "[https://example.com/btc.png](https://www.google.com/search?q=https://example.com/btc.png)",
+      "iconURL": "https://example.com/btc.png",
       "baseAsset": "BTC",
       "quoteAsset": "USDT",
       "marginAsset": "USDT"

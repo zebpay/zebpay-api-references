@@ -8,7 +8,7 @@ Welcome to the official documentation repository for the Zebpay Spot and Futures
 
 ## 🔑  Key Information & Quick Links
 
-* **Spot REST API Base URL:** `https://api.zebpay.com` (version: v2)
+* **Spot REST API Base URL:** `https://sapi.zebpay.com` (version: v2)
 * **Futures REST API Base URL:** `https://futuresbe.zebpay.com` (version: v1)
 * **Futures Private WebSocket URL:** `https://sp-futuresws.zebpay.com/auth-stream` (Socket.IO)
 * **Futures Webhooks – Management Base URL:** `https://futuresbe.zebpay.com` (version: v1)

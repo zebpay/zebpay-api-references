@@ -82,7 +82,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 ```javascript
 async function getTicker24hrExample(symbol) {
   try {
-    console.log(`Workspaceing 24hr ticker for ${symbol}...`);
+    console.log(`Fetching 24hr ticker for ${symbol}...`);
     // Ensure symbol is passed to the method
     const response = await client.getTicker24Hr(symbol); //
     console.log("API Response:", JSON.stringify(response, null, 2));

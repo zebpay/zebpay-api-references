@@ -90,7 +90,7 @@ In addition to the key scope:
 
 This section is for developers not using the sample client libraries.
 
-> 💡 **Recommendation:** Use the [Node.js Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node/README.md) or [Python Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/python/README.md) to avoid handling these steps manually.
+> 💡 **Recommendation:** Use the [Node.js Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node) or [Python Client](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/python) to avoid handling these steps manually.
 
 ### Manual JWT Authentication
 
