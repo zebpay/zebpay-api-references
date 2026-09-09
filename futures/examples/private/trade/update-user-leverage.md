@@ -2,10 +2,11 @@
 
 Updates the user's leverage setting for a specific trading symbol.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Update User Leverage](../../../api-reference/private-endpoints/trade.md#update-user-leverage).
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Update User Leverage](../../../api-reference/private-endpoints/trade.md/#update-user-leverage).
 
 **Endpoint:** `POST /api/v1/trade/update/userLeverage`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 **Request Body:**
 
 * **`symbol`** (`string`, required): Trading symbol (e.g., "BTCUSDT") .

@@ -33,13 +33,13 @@ This section describes the common JSON data structures returned by the API. Unde
 ### 🔁 Action Response Models
 - [`MarketsData`](#marketsdata)
 - [`CreateOrderResponseData`](#createorderresponsedata)
-- [`EditOrderResponseData`](#editorderresponsedata)
 - [`AddTPSLResponseData`](#addtpslresponsedata)
 - [`ClosePositionResponseData`](#closepositionresponsedata)
 - [`CancelOrderResponseData`](#cancelorderresponsedata)
 - [`MarginResponse`](#marginresponse)
 
 ### 📄 Paginated List Response Models
+- [`OpenOrdersListResponse`](#openorderslistresponse)
 - [`OrdersListResponse`](#orderslistresponse)
 - [`TradesListResponse`](#tradeslistresponse)
 - [`TransactionsListResponse`](#transactionslistresponse)
@@ -94,7 +94,7 @@ Represents details for a single trading symbol, returned within the `symbols` ar
 | `quantityPrecision`     | `number`        | Number of decimal places for quantity/amount formatting/entry.          |
 | `baseAssetPrecision`    | `number`        | Precision for the base asset itself.                                  |
 | `quotePrecision`        | `number`        | Precision for the quote asset itself.                                 |
-| `orderTypes`            | `Array<string>` | List of supported order types (e.g., ["LIMIT", "MARKET"]).            |
+| `orderTypes`            | `Array<string>` | Order types enabled for this symbol, such as `MARKET`, `LIMIT`, `STOP_MARKET`, and `STOP_LIMIT`. |
 | `timeInForce`           | `Array<string>` | List of supported time-in-force policies (e.g., ["GTC"]).             |
 | `makerFee`              | `number`        | Maker fee rate for this symbol.                                       |
 | `takerFee`              | `number`        | Taker fee rate for this symbol.                                       |
@@ -116,7 +116,7 @@ Represents details for a single trading symbol, returned within the `symbols` ar
   "quantityPrecision": 0,
   "baseAssetPrecision": 0,
   "quotePrecision": 0,
-  "orderTypes": [ "LIMIT", "MARKET" ],
+  "orderTypes": [ "LIMIT", "MARKET", "STOP_MARKET", "STOP_LIMIT" ],
   "timeInForce": [ "GTC" ],
   "makerFee": 0.05,
   "takerFee": 0.1,
@@ -138,9 +138,9 @@ Represents the market depth for a trading pair, returned within the `data` field
 | `symbol`   | `string`                  | Trading pair symbol (e.g., "BTCUSDT").                           |
 | `bids`     | `Array<[number, number]>` | Array of buy orders `[price, amount]`, sorted by price descending.|
 | `asks`     | `Array<[number, number]>` | Array of sell orders `[price, amount]`, sorted by price ascending.|
-| `timestamp`| `number` \| `null`        | Unix timestamp (ms) when the order book was generated.           |
-| `datetime` | `string` \| `null`        | ISO8601 formatted datetime string.                               |
-| `nonce`    | `number` \| `null`        | Exchange-provided sequence number, if available.                 |
+| `timestamp`| `number`                  | Unix timestamp (ms). Set to `Date.now()` when the book is transformed. |
+| `datetime` | `null`                    | Always `null` in the current implementation.                     |
+| `nonce`    | `number`                  | Set to `Date.now()` when the book is transformed (not an exchange sequence). |
 
 ##### Example (`data` field content)
 
@@ -158,8 +158,8 @@ Represents the market depth for a trading pair, returned within the `data` field
     [65002.00, 0.7]
   ],
   "timestamp": 1712345678901,
-  "datetime": "2025-04-05T11:59:38.901Z",
-  "nonce": 123456789
+  "datetime": null,
+  "nonce": 1712345678901
 }
 ```
 
@@ -397,10 +397,11 @@ Represents a trading order, returned by `GET /api/v1/trade/order` and within lis
 | `datetime`      | `string`              | ISO8601 formatted datetime string of order creation.              |
 | `timestamp`     | `number`              | Unix timestamp (ms) of order creation.                            |
 | `symbol`        | `string`              | Trading pair symbol.                                              |
-| `type`          | `string`              | Order type (e.g., 'MARKET', 'LIMIT').                               |
+| `type`          | `string`              | Order type, including stop types when enabled for the symbol.       |
 | `timeInForce`   | `string`              | Time in force policy (e.g., 'GTC', 'IOC', 'FOK').                   |
 | `side`          | `string`              | Order side ('BUY' or 'SELL').                                       |
 | `price`         | `number`              | Order price (can be 0 for market orders).                           |
+| `triggerPrice`  | `number` \| `undefined` | Trigger price returned for stop and TP/SL orders.                 |
 | `amount`        | `number`              | Order amount in the base asset.                                    |
 | `filled`        | `number`              | Amount of the order that has been filled.                           |
 | `remaining`     | `number`              | Amount of the order remaining to be filled.                        |
@@ -574,6 +575,7 @@ Represents a wallet transaction (e.g., fee, funding), returned in lists from `GE
 | Field Name | Type     | Description                                                     |
 |------------|----------|-----------------------------------------------------------------|
 | `txid`     | `string` | Unique transaction identifier.                                   |
+| `tradeId`  | `string` \| `null` | Associated trade identifier when the transaction is tied to a fill. |
 | `timestamp`| `number` | Unix timestamp in milliseconds.                                  |
 | `datetime` | `string` | ISO8601 formatted datetime string.                                 |
 | `type`     | `string` | Type of transaction (e.g., 'COMMISSION', 'FUNDING_FEE').           |
@@ -606,7 +608,7 @@ Represents a wallet transaction (e.g., fee, funding), returned in lists from `GE
 
 Represents detailed exchange configuration, returned within the `data` field of `GET /api/v1/exchange/exchangeInfo`. This is a complex object containing arrays and nested objects for trading rules, filters, leverage, fee tiers, and more.
 
-> 🔗 **Explore full schema:** [GET /api/v1/exchange/exchangeInfo – OpenAPI Docs](https://api.zebapi.com/docs#operation/getExchangeInfo)
+> 🔗 **Explore the API:** [ZebPay Futures OpenAPI documentation](https://futuresbe.zebpay.com/api/docs)
 
 **Top-Level Fields:**
 
@@ -627,7 +629,7 @@ Represents detailed exchange configuration, returned within the `data` field of 
     {
       "name": "Bitcoin",
       "pair": "BTCUSDT",
-      "orderTypes": ["MARKET", "LIMIT"],
+      "orderTypes": ["MARKET", "LIMIT", "STOP_MARKET", "STOP_LIMIT"],
       "filters": [
         { "filterType": "LIMIT_QTY_SIZE", "maxQty": "100", "minQty": "0.0001" },
         { /* other filters */ }
@@ -755,7 +757,7 @@ Represents the structure of the `data` field returned by `GET /api/v1/market/mar
 
 Response from `POST /api/v1/trade/order`. This structure is also used as the base for responses when adding TP/SL or closing positions.
 
-* **Structure:** Generally inherits fields from the [Order](#order) model, representing the details of the newly created order. Key fields typically include `clientOrderId`, `timestamp`, `symbol`, `type`, `side`, `price`, `amount`, `status`, etc.
+* **Structure:** Generally inherits fields from the [Order](#order) model, representing the details of the newly created order. Stop-order responses include `triggerPrice`. The create response describes the entry order; bracket protection should be reconciled through open orders and private WebSocket events after the entry fills.
 
 ##### Example (`data` field content)
 
@@ -765,16 +767,17 @@ Response from `POST /api/v1/trade/order`. This structure is also used as the bas
   "datetime": "2025-04-05T13:10:00.123Z",
   "timestamp": 1712346600123,
   "symbol": "BTCUSDT",
-  "type": "MARKET",
+  "type": "stop_limit",
   "timeInForce": "GTC",
-  "side": "BUY",
-  "price": 0,
-  "amount": 0.001,
-  "filled": 0.001,
-  "remaining": 0,
+  "side": "buy",
+  "price": 66000,
+  "triggerPrice": 65500,
+  "amount": 0.005,
+  "filled": 0,
+  "remaining": 0.005,
   "reduceOnly": false,
   "postOnly": false,
-  "status": "filled"
+  "status": "new"
 }
 ```
 
@@ -783,53 +786,20 @@ Response from `POST /api/v1/trade/order`. This structure is also used as the bas
 <a id="editorderresponsedata"></a>
 ### `EditOrderResponseData`
 
-Response from `PATCH /api/v1/trade/order`. This structure represents the response when editing an existing order.
+Response from `PATCH /api/v1/trade/order`. It identifies the edited order and includes the submitted order values plus exchange-specific details in `info`.
 
 **Fields:**
 
-| Field Name              | Type             | Description                                                           |
-|-------------------------|------------------|-----------------------------------------------------------------------|
-| `id`                    | `undefined`      | Order ID (undefined in edit response).                               |
-| `clientOrderId`         | `string`         | The client-generated unique order identifier that was edited.        |
-| `lastTradeTimestamp`    | `null`           | Last trade timestamp (null in edit response).                        |
-| `timeInForce`           | `string`         | Time in force policy (typically "GTC").                              |
-| `price`                 | `number`         | The new/updated price for the order.                                 |
-| `average`               | `null`           | Average fill price (null in edit response).                          |
-| `amount`                | `number`         | The new/updated amount for the order.                                |
-| `trades`                | `Array<object>`  | List of trades (empty array in edit response).                       |
-| `fee`                   | `null`           | Fee information (null in edit response).                             |
-| `info`                  | `object`         | Raw response data from the exchange containing edit status details.  |
+| Field Name | Type | Description |
+|---|---|---|
+| `clientOrderId` | `string` | Identifier of the edited order. |
+| `timeInForce` | `string` | Time-in-force policy. |
+| `price` | `number` \| `undefined` | Submitted replacement price, when provided. |
+| `amount` | `number` \| `undefined` | Submitted replacement amount, when provided. |
+| `triggerPrice` | `number` \| `undefined` | Submitted replacement trigger for a stop or TP/SL order. |
+| `info` | `object` | Exchange-specific edit result. |
 
-**`info` Object Fields:**
-
-| Field Name                    | Type     | Description                                      |
-|-------------------------------|----------|--------------------------------------------------|
-| `status`                      | `string` | Edit operation status message.                   |
-| `availableBalance`            | `number` | Available balance after the edit operation.     |
-| `lockedMargin`                | `number` | Amount of margin locked for positions.          |
-| `lockedMarginInMarginAsset`   | `number` | Locked margin amount in the margin asset.       |
-
-##### Example (`data` field content)
-
-```js
-{
-  "id": undefined,
-  "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-  "lastTradeTimestamp": null,
-  "timeInForce": "GTC",
-  "price": 7100000,
-  "average": null,
-  "amount": 0.001,
-  "trades": [],
-  "fee": null,
-  "info": {
-    "status": "Edit request submitted successfully",
-    "availableBalance": 700,
-    "lockedMargin": 200,
-    "lockedMarginInMarginAsset": 200
-  }
-}
-```
+Only submitted optional values are present. A TP/SL trigger-only edit therefore returns `triggerPrice` without requiring `price` or `amount`.
 
 ---
 
@@ -922,14 +892,45 @@ Response from `POST /api/v1/trade/addMargin` and `POST /api/v1/trade/reduceMargi
 <a id="paginatedlistresponsemodels"></a>
 ## Paginated List Response Models
 
-These models describe the structure within the `data` field when fetching lists of historical data.
+These models describe the structure within the `data` field when fetching lists of orders, trades, or transactions.
+
+---
+
+<a id="openorderslistresponse"></a>
+### `OpenOrdersListResponse`
+
+Response from `GET /api/v1/trade/order/open-orders`. The list lives on a nested `data` array, not `items`.
+
+**Fields:**
+
+| Field Name      | Type             | Description                                                           |
+|-----------------|------------------|-----------------------------------------------------------------------|
+| `data`          | `Array<Order>`   | List of open [Order](#order) objects.                                 |
+| `totalCount`    | `number`         | Number of orders returned.                                            |
+| `nextTimestamp` | `number`\|`null`  | Timestamp for fetching the next page, if any.                         |
+
+##### Example (`data` field content from `GET /api/v1/trade/order/open-orders`)
+
+```js
+{
+  "data": [
+    {
+      "clientOrderId": "myOpenLimitOrder789",
+      "datetime": "2025-04-05T13:18:00.000Z",
+      "status": "new"
+    }
+  ],
+  "totalCount": 1,
+  "nextTimestamp": null
+}
+```
 
 ---
 
 <a id="orderslistresponse"></a>
 ### `OrdersListResponse`
 
-Response from `GET /api/v1/trade/order/open-orders` and `GET /api/v1/trade/order/history`.
+Response from `GET /api/v1/trade/order/history`.
 
 **Fields:**
 

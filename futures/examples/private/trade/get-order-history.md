@@ -2,20 +2,24 @@
 
 Retrieves the user's historical orders (filled, canceled, etc.) with pagination support.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get Order History](../../../../api-reference/private-endpoints/trade.md#get-order-history).
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get Order History](../../../api-reference/private-endpoints/trade.md#get-order-history).
 
 **Endpoint:** `GET /api/v1/trade/order/history`
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `pageSize` (`number`, optional): Number of orders to return per page .
-* `timestamp` (`number`, optional): Fetch orders created before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+* `pageSize` (`number`, optional): Number of orders to return per page. Defaults to **10**.
+* `timestamp` (`number`, optional): Pagination cursor: fetch orders created before this Unix timestamp (ms). Use `nextTimestamp` from a previous response for the next page.
+* `startTimestamp` (`number`, optional): Inclusive lower bound on order time (ms).
+* `endTimestamp` (`number`, optional): Inclusive upper bound on order time (ms).
+* `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+* `symbol` (`string`, optional): Filter to a single trading symbol.
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication (First Page)
 
@@ -28,10 +32,19 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/history?pageSize=20 
 #### Using API Key + Secret Authentication
 
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/history?pageSize=20 \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="pageSize=20&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/order/history?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
+```
+
+For API-key auth, sign the complete query string in the same order. The endpoint also uses `timestamp` as its pagination cursor, so API-key requests can only use a cursor within the authentication timestamp window; use JWT auth for older cursor values.
 
 #### Success Response (Example)
 
@@ -85,7 +98,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/history?pageSize=20 
 }
 ```
 
-*Note: See [OrdersListResponse model](../../../../api-reference/data-models.md#orderslistresponse) and [Order model](../../../../api-reference/data-models.md#order) for field details.*
+*Note: See [OrdersListResponse model](../../../api-reference/data-models.md#orderslistresponse) and [Order model](../../../api-reference/data-models.md#order) for field details.*
 
 -----
 
@@ -96,7 +109,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/history?pageSize=20 
 ```javascript
 async function getOrderHistoryExample(options = {}) {
   try {
-    console.log(`Workspaceing order history...`);
+    console.log(`Fetching order history...`);
     // Client handles authentication headers automatically
     const response = await client.getOrderHistory(options); //
     console.log("API Response:", JSON.stringify(response, null, 2));
@@ -106,7 +119,7 @@ async function getOrderHistoryExample(options = {}) {
       // Access the list of orders and pagination token:
       // const orders = response.data.items;
       // const nextTimestamp = response.data.nextTimestamp;
-      // console.log(`Workspaceed ${orders.length} orders. Next page timestamp: ${nextTimestamp}`);
+      // console.log(`Fetched ${orders.length} orders. Next page timestamp: ${nextTimestamp}`);
       // if (nextTimestamp) {
       //   // Fetch next page: await getOrderHistoryExample({ pageSize: options.pageSize, timestamp: nextTimestamp });
       // }

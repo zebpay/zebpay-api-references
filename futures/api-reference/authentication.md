@@ -27,7 +27,7 @@ Authorization: Bearer <your_jwt_token>
 ### Example cURL Request
 
 ```bash
-curl -X GET 'https://api.zebapi.com/api/v1/wallet/balance' \
+curl -X GET 'https://futuresbe.zebpay.com/api/v1/wallet/balance' \
   -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' \
   -H 'Accept: application/json'
 ```
@@ -44,14 +44,45 @@ This method is ideal for programmatic access or server-to-server integrations.
 
 Each request to a private endpoint must be signed with an `HMAC-SHA256` signature using your `Secret Key`. The signature is validated server-side to ensure integrity and authenticity.
 
+Create and manage Futures API credentials in the **API Trading** section of the [ZebPay API portal](https://api.zebpay.com). The secret is shown when the key is created and must be stored securely.
+
+### API Key Scopes
+
+API-key authorization is separate from signature validation. A correctly signed request is still rejected with `403 Forbidden` when the key lacks the required scope.
+
+
+| Scope             | Access                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `fetch:details`   | Read-only private data, including balances, orders, positions, leverage, and history |
+| `futures:trading` | Futures trade reads and all write operations                                         |
+
+
+- REST write operations—including create, edit, cancel, add TP/SL, margin changes, closing positions, and leverage updates—require `futures:trading`.
+- REST read endpoints accept either `fetch:details` or `futures:trading`.
+- A key with `futures:trading` can therefore perform the currently documented REST reads and writes.
+- The [private Futures WebSocket](./websocket/authentication.md) API-key handshake requires `fetch:details`. A single key intended for both full REST trading and private WebSocket events should have both scopes.
+- JWT-authenticated requests do not use API-key scope checks.
+
+### Account and Key Requirements
+
+In addition to the key scope:
+
+- Futures trading must be available for the account.
+- Creating a new entry order—including stop and bracket entries—requires completed KYC and bank verification.
+- Order and position management remains subject to scope, ownership, subaccount, and endpoint-specific state checks. The entry-order KYC/bank gate does not apply to private reads or risk-reducing management such as adding or editing protective TP/SL, cancelling an existing order, or closing an existing position.
+- If the key has an IP allowlist, requests must originate from an allowed IP.
+- Subaccount requests use the `subaccountid` header. The subaccount must belong to the root account, must not be frozen, and must have Futures permission enabled by the main account.
+
 ### Required Headers
 
-| Header              | Value                             |
-|---------------------|------------------------------------|
-| `x-auth-apikey`     | Your API Key                       |
-| `x-auth-signature`  | HMAC-SHA256 signature              |
-| `Content-Type`      | `application/json`                 |
-| `Accept`            | `application/json`                 |
+
+| Header             | Value                 |
+| ------------------ | --------------------- |
+| `x-auth-apikey`    | Your API Key          |
+| `x-auth-signature` | HMAC-SHA256 signature |
+| `Content-Type`     | `application/json`    |
+| `Accept`           | `application/json`    |
+
 
 ---
 
@@ -79,17 +110,20 @@ That’s it. This header must be included in all authenticated requests.
 Here’s a step-by-step guide:
 
 #### Step 1: Retrieve your credentials
+
 - `API Key`
 - `Secret Key`
 
 > 🔒 Keep your `Secret Key` safe! Never expose it publicly.
+>
+> For trade writes, ensure the key includes the `futures:trading` scope.
 
 #### Step 2: Generate `timestamp`
 
 Use the current Unix timestamp **in milliseconds**.
 
-- JavaScript: ``Date.now()``
-- Python: ``int(time.time() * 1000)``
+- JavaScript: `Date.now()`
+- Python: `int(time.time() * 1000)`
 
 Let’s call this value `timestamp`.
 
@@ -98,17 +132,18 @@ Let’s call this value `timestamp`.
 #### Step 3: Construct `dataToSign`
 
 - For **GET** requests:
-    - Append `timestamp` to your query parameters
-    - Example:
-      ```
-      symbol=BTCUSDT&timestamp=1712345678901
-      ```
-    - This full query string becomes your `dataToSign`.
-
-- For **POST/PUT/DELETE** requests:
-    - Add `timestamp` to the root level of your JSON body.
-    - Serialize the full object into a **compact** JSON string (no extra whitespace).
-    - This JSON string becomes your `dataToSign`.
+  - Append `timestamp` to your query parameters
+  - Sign the query string exactly as it will be transmitted, preserving parameter order and URL encoding
+  - Example:
+    ```
+    symbol=BTCUSDT&timestamp=1712345678901
+    ```
+  - This full query string becomes your `dataToSign`.
+- For **POST/PUT/PATCH/DELETE** requests:
+  - Add `timestamp` to the root level of your JSON body.
+  - Serialize the full object into a **compact** JSON string (no extra whitespace).
+  - This JSON string becomes your `dataToSign`.
+  - Send the exact compact JSON string that was signed. This applies equally to `PATCH` and `DELETE` requests.
 
 #### Step 4: Generate HMAC Signature
 
@@ -143,7 +178,7 @@ Accept: application/json
 ### Example (Signed GET Request)
 
 ```bash
-curl -X GET "https://api.zebapi.com/api/v1/trade/history?symbol=BTCUSDT&timestamp=1712345678901" \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/history?symbol=BTCUSDT&timestamp=1712345678901" \
   -H "x-auth-apikey: YOUR_API_KEY" \
   -H "x-auth-signature: abcdef1234567890deadbeef..." \
   -H "Accept: application/json"
@@ -154,7 +189,7 @@ curl -X GET "https://api.zebapi.com/api/v1/trade/history?symbol=BTCUSDT&timestam
 ### Example (Signed POST Request)
 
 ```bash
-curl -X POST "https://api.zebapi.com/api/v1/trade/order" \
+curl -X POST "https://futuresbe.zebpay.com/api/v1/trade/order" \
   -H "x-auth-apikey: YOUR_API_KEY" \
   -H "x-auth-signature: abcdef1234567890deadbeef..." \
   -H "Content-Type: application/json" \
@@ -168,6 +203,22 @@ curl -X POST "https://api.zebapi.com/api/v1/trade/order" \
         "timestamp": 1712345678901
       }'
 ```
+
+---
+
+## Troubleshooting Authorization
+
+
+| Response                                          | Typical cause                                                  |
+| ------------------------------------------------- | -------------------------------------------------------------- |
+| `400 Invalid or expired timestamp`                | Missing timestamp, wrong units, or excessive clock skew        |
+| `400 Invalid signature`                           | Signed bytes do not match the transmitted query/body           |
+| `403 You do not have the required scope...`       | API key is missing the required scope                          |
+| `403 You are not allowed API access from this ip` | Request IP is not on the key allowlist                         |
+| `403 Forbidden request`                           | Invalid subaccount access or resource ownership/access failure |
+
+
+Authentication proves who is calling. It does not override pair capabilities, account eligibility, or ownership checks.
 
 ---
 

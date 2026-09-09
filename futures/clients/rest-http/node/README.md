@@ -19,7 +19,7 @@
 8. [📦 API Response Structure](#-api-response-structure)
 9. [🧯 Error Handling](#-error-handling)
 10. [🗂️ Project Structure](#-project-structure)
-11. [📌 Compatibility & Version](#-compatibility--version)
+11. [📌 Compatibility & Version](#compatibility-version)
 12. [🔗 Helpful Links](#-helpful-links)
 
 ---
@@ -39,11 +39,11 @@ Focus on writing your **strategies**, **analytics**, or **integrations** — we 
 
 ## ⚡ Quickstart
 
-Once installed and authenticated, you're one line away from live data:
+Public market data does not require authentication:
 
 ```javascript
 const FuturesApiClient = require('./client');
-const client = new FuturesApiClient({ jwt: 'your_token' });
+const client = new FuturesApiClient();
 console.log(await client.getMarketInfo());
 ```
 
@@ -65,6 +65,12 @@ Dive deeper into [📡 Client Methods](#-client-methods) for full capabilities.
 npm install
 ```
 
+Run request-signing, validation, and local HTTP transport tests with:
+
+```bash
+npm test
+```
+
 ---
 
 ## 🔐 Authentication Setup
@@ -82,11 +88,22 @@ SECRET_KEY=your_secret_key_here
 
 The `dotenv` package is used to load these into the environment automatically.
 
+API-key REST reads require `fetch:details` or `futures:trading`; REST writes require `futures:trading`. The client adds and signs a millisecond timestamp automatically.
+
+Authentication is optional for public methods. Private methods require either JWT or API-key credentials, never both.
+
 ---
 
 ## 🚀 Client Initialization
 
 > `timeout` is optional (default: 30 seconds).
+
+### Public Methods Only
+
+```javascript
+const FuturesApiClient = require('./client');
+const client = new FuturesApiClient();
+```
 
 ### 🛡️ Using JWT Authentication
 
@@ -107,7 +124,9 @@ require('dotenv').config();
 
 const client = new FuturesApiClient({
   apiKey: process.env.API_KEY,
-  secretKey: process.env.SECRET_KEY
+  secretKey: process.env.SECRET_KEY,
+  // Optional:
+  subaccountId: process.env.SUBACCOUNT_ID
 });
 ```
 
@@ -119,10 +138,12 @@ const client = new FuturesApiClient({
 
 | Method | Description |
 |--------|-------------|
+| `fetchMarkets()` | Get all available markets |
 | `getOrderBook(symbol)` | Get order book (bids/asks) for a symbol |
 | `getTicker24Hr(symbol)` | 24-hour price stats |
 | `getMarketInfo()` | Market status and metrics |
 | `getAggTrade(symbol)` | Recent aggregated trades |
+| `getKlines(klineParams)` | Fetch OHLCV candles |
 | `getSystemTime()` | API server time |
 | `getSystemStatus()` | System operational status |
 | `getTradeFee(symbol)` | Fee info for one symbol |
@@ -137,18 +158,20 @@ const client = new FuturesApiClient({
 | Method | Description |
 |--------|-------------|
 | `getBalance()` | Wallet balances for all assets |
-| `createOrder(orderParams)` | Place a new order. Required fields: `symbol`, `amount`, `side`, `type`, `marginAsset`, and optionally `price` (for LIMIT orders) |
+| `createOrder(orderParams)` | Place `MARKET`, `LIMIT`, `STOP_MARKET`, or `STOP_LIMIT`. `marginAsset` is optional; stop orders require `triggerPrice` |
 | `cancelOrder(cancelParams)` | Cancel order by `clientOrderId` |
+| `cancelAllOrders()` | Cancel all open orders |
+| `editOrder(orderParams)` | Edit an open order |
 | `getOrder(clientOrderId)` | Get order details |
-| `getOpenOrders(symbol, limit, since)` | Open orders for a symbol |
-| `getOrderHistory(pageSize, timestamp)` | Historical orders |
-| `getTradeHistory(pageSize, timestamp)` | Historical trades |
-| `getTransactionHistory(pageSize, timestamp)` | Wallet activity (deposits, withdrawals, fees) |
-| `addTPSLOrder(tpslParams)` | Add take-profit / stop-loss |
+| `getOpenOrders(symbol, options)` | Open orders for a symbol (`data.data`; `limit` default 100) |
+| `getOrderHistory(options)` | Historical orders (`pageSize` default 10; supports `startTimestamp`, `endTimestamp`, `sortOrder`, `symbol`) |
+| `getTradeHistory(options)` | Historical trades (same pagination filters as order history) |
+| `getTransactionHistory(options)` | Wallet activity (same filters plus `tradeId`) |
+| `addTPSLOrder(tpslParams)` | Add one take-profit or stop-loss; requires `symbol` and exactly one trigger |
 | `addMargin(marginParams)` | Add margin to position |
 | `reduceMargin(marginParams)` | Reduce margin from position |
-| `closePosition(closeParams)` | Close position by `positionId` |
-| `getPositions(symbols, status)` | Filter by symbols and status (OPEN/CLOSED) |
+| `closePosition(closeParams)` | Close position by `positionId` and `symbol` |
+| `getPositions(symbols, status)` | Filter by symbols array and status (OPEN/CLOSED/LIQUIDATED; default OPEN) |
 | `getUserLeverage(symbol)` | Leverage for a symbol |
 | `getUserLeverages()` | All user leverages |
 | `updateLeverage(leverageParams)` | Set leverage for a symbol |
@@ -232,7 +255,7 @@ if ([200, 201].includes(response.statusCode)) {
 
 ## 🗂️ Project Structure
 
-> Located at: `futures/clients/rest-http/javascript`
+> Located at: `futures/clients/rest-http/node`
 
 ```
 .
@@ -249,6 +272,7 @@ if ([200, 201].includes(response.statusCode)) {
 
 ---
 
+<a id="compatibility-version"></a>
 ## 📌 Compatibility & Version
 
 | Field | Value |
@@ -261,7 +285,7 @@ if ([200, 201].includes(response.statusCode)) {
 
 ## 🔗 Helpful Links
 
-- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://dev-futuresbe.zebstage.com/api/docs)
+- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://futuresbe.zebpay.com/api/docs)
 - 🛠 [Submit an Issue](https://github.com/zebpay/zebpay-api-references/issues)
 - 🧪 [Node.js Client Code](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)
 - 🗃️ [ZebPay API GitHub Monorepo (Root)](https://github.com/zebpay/zebpay-api-references/)

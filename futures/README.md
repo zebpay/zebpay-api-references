@@ -1,35 +1,49 @@
-# Zebpay Futures API Documentation
+# Zebpay Futures — Developer Documentation
 
-Welcome to the official documentation repository for the Zebpay Futures REST API. This repository provides comprehensive resources to help you integrate with our futures trading platform.
+The **Zebpay Futures** product offers three complementary integration surfaces:
 
-## 📚 Documentation Sections
+1. **REST API** – programmatic access for placing orders, querying account information and retrieving market data.
+2. **Private WebSocket** – authenticated live order, position, balance, trade, and risk events.
+3. **Webhooks** – push-style notifications to automate trading strategies triggered by external events.
 
-This repository is organized into the following main sections:
+This directory contains documentation, client libraries and examples for all three surfaces.
 
-1.  **[API Reference](api-reference)**:
-    * Detailed explanations of core concepts like [Authentication](api-reference/authentication.md) , [Data Models](api-reference/data-models.md) , [Error Handling](api-reference/error-handling.md) , and [Rate Limits](api-reference/rate-limits.md) .
-    * Complete reference for all [Public Endpoints](api-reference/public-endpoints) (Market, System, Exchange) and [Private Endpoints](api-reference/private-endpoints) (Trade, Wallet) .
-    * Includes information on request parameters, response structures, and authentication requirements .
-    * Start here: [Getting Started Guide](api-reference/getting-started.md) .
+## 📚 Documentation Map
 
-2.  **[Client Libraries](clients)**:
-    * Ready-to-use client libraries to simplify interaction with the API.
-    * **REST/HTTP Clients**:
-        * [Node.js Client](clients/rest-http/node/README.md)
-        * [Python Client](clients/rest-http/python/README.md)
-    * **CCXT Integration**:
-        * [Node.js (via CCXT)](clients/ccxt/node/README.md)  - *Note: Integration pending CCXT approval under `zebpayfutures` identifier.*
+| Surface | Location | Docs | Clients | Examples |
+|---------|----------|------|---------|----------|
+| **REST API** | `./` | [Reference](./api-reference) | [Node.js](./clients/rest-http/node/README.md) / [Python](./clients/rest-http/python/README.md) / [CCXT](./clients/ccxt/node/README.md) | [Examples](./examples) |
+| **Private WebSocket** | `./api-reference/websocket` | [Reference](./api-reference/websocket/README.md) | [Node.js](./clients/websocket/node/README.md) / [Python](./clients/websocket/python/README.md) | [Examples](./examples/websocket/private-stream.md) |
+| **Webhooks** | `./webhooks` | [Reference](./webhooks/reference-docs) | — | [Examples](./webhooks/examples) |
 
-3.  **[Examples](examples)**:
-    * Practical code examples demonstrating how to use various API endpoints.
-    * Examples are provided for:
-        * `cURL`
-        * Node.js (using the REST client)
-        * Python (using the REST client)
-    * Covers both [Public Examples](examples/public) and [Private Examples](examples/private).
+### REST API Highlights
+* Covers **public** (Market, Exchange, System) and **private** (Trade, Wallet) endpoints.
+* Authenticate private REST calls with JWT or API Key + Secret (HMAC-SHA256).
+* Start with the [Getting Started guide](./api-reference/getting-started.md).
+
+### Private WebSocket Highlights
+* Connect to the Socket.IO `/auth-stream` namespace over WebSocket transport.
+* Authenticate with an API key and HMAC-SHA256; no web-session JWT is required.
+* Receive 14 order, position, balance, trade, and risk events.
+* Start with the [Private WebSocket overview](./api-reference/websocket/README.md), then use the [Node.js](./clients/websocket/node/README.md) or [Python](./clients/websocket/python/README.md) client.
+
+### One API Key for REST and Private WebSocket
+
+To run without a web-session JWT, create one key in the [ZebPay API portal](https://api.zebpay.com) with both scopes:
+
+- `futures:trading` for REST trading and write operations.
+- `fetch:details` for private WebSocket authentication and read-only private data.
+
+The same API Key + Secret can then authenticate both REST and `/auth-stream`; do not send the secret to either service.
+
+### Webhooks Highlights
+* Subscribe to order-lifecycle events, position changes and more.
+* Two parts:
+  * **Management Endpoints** (create, list, pause …) – authenticated REST calls.
+  * **Event Listener** – HTTPS callback on your infrastructure signed with a shared secret.
+* Begin with [Authentication](./webhooks/reference-docs/authentication.md) and the [Event Listener guide](./webhooks/reference-docs/event-listener.md).
 
 ## 🤝 Contributing & Support
+Please open an issue for questions or suggestions. Pull requests are welcome!
 
-Please refer to the contribution guidelines if you wish to contribute. For issues or questions, please open an issue in this repository.
-
-Happy Trading!
+Happy trading!

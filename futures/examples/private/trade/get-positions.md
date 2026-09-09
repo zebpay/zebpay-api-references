@@ -2,39 +2,46 @@
 
 Retrieves a list of the user's current and/or historical positions, optionally filtered by symbols or status.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get Positions](../../api-reference/private-endpoints/trade.md#get-positions).
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get Positions](../../../api-reference/private-endpoints/trade.md#get-positions).
 
 **Endpoint:** `GET /api/v1/trade/positions`
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `symbols` (`Array<string>`, optional): List of trading symbols to filter by (e.g., `symbols=BTCUSDT&symbols=ETHUSDT`) . If omitted, positions for all symbols are returned.
-* `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`) . If omitted, positions with any status might be returned (check API behavior).
+* `symbols` (`Array<string>`, optional): List of trading symbols to filter by (e.g., `symbols=BTCUSDT&symbols=ETHUSDT`). When provided it must be an array. If omitted, positions for all symbols are returned.
+* `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`). Defaults to **`OPEN`**.
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication (Get Open Positions for Specific Symbols)
 
 ```bash
 # URL encodes as: symbols=BTCUSDT&symbols=ETHUSDT
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/positions?symbols=BTCUSDT&symbols=ETHUSDT&status=OPEN \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/positions?symbols=BTCUSDT&symbols=ETHUSDT&status=OPEN" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
-````
+```
 
-#### Using API Key + Secret Authentication (Get All Positions)
+#### Using API Key + Secret Authentication (Get Open Positions for Specific Symbols)
 
 ```bash
-# Remember to include the timestamp in the query string for signing
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/positions \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="symbols=BTCUSDT&symbols=ETHUSDT&status=OPEN&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/positions?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+Repeated `symbols` parameters and their order are preserved in both the signed and transmitted query string.
 
 #### Success Response (Example - Single Open Position)
 
@@ -65,7 +72,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/positions \
 }
 ```
 
-*Note: The response is an array of [Position objects](../../api-reference/data-models.md#position).*
+*Note: The response is an array of [Position objects](../../../api-reference/data-models.md#position).*
 
 -----
 

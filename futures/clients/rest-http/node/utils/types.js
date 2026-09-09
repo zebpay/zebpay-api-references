@@ -30,7 +30,7 @@
  * @property {number} quantityPrecision - Decimal places for quantity
  * @property {number} baseAssetPrecision - Precision for base asset
  * @property {number} quotePrecision - Precision for quote asset
- * @property {string[]} orderTypes - Supported order types (e.g., ["LIMIT", "MARKET"])
+ * @property {string[]} orderTypes - Enabled order types (MARKET, LIMIT, STOP_MARKET, STOP_LIMIT)
  * @property {string[]} timeInForce - Supported time-in-force policies (e.g., ["GTC"])
  * @property {number} makerFee - Maker fee rate
  * @property {number} takerFee - Taker fee rate
@@ -58,9 +58,9 @@
  * @property {string} symbol - Trading pair symbol (e.g., "BTCUSDT")
  * @property {Array<[number, number]>} bids - Buy orders as array of [price, amount] pairs, sorted by price in descending order
  * @property {Array<[number, number]>} asks - Sell orders as array of [price, amount] pairs, sorted by price in ascending order
- * @property {number|null} timestamp - Unix timestamp in milliseconds (if available)
- * @property {string|null} datetime - ISO8601 datetime string (if available)
- * @property {number|null} nonce - Exchange-provided sequence number (if available)
+ * @property {number} timestamp - Unix timestamp in milliseconds from `Date.now()`
+ * @property {null} datetime - Always `null` in the current implementation
+ * @property {number} nonce - Set to `Date.now()` when the book is transformed
  */
 
 /**
@@ -171,6 +171,7 @@
  * @property {string} timeInForce - Time in force policy (GTC, IOC, FOK)
  * @property {string} side - Order side (buy or sell)
  * @property {number} price - Order price
+ * @property {number} [triggerPrice] - Trigger price for stop and TP/SL orders
  * @property {number} amount - Order amount in base asset
  * @property {number} filled - Filled amount in base asset
  * @property {number} remaining - Remaining amount to be filled
@@ -259,6 +260,7 @@
  *
  * @typedef {Object} Transaction
  * @property {string} txid - Transaction identifier
+ * @property {string|null} [tradeId] - Associated trade identifier when present
  * @property {number} timestamp - Unix timestamp in milliseconds
  * @property {string} datetime - ISO8601 datetime string
  * @property {string} type - Transaction type (COMMISSION, FUNDING_FEE, etc.)
@@ -364,10 +366,11 @@
  * @property {string} datetime - ISO8601 datetime string of order creation
  * @property {number} timestamp - Unix timestamp in milliseconds of order creation
  * @property {string} symbol - Trading pair symbol
- * @property {string} type - Order type (market, limit)
+ * @property {string} type - Order type (market, limit, stop_market, stop_limit)
  * @property {string} timeInForce - Time in force policy (GTC, IOC, FOK)
  * @property {string} side - Order side (buy or sell)
  * @property {number} price - Order price
+ * @property {number} [triggerPrice] - Trigger price for stop and TP/SL orders
  * @property {number} amount - Order amount in base asset
  * @property {number} filled - Filled amount in base asset
  * @property {number} remaining - Remaining amount to be filled
@@ -379,20 +382,16 @@
  * EditOrderResponseData data model representing the response from editing an order
  *
  * @typedef {Object} EditOrderResponseData
- * @property {undefined} id - Order ID (undefined in edit response)
- * @property {string} clientOrderId - The client-generated unique order identifier that was edited
- * @property {null} lastTradeTimestamp - Last trade timestamp (null in edit response)
- * @property {string} timeInForce - Time in force policy (typically "GTC")
- * @property {number} price - The new/updated price for the order
- * @property {null} average - Average fill price (null in edit response)
- * @property {number} amount - The new/updated amount for the order
- * @property {Array<Object>} trades - List of trades (empty array in edit response)
- * @property {null} fee - Fee information (null in edit response)
- * @property {Object} info - Raw response data from the exchange containing edit status details
- * @property {string} info.status - Edit operation status message
- * @property {number} info.availableBalance - Available balance after the edit operation
- * @property {number} info.lockedMargin - Amount of margin locked for positions
- * @property {number} info.lockedMarginInMarginAsset - Locked margin amount in the margin asset
+ * @property {string} clientOrderId - The client-side ID of the edited order.
+ * @property {string} timeInForce - The time-in-force policy (e.g., 'GTC').
+ * @property {number} [price] - The updated price of the order, when submitted.
+ * @property {number} [amount] - The updated amount of the order, when submitted.
+ * @property {number} [triggerPrice] - The updated trigger for a stop or TP/SL order, when submitted.
+ * @property {Object} info - An object containing additional details from the exchange.
+ * @property {number} info.availableBalance - The available balance.
+ * @property {string} info.status - A message confirming the request status.
+ * @property {number} info.lockedMargin - The locked margin.
+ * @property {number} info.lockedMarginInMarginAsset - The locked margin in the margin asset.
  */
 
 /**
@@ -424,7 +423,15 @@
  */
 
 /**
- * Paginated response for order listings
+ * Paginated response for open orders (`GET /api/v1/trade/order/open-orders`)
+ * @typedef {Object} OpenOrdersListResponse
+ * @property {Order[]} data - List of open orders
+ * @property {number} totalCount - Number of orders returned
+ * @property {number|null} nextTimestamp - Timestamp for pagination to fetch next page
+ */
+
+/**
+ * Paginated response for order history (`GET /api/v1/trade/order/history`)
  * @typedef {Object} OrdersListResponse
  * @property {Order[]} items - List of orders
  * @property {number} totalCount - Total number of orders matching the query

@@ -6,32 +6,36 @@ The Zebpay Futures REST API uses standard HTTP status codes to indicate the succ
 
 Your application should be prepared to handle the following common HTTP status codes:
 
-| Status Code          | Meaning                | Typical Cause / Notes                                                                                                      |
-| :------------------- | :--------------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| `200 OK`             | Success                | The request was successful (for GET, PUT, DELETE).                                                                         |
-| `201 Created`        | Success                | The resource was successfully created (often for POST requests). *(Check specific endpoint docs; some POSTs may return 200)*. |
-| `400 Bad Request`    | Client Error           | Malformed request (missing parameters, invalid values, incorrect JSON). Check response body for details.                 |
-| `401 Unauthorized`   | Client Error           | Authentication failed (missing/invalid/expired JWT or API Key/Secret signature). Verify credentials/auth logic.              |
-| `403 Forbidden`      | Client Error           | Authentication succeeded, but the user/key lacks permission for the requested action/resource.                           |
-| `404 Not Found`      | Client Error           | The requested resource or endpoint path could not be found.                                                              |
-| `429 Too Many Requests`| Client Error           | Rate limit exceeded. Check the `Retry-After` header (if present) and implement backoff. See [Rate Limits](./rate-limits.md). |
-| `500 Internal Server Error` | Server Error         | An unexpected error occurred on the server side. Retrying later might resolve temporary issues.                              |
-| `502 Bad Gateway`    | Server Error         | Server received an invalid response from an upstream server while acting as a gateway/proxy. Issue is likely upstream. Retrying later might help. |
-| `503 Service Unavailable` | Server Error         | Server is temporarily unable to handle the request (maintenance, overload). Retrying later is recommended.                 |
-| `504 Gateway Timeout`| Server Error         | Server did not receive a timely response from an upstream server while acting as a gateway/proxy. Retrying later might help.   |
 
-## <a id="errorresponse"></a>Standard Error Response Format
+| Status Code                 | Meaning      | Typical Cause / Notes                                                                                                                             |
+| --------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `200 OK`                    | Success      | The request was successful (for GET, PUT, DELETE).                                                                                                |
+| `201 Created`               | Success      | The resource was successfully created (often for POST requests). *(Check specific endpoint docs; some POSTs may return 200)*.                     |
+| `400 Bad Request`           | Client Error | Malformed request (missing parameters, invalid values, incorrect JSON). Check response body for details.                                          |
+| `401 Unauthorized`          | Client Error | Authentication failed (missing/invalid/expired JWT or API Key/Secret signature). Verify credentials/auth logic.                                   |
+| `403 Forbidden`             | Client Error | Authentication succeeded, but the user/key lacks permission for the requested action/resource.                                                    |
+| `404 Not Found`             | Client Error | The requested resource or endpoint path could not be found.                                                                                       |
+| `429 Too Many Requests`     | Client Error | Rate limit exceeded. The response does not include `Retry-After`. Back off before retrying. See [Rate Limits](./rate-limits.md).                      |
+| `500 Internal Server Error` | Server Error | An unexpected error occurred on the server side. Retrying later might resolve temporary issues.                                                   |
+| `502 Bad Gateway`           | Server Error | Server received an invalid response from an upstream server while acting as a gateway/proxy. Issue is likely upstream. Retrying later might help. |
+| `503 Service Unavailable`   | Server Error | Server is temporarily unable to handle the request (maintenance, overload). Retrying later is recommended.                                        |
+| `504 Gateway Timeout`       | Server Error | Server did not receive a timely response from an upstream server while acting as a gateway/proxy. Retrying later might help.                      |
+
+
+## Standard Error Response Format
 
 When the API encounters an error it can handle (including validation errors, authentication issues, or internal errors caught by the system), it returns a standardized JSON response body along with the appropriate HTTP status code (4xx or 5xx).
 
 **Fields:**
 
-| Field Name        | Type           | Description                                                                                     |
-| :---------------- | :------------- | :---------------------------------------------------------------------------------------------- |
-| `statusDescription`| `string`       | A human-readable description of the error message [cite: Response interceptor Code].                             |
-| `data`            | `object`       | Typically an empty object `{}`. In specific error cases (like `/user/status`), it might contain default values [cite: Response interceptor Code]. |
-| `statusCode`      | `number`       | The HTTP status code reflecting the error type (e.g., 400, 401, 429, 500) [cite: Response interceptor Code].        |
-| `customMessage`   | `Array<string>`| An array typically containing the same message(s) as `statusDescription` [cite: Response interceptor Code].        |
+
+| Field Name          | Type            | Description                                                                                                                                       |
+| ------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `statusDescription` | `string`        | A human-readable description of the error message [cite: Response interceptor Code].                                                              |
+| `data`              | `object`        | Typically an empty object `{}`. In specific error cases (like `/user/status`), it might contain default values [cite: Response interceptor Code]. |
+| `statusCode`        | `number`        | The HTTP status code reflecting the error type (e.g., 400, 401, 429, 500) [cite: Response interceptor Code].                                      |
+| `customMessage`     | `Array<string>` | An array typically containing the same message(s) as `statusDescription` [cite: Response interceptor Code].                                       |
+
 
 ##### Example (400 Bad Request)
 
@@ -44,7 +48,7 @@ When the API encounters an error it can handle (including validation errors, aut
     "Invalid symbol parameter provided."
   ]
 }
-````
+```
 
 ##### Example (500 Internal Server Error)
 
@@ -59,10 +63,29 @@ When the API encounters an error it can handle (including validation errors, aut
 }
 ```
 
+## Private API Error Guide
+
+
+| Status | Message pattern                               | Meaning                                                        |
+| ------ | --------------------------------------------- | -------------------------------------------------------------- |
+| `400`  | `Order must be of type MARKET,LIMIT,STOP_MARKET,STOP_LIMIT` | The order `type` is not one of the globally supported types |
+| `400`  | `triggerPrice is required...`                 | A stop order is missing its trigger price                      |
+| `400`  | `Invalid or expired timestamp`                | API-key timestamp is missing, stale, or not in milliseconds    |
+| `400`  | `Invalid signature`                           | The HMAC does not match the exact transmitted query or body    |
+| `403`  | `You do not have the required scope...`       | API key is missing `fetch:details` or `futures:trading`        |
+| `403`  | `Forbidden request` or `forbidden request`    | Subaccount access, ownership, or resource authorization failed |
+| `403`  | `You are not allowed API access from this ip` | The caller IP is not allowed by the API key                    |
+| `403`  | `Account is pending KYC verification. Please contact support for assitance.` | A new entry order failed the KYC gate |
+| `403`  | `Account is pending Bank verification. Please contact support for assitance.` | A new entry order failed the bank-verification gate |
+| `403`  | Account access or permission message          | Frozen-subaccount, or Futures permission requirement failed    |
+
+
+Do not treat every `403` as an invalid API key. Use the response message to distinguish scope, IP, account, subaccount, and resource-access failures.
+
 ## Client-Side Handling Recommendations
 
-  * **Check Status Codes:** Always verify the HTTP status code of the response before attempting to process the body.
-  * **Parse Error Body:** For 4xx/5xx responses, parse the JSON error body according to the structure defined above to extract the `statusDescription` or `customMessage` for logging or user feedback.
-  * **Implement Retries:** For transient errors like `429 Too Many Requests`, `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, or `504 Gateway Timeout`, implement a retry mechanism, preferably with exponential backoff.
-  * **Logging:** Log relevant error information (status code, response body, request details if possible) to aid in debugging.
-  * **Client Libraries:** If using the sample [Node.js](../clients/rest-http/node/README.md) or [Python](../clients/rest-http/python/README.md) clients, they typically abstract some of this by throwing language-specific exceptions containing the error details. Refer to the specific client documentation for details.
+- **Check Status Codes:** Always verify the HTTP status code of the response before attempting to process the body.
+- **Parse Error Body:** For 4xx/5xx responses, parse the JSON error body according to the structure defined above to extract the `statusDescription` or `customMessage` for logging or user feedback.
+- **Implement Retries:** For transient errors like `429 Too Many Requests`, `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, or `504 Gateway Timeout`, implement a retry mechanism, preferably with exponential backoff.
+- **Logging:** Log relevant error information (status code, response body, request details if possible) to aid in debugging.
+- **Client Libraries:** If using the sample [Node.js](../clients/rest-http/node/README.md) or [Python](../clients/rest-http/python/README.md) clients, they typically abstract some of this by throwing language-specific exceptions containing the error details. Refer to the specific client documentation for details.

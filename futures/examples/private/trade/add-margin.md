@@ -2,16 +2,17 @@
 
 Adds margin to an existing isolated margin position. This can help lower the liquidation price for the position.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Add Margin](../../api-reference/private-endpoints/trade.md#add-margin) and the [MarginResponse Data Model](../../api-reference/data-models.md#marginresponse).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Add Margin](../../../api-reference/private-endpoints/trade.md#add-margin) and the [MarginResponse Data Model](../../../api-reference/data-models.md#marginresponse).
 
 **Endpoint:** `POST /api/v1/trade/addMargin`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
@@ -67,7 +68,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/addMargin \
 }
 ```
 
-*Note: See [MarginResponse model](../../api-reference/data-models.md#marginresponse) for field details. Balances are illustrative.*
+*Note: See [MarginResponse model](../../../api-reference/data-models.md#marginresponse) for field details. Balances are illustrative.*
 
 -----
 

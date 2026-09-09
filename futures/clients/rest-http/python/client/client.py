@@ -6,10 +6,11 @@
 from typing import Any, Dict, List, Optional
 import requests
 import json
+import time
 
-from ..utils import config
-from ..utils.auth import AuthUtils
-from ..utils.types import (
+from utils import config
+from utils.auth import AuthUtils
+from utils.types import (
     ApiResponse,
     MarketsData,
     OrderBook,
@@ -26,8 +27,10 @@ from ..utils.types import (
     ExchangeInfo,
     PairsInfo,
     OrdersListResponse,
+    OpenOrdersListResponse,
     TradesListResponse,
     TransactionsListResponse,
+    EditOrderResponseData,
 )
 
 class FuturesApiClient:
@@ -37,13 +40,14 @@ class FuturesApiClient:
         api_key: Optional[str] = None,
         secret_key: Optional[str] = None,
         timeout: int = 30,
-        base_url: str = config.BASE_URL
+        base_url: str = config.BASE_URL,
+        subaccount_id: Optional[str] = None
     ) -> None:
         """
         Initialize the Futures API Client with authentication and configuration details.
 
-        This client supports both JWT-based and API key/secret based authentication.
-        You must provide either a valid JWT token, or both API key and secret key.
+        Authentication is optional for public endpoints. Private endpoints
+        require either a valid JWT token, or both API key and secret key.
 
         Args:
             jwt (Optional[str]): JWT authentication token.
@@ -51,9 +55,10 @@ class FuturesApiClient:
             secret_key (Optional[str]): Secret key for API key authentication.
             timeout (int): Request timeout in seconds (default is 30 seconds).
             base_url (str): Base URL for the API (default is configured in utils.config).
+            subaccount_id (Optional[str]): Optional subaccount ID sent as `subaccountid`.
 
         Raises:
-            ValueError: If authentication credentials are missing.
+            ValueError: If authentication credentials are incomplete or ambiguous.
 
         Example:
             # Using JWT authentication:
@@ -62,16 +67,19 @@ class FuturesApiClient:
             # Using API key authentication:
             client = FuturesApiClient(api_key="your_api_key", secret_key="your_secret_key", timeout=20)
         """
-        # Validate that at least one valid authentication method is provided.
-        if not jwt and (not api_key or not secret_key):
-            raise ValueError(
-                'Authentication credentials are required. Provide either a JWT token or an API key and secret key.'
-            )
+        has_jwt = bool(jwt)
+        has_api_key_credentials = bool(api_key or secret_key)
+        if has_jwt and has_api_key_credentials:
+            raise ValueError('JWT and API key authentication are mutually exclusive.')
+
+        if has_api_key_credentials and (not api_key or not secret_key):
+            raise ValueError('Both api_key and secret_key are required.')
         self.jwt = jwt
         self.api_key = api_key
         self.secret_key = secret_key
         self.timeout_seconds = timeout
         self.base_url = base_url
+        self.subaccount_id = subaccount_id
 
         # Create a persistent HTTP session for efficient connection reuse.
         self.http_session = requests.Session()
@@ -158,22 +166,47 @@ class FuturesApiClient:
             response = client._request("GET", "/public/system/time")
         """
         # Remove keys with None values from params and data to avoid sending unwanted fields.
-        cleaned_params = {k: v for k, v in params.items() if v is not None} if params else None
+        cleaned_params = {k: v for k, v in params.items() if v is not None} if params else {}
         cleaned_data = {k: v for k, v in data.items() if v is not None} if data else None
+
+        method = method.upper()
+        is_private = AuthUtils.is_private_endpoint(endpoint)
+        is_api_key_request = (
+            is_private and not self.jwt and self.api_key and self.secret_key
+        )
+        if is_api_key_request:
+            timestamp = int(time.time() * 1000)
+            if method == 'GET':
+                cleaned_params['timestamp'] = timestamp
+            else:
+                cleaned_data = {**(cleaned_data or {}), 'timestamp': timestamp}
 
         # Retrieve necessary headers for the request.
         headers = self._get_headers(method, endpoint, cleaned_params, cleaned_data)
+        if is_private and self.subaccount_id:
+            headers['subaccountid'] = self.subaccount_id
         url = f"{self.base_url}{endpoint}"  # Build the complete URL.
 
         try:
             # Send the HTTP request using the session.
+            request_kwargs = {
+                'method': method,
+                'url': url,
+                'params': cleaned_params,
+                'headers': headers,
+                'timeout': self.timeout_seconds
+            }
+            if method != 'GET' and cleaned_data is not None:
+                if is_api_key_request:
+                    # Transmit the exact compact JSON string that was signed.
+                    request_kwargs['data'] = AuthUtils.serialize_body(
+                        cleaned_data
+                    )
+                else:
+                    request_kwargs['json'] = cleaned_data
+
             response = self.http_session.request(
-                method=method,
-                url=url,
-                params=cleaned_params,
-                json=cleaned_data,
-                headers=headers,
-                timeout=self.timeout_seconds
+                **request_kwargs
             )
             # Raise an exception for HTTP error statuses.
             response.raise_for_status()
@@ -305,17 +338,18 @@ class FuturesApiClient:
 
     def get_klines(self, kline_params: Dict[str, Any]) -> ApiResponse[List[List[Any]]]:
         """
-        Retrieve historical candlestick data (K-lines) for a specific trading symbol and interval.
+        Retrieve historical candlestick data (K-lines) for a specific trading symbol and timeframe.
 
         Args:
             kline_params (Dict[str, Any]): Dictionary containing k-line parameters.
                 Must include:
                   - symbol: Trading symbol (e.g., 'BTCINR').
-                  - interval: Candlestick interval (e.g., '1m', '5m', '1h').
+                  - timeframe: Candlestick interval (e.g., '1m', '5m', '1h').
+                    `interval` is accepted as an alias for `timeframe`.
                 Optionally include:
-                  - startTime: Start time in milliseconds.
-                  - endTime: End time in milliseconds.
+                  - since: Start time in milliseconds (`startTime` is accepted as an alias).
                   - limit: Maximum number of data points to return.
+                  - priceType: `LTP` (default) or `MARK_PRICE`, sent as a query parameter.
 
         Returns:
             ApiResponse[List[List[Any]]]: A list of K-line data points.
@@ -326,16 +360,32 @@ class FuturesApiClient:
         Example:
             klines = client.get_klines({
                 "symbol": "BTCINR",
-                "interval": "1h",
+                "timeframe": "1h",
                 "limit": 100
             })
         """
-        required_keys = ['symbol', 'interval']
-        if not all(key in kline_params for key in required_keys):
-            raise ValueError(f"Required k-line parameters missing. Needed: {required_keys}")
-        kline_params['symbol'] = self._normalize_string(kline_params['symbol'])
+        if not kline_params or not kline_params.get('symbol'):
+            raise ValueError('Symbol is required')
+        timeframe = kline_params.get('timeframe') or kline_params.get('interval')
+        if not timeframe:
+            raise ValueError('timeframe (or interval) is required')
+
+        body: Dict[str, Any] = {
+            'symbol': self._normalize_string(kline_params['symbol']),
+            'timeframe': timeframe,
+        }
+        since = kline_params.get('since', kline_params.get('startTime'))
+        if since is not None:
+            body['since'] = since
+        if kline_params.get('limit') is not None:
+            body['limit'] = kline_params['limit']
+
+        query: Dict[str, Any] = {}
+        if kline_params.get('priceType') is not None:
+            query['priceType'] = kline_params['priceType']
+
         endpoint = config.get_endpoint(['public', 'market', 'klines'])
-        return self._request('POST', endpoint, data=kline_params)
+        return self._request('POST', endpoint, params=query or None, data=body)
 
     # ------------------- SYSTEM ENDPOINTS (PUBLIC) -------------------
     def get_system_time(self) -> ApiResponse[Dict[str, Any]]:
@@ -356,7 +406,7 @@ class FuturesApiClient:
         Retrieve the current system status.
 
         Returns:
-            ApiResponse[Dict[str, Any]]: Status of the API system (e.g., "ok" or error details).
+            ApiResponse[Dict[str, Any]]: `{ "systemStatus": "ok" | "error" }`.
 
         Example:
             status = client.get_system_status()
@@ -365,7 +415,7 @@ class FuturesApiClient:
         return self._request('GET', endpoint)
 
     # ------------------- EXCHANGE ENDPOINTS (PUBLIC) -------------------
-    def get_trade_fee(self, symbol: str) -> ApiResponse[Dict[str, Any]]:
+    def get_trade_fee(self, symbol: str) -> ApiResponse[List[Dict[str, Any]]]:
         """
         Retrieve trading fee details for a specified trading pair.
 
@@ -373,7 +423,8 @@ class FuturesApiClient:
             symbol (str): Trading symbol (e.g., 'BTCUSDT').
 
         Returns:
-            ApiResponse[Dict[str, Any]]: Fee details including maker and taker fees.
+            ApiResponse[List[Dict[str, Any]]]: One-element array of `{ symbol, makerFee, takerFee }`
+            with fee rates as strings.
 
         Raises:
             ValueError: If the symbol is not provided.
@@ -393,6 +444,7 @@ class FuturesApiClient:
 
         Returns:
             ApiResponse[List[Dict[str, Any]]]: List of fee details for each trading pair.
+            `makerFee` and `takerFee` are strings.
 
         Example:
             fees = client.get_trade_fees()
@@ -449,9 +501,10 @@ class FuturesApiClient:
           - symbol: Trading symbol (e.g., 'BTCUSDT'); normalized to uppercase.
           - amount: Quantity to trade.
           - side: 'BUY' or 'SELL'; normalized to uppercase.
-          - type: Order type ('MARKET' or 'LIMIT'); normalized to uppercase.
-          - marginAsset: Asset for margin; normalized to uppercase.
-          - price: Required for LIMIT orders and must be positive.
+          - type: MARKET, LIMIT, STOP_MARKET, or STOP_LIMIT.
+          - marginAsset: Optional asset for margin; normalized to uppercase.
+          - price: Required for LIMIT and STOP_LIMIT orders.
+          - triggerPrice: Required for STOP_MARKET and STOP_LIMIT orders.
           - Optionally: stopLossPrice and/or takeProfitPrice for risk management.
 
         Args:
@@ -473,18 +526,44 @@ class FuturesApiClient:
                 "price": 30000
             })
         """
-        required_keys = ['symbol', 'amount', 'side', 'type', 'marginAsset']
-        if not all(key in order_params for key in required_keys):
+        required_keys = ['symbol', 'amount', 'side', 'type']
+        if not order_params or not all(order_params.get(key) is not None for key in required_keys):
             raise ValueError(f"Required order parameters missing. Needed: {required_keys}")
-        # Normalize string parameters to uppercase.
-        order_params['symbol'] = self._normalize_string(order_params['symbol'])
-        order_params['side'] = self._normalize_string(order_params['side'])
-        order_params['type'] = self._normalize_string(order_params['type'])
-        order_params['marginAsset'] = self._normalize_string(order_params['marginAsset'])
-        if order_params['type'] == 'LIMIT' and 'price' not in order_params:
-            raise ValueError('Price is required for LIMIT orders')
-        if order_params.get('price') is not None and order_params['price'] <= 0:
-            raise ValueError('Price must be positive for LIMIT orders')
+        order_params = {
+            **order_params,
+            'symbol': self._normalize_string(order_params['symbol']),
+            'side': self._normalize_string(order_params['side']),
+            'type': self._normalize_string(order_params['type'])
+        }
+        if order_params.get('marginAsset'):
+            order_params['marginAsset'] = self._normalize_string(order_params['marginAsset'])
+
+        supported_types = {'MARKET', 'LIMIT', 'STOP_MARKET', 'STOP_LIMIT'}
+        if order_params['type'] not in supported_types:
+            raise ValueError(f"Order type must be one of: {', '.join(sorted(supported_types))}")
+        if order_params['side'] not in {'BUY', 'SELL'}:
+            raise ValueError('Order side must be BUY or SELL')
+        if order_params['amount'] <= 0:
+            raise ValueError('Amount must be positive')
+        if order_params['type'] in {'LIMIT', 'STOP_LIMIT'} and order_params.get('price', 0) <= 0:
+            raise ValueError(f"Price is required for {order_params['type']} orders and must be positive")
+        if order_params['type'] in {'STOP_MARKET', 'STOP_LIMIT'} and order_params.get('triggerPrice', 0) <= 0:
+            raise ValueError(
+                f"Trigger price is required for {order_params['type']} orders and must be positive"
+            )
+        if order_params['type'] == 'STOP_LIMIT':
+            invalid_buy_price = (
+                order_params['side'] == 'BUY'
+                and order_params['price'] < order_params['triggerPrice']
+            )
+            invalid_sell_price = (
+                order_params['side'] == 'SELL'
+                and order_params['price'] > order_params['triggerPrice']
+            )
+            if invalid_buy_price or invalid_sell_price:
+                raise ValueError(
+                    'STOP_LIMIT price must be >= triggerPrice for BUY and <= triggerPrice for SELL'
+                )
         endpoint = config.get_endpoint(['private', 'trade', 'order'])
         return self._request('POST', endpoint, data=order_params)
 
@@ -517,7 +596,7 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['private', 'trade', 'order'])
         return self._request('DELETE', endpoint, data=cancel_params)
 
-    def edit_order(self, order_params: Dict[str, Any]) -> ApiResponse[Any]:
+    def edit_order(self, order_params: Dict[str, Any]) -> ApiResponse[EditOrderResponseData]:
         """
         Edit an existing open order.
 
@@ -531,7 +610,7 @@ class FuturesApiClient:
                   - triggerPrice: The new trigger price for stop or take-profit orders.
 
         Returns:
-            ApiResponse[Any]: Confirmation of the edit request.
+            ApiResponse[EditOrderResponseData]: Confirmation of the edit request.
 
         Raises:
             ValueError: If clientOrderId is missing.
@@ -584,7 +663,7 @@ class FuturesApiClient:
 
     def add_tpsl_order(self, tpsl_params: Dict[str, Any]) -> ApiResponse[AddTPSLResponseData]:
         """
-        Add take-profit and/or stop-loss orders to an existing position.
+        Add one take-profit or one stop-loss order to an existing position.
 
         These orders help secure profits or limit losses by automatically triggering at specified price levels.
 
@@ -594,9 +673,8 @@ class FuturesApiClient:
                   - positionId: Identifier of the position.
                   - amount: Trade amount.
                   - side: 'BUY' or 'SELL'; normalized to uppercase.
-                Optionally include:
-                  - symbol: Trading symbol (will be normalized if provided).
-                  - stopLossPrice and/or takeProfitPrice (at least one is required).
+                  - symbol: Trading symbol; normalized to uppercase.
+                  - exactly one of stopLossPrice or takeProfitPrice.
 
         Returns:
             ApiResponse[AddTPSLResponseData]: Details of the created TP/SL order.
@@ -609,17 +687,27 @@ class FuturesApiClient:
                 "positionId": "pos123",
                 "amount": 0.1,
                 "side": "SELL",
+                "symbol": "BTCUSDT",
                 "takeProfitPrice": 35000
             })
         """
-        required_keys = ['positionId', 'amount', 'side']
-        if not all(key in tpsl_params for key in required_keys):
-            raise ValueError(f"positionId, amount & side are required. Needed: {required_keys}")
-        if 'symbol' in tpsl_params:
-            tpsl_params['symbol'] = self._normalize_string(tpsl_params['symbol'])
-        tpsl_params['side'] = self._normalize_string(tpsl_params['side'])
-        if 'stopLossPrice' not in tpsl_params and 'takeProfitPrice' not in tpsl_params:
-            raise ValueError('Either stop loss price or take profit price must be provided')
+        required_keys = ['positionId', 'amount', 'side', 'symbol']
+        if not tpsl_params or not all(tpsl_params.get(key) is not None for key in required_keys):
+            raise ValueError(f"positionId, amount, side & symbol are required. Needed: {required_keys}")
+        tpsl_params = {
+            **tpsl_params,
+            'symbol': self._normalize_string(tpsl_params['symbol']),
+            'side': self._normalize_string(tpsl_params['side'])
+        }
+        has_stop_loss = 'stopLossPrice' in tpsl_params
+        has_take_profit = 'takeProfitPrice' in tpsl_params
+        if has_stop_loss == has_take_profit:
+            raise ValueError('Exactly one of stopLossPrice or takeProfitPrice must be provided')
+        trigger_price = (
+            tpsl_params['stopLossPrice'] if has_stop_loss else tpsl_params['takeProfitPrice']
+        )
+        if tpsl_params['amount'] <= 0 or trigger_price <= 0:
+            raise ValueError('Amount and TP/SL trigger price must be positive')
         endpoint = config.get_endpoint(['private', 'trade', 'add_tpsl'])
         return self._request('POST', endpoint, data=tpsl_params)
 
@@ -632,8 +720,7 @@ class FuturesApiClient:
                 Must include:
                   - positionId: Identifier of the position.
                   - amount: Margin amount to add.
-                Optionally include:
-                  - symbol: Trading symbol (will be normalized if provided).
+                  - symbol: Trading symbol.
 
         Returns:
             ApiResponse[MarginResponse]: Updated margin details.
@@ -648,11 +735,10 @@ class FuturesApiClient:
                 "symbol": "BTCUSDT"
             })
         """
-        required_keys = ['positionId', 'amount']
+        required_keys = ['positionId', 'amount', 'symbol']
         if not all(key in margin_params for key in required_keys):
-            raise ValueError(f"positionId and amount are required. Needed: {required_keys}")
-        if 'symbol' in margin_params:
-            margin_params['symbol'] = self._normalize_string(margin_params['symbol'])
+            raise ValueError(f"positionId, amount, and symbol are required. Needed: {required_keys}")
+        margin_params['symbol'] = self._normalize_string(margin_params['symbol'])
         endpoint = config.get_endpoint(['private', 'trade', 'add_margin'])
         return self._request('POST', endpoint, data=margin_params)
 
@@ -665,8 +751,7 @@ class FuturesApiClient:
                 Must include:
                   - positionId: Identifier of the position.
                   - amount: Margin amount to reduce.
-                Optionally include:
-                  - symbol: Trading symbol (will be normalized if provided).
+                  - symbol: Trading symbol.
 
         Returns:
             ApiResponse[MarginResponse]: Updated margin details.
@@ -681,11 +766,10 @@ class FuturesApiClient:
                 "symbol": "BTCUSDT"
             })
         """
-        required_keys = ['positionId', 'amount']
+        required_keys = ['positionId', 'amount', 'symbol']
         if not all(key in margin_params for key in required_keys):
-            raise ValueError(f"positionId and amount are required. Needed: {required_keys}")
-        if 'symbol' in margin_params:
-            margin_params['symbol'] = self._normalize_string(margin_params['symbol'])
+            raise ValueError(f"positionId, amount, and symbol are required. Needed: {required_keys}")
+        margin_params['symbol'] = self._normalize_string(margin_params['symbol'])
         endpoint = config.get_endpoint(['private', 'trade', 'reduce_margin'])
         return self._request('POST', endpoint, data=margin_params)
 
@@ -697,14 +781,13 @@ class FuturesApiClient:
             close_params (Dict[str, Any]): Dictionary containing parameters to close a position.
                 Must include:
                   - positionId: Identifier of the position to close.
-                Optionally include:
-                  - symbol: Trading symbol (will be normalized if provided).
+                  - symbol: Trading symbol.
 
         Returns:
             ApiResponse[CreateOrderResponseData]: Details of the position closure.
 
         Raises:
-            ValueError: If positionId is not provided.
+            ValueError: If positionId or symbol is not provided.
 
         Example:
             close_response = client.close_position({
@@ -712,10 +795,9 @@ class FuturesApiClient:
                 "symbol": "BTCUSDT"
             })
         """
-        if 'positionId' not in close_params:
-            raise ValueError('positionId is required')
-        if 'symbol' in close_params:
-            close_params['symbol'] = self._normalize_string(close_params['symbol'])
+        if 'positionId' not in close_params or 'symbol' not in close_params:
+            raise ValueError('positionId and symbol are required')
+        close_params['symbol'] = self._normalize_string(close_params['symbol'])
         endpoint = config.get_endpoint(['private', 'trade', 'close_position'])
         return self._request('POST', endpoint, data=close_params)
 
@@ -724,17 +806,17 @@ class FuturesApiClient:
         symbol: str,
         limit: Optional[int] = None,
         since: Optional[int] = None
-    ) -> ApiResponse[OrdersListResponse]:
+    ) -> ApiResponse[OpenOrdersListResponse]:
         """
         Retrieve open orders for a specific trading symbol with optional pagination.
 
         Args:
             symbol (str): Trading symbol.
-            limit (Optional[int]): Maximum number of orders to return.
+            limit (Optional[int]): Maximum number of orders to return. Server default is 100.
             since (Optional[int]): Timestamp (in milliseconds) to filter orders placed after this time.
 
         Returns:
-            ApiResponse[OrdersListResponse]: List of open orders.
+            ApiResponse[OpenOrdersListResponse]: Nested `data` array of open orders.
 
         Raises:
             ValueError: If the symbol is not provided.
@@ -762,8 +844,9 @@ class FuturesApiClient:
         Retrieve user positions, optionally filtered by trading symbols or status.
 
         Args:
-            symbols (Optional[List[str]]): List of trading symbols (if provided, only positions for these symbols are returned).
-            status (Optional[str]): Filter positions by status (e.g., 'OPEN', 'CLOSED', 'LIQUIDATED').
+            symbols (Optional[List[str]]): List of trading symbols. Must be an array when provided.
+            status (Optional[str]): Filter by status (`OPEN`, `CLOSED`, `LIQUIDATED`).
+                The server defaults to `OPEN` when omitted.
 
         Returns:
             ApiResponse[List[Position]]: List of positions.
@@ -842,43 +925,89 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['private', 'trade', 'update_leverage'])
         return self._request('POST', endpoint, data=leverage_params)
 
+    def _history_query(
+        self,
+        page_size: Optional[int] = None,
+        timestamp: Optional[int] = None,
+        start_timestamp: Optional[int] = None,
+        end_timestamp: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        symbol: Optional[str] = None,
+        trade_id: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        params: Dict[str, Any] = {}
+        if page_size is not None:
+            params['pageSize'] = page_size
+        if timestamp is not None:
+            params['timestamp'] = timestamp
+        if start_timestamp is not None:
+            params['startTimestamp'] = start_timestamp
+        if end_timestamp is not None:
+            params['endTimestamp'] = end_timestamp
+        if sort_order is not None:
+            params['sortOrder'] = sort_order
+        if symbol is not None:
+            params['symbol'] = self._normalize_string(symbol)
+        if trade_id is not None:
+            params['tradeId'] = trade_id
+        return params
+
     def get_order_history(
         self,
         page_size: Optional[int] = None,
-        timestamp: Optional[int] = None
+        timestamp: Optional[int] = None,
+        start_timestamp: Optional[int] = None,
+        end_timestamp: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        symbol: Optional[str] = None,
     ) -> ApiResponse[OrdersListResponse]:
         """
         Retrieve the user's order history with optional pagination.
 
         Args:
-            page_size (Optional[int]): Number of orders per page.
-            timestamp (Optional[int]): Timestamp in milliseconds to fetch orders before this time.
+            page_size (Optional[int]): Number of orders per page. Server default is 10.
+            timestamp (Optional[int]): Pagination cursor: fetch orders before this time (ms).
+            start_timestamp (Optional[int]): Inclusive lower bound on order time (ms).
+            end_timestamp (Optional[int]): Inclusive upper bound on order time (ms).
+            sort_order (Optional[str]): `asc` or `desc`. Server default is `desc`.
+            symbol (Optional[str]): Filter to a single trading symbol.
 
         Returns:
             ApiResponse[OrdersListResponse]: Paginated order history.
 
         Example:
-            history = client.get_order_history(page_size=20)
+            history = client.get_order_history(page_size=20, symbol='BTCUSDT')
         """
-        params = {}
-        if page_size is not None:
-            params['pageSize'] = page_size
-        if timestamp is not None:
-            params['timestamp'] = timestamp
+        params = self._history_query(
+            page_size=page_size,
+            timestamp=timestamp,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            sort_order=sort_order,
+            symbol=symbol,
+        )
         endpoint = config.get_endpoint(['private', 'trade', 'order_history'])
         return self._request('GET', endpoint, params=params)
 
     def get_trade_history(
         self,
         page_size: Optional[int] = None,
-        timestamp: Optional[int] = None
+        timestamp: Optional[int] = None,
+        start_timestamp: Optional[int] = None,
+        end_timestamp: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        symbol: Optional[str] = None,
     ) -> ApiResponse[TradesListResponse]:
         """
         Retrieve the user's trade history with optional pagination.
 
         Args:
-            page_size (Optional[int]): Number of trades per page.
-            timestamp (Optional[int]): Timestamp in milliseconds to fetch trades before this time.
+            page_size (Optional[int]): Number of trades per page. Server default is 10.
+            timestamp (Optional[int]): Pagination cursor: fetch trades before this time (ms).
+            start_timestamp (Optional[int]): Inclusive lower bound on trade time (ms).
+            end_timestamp (Optional[int]): Inclusive upper bound on trade time (ms).
+            sort_order (Optional[str]): `asc` or `desc`. Server default is `desc`.
+            symbol (Optional[str]): Filter to a single trading symbol.
 
         Returns:
             ApiResponse[TradesListResponse]: Paginated trade history.
@@ -886,36 +1015,53 @@ class FuturesApiClient:
         Example:
             trade_history = client.get_trade_history(page_size=20)
         """
-        params = {}
-        if page_size is not None:
-            params['pageSize'] = page_size
-        if timestamp is not None:
-            params['timestamp'] = timestamp
+        params = self._history_query(
+            page_size=page_size,
+            timestamp=timestamp,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            sort_order=sort_order,
+            symbol=symbol,
+        )
         endpoint = config.get_endpoint(['private', 'trade', 'trade_history'])
         return self._request('GET', endpoint, params=params)
 
     def get_transaction_history(
         self,
         page_size: Optional[int] = None,
-        timestamp: Optional[int] = None
+        timestamp: Optional[int] = None,
+        start_timestamp: Optional[int] = None,
+        end_timestamp: Optional[int] = None,
+        sort_order: Optional[str] = None,
+        symbol: Optional[str] = None,
+        trade_id: Optional[int] = None,
     ) -> ApiResponse[TransactionsListResponse]:
         """
         Retrieve the user's transaction history with optional pagination.
 
         Args:
-            page_size (Optional[int]): Number of transactions per page.
-            timestamp (Optional[int]): Timestamp in milliseconds to fetch transactions before this time.
+            page_size (Optional[int]): Number of transactions per page. Server default is 10.
+            timestamp (Optional[int]): Pagination cursor: fetch transactions before this time (ms).
+            start_timestamp (Optional[int]): Inclusive lower bound on transaction time (ms).
+            end_timestamp (Optional[int]): Inclusive upper bound on transaction time (ms).
+            sort_order (Optional[str]): `asc` or `desc`. Server default is `desc`.
+            symbol (Optional[str]): Filter to a single trading symbol.
+            trade_id (Optional[int]): Filter transactions belonging to a specific trade.
 
         Returns:
             ApiResponse[TransactionsListResponse]: Paginated transaction history.
 
         Example:
-            transactions = client.get_transaction_history(page_size=20)
+            transactions = client.get_transaction_history(page_size=20, trade_id=17909)
         """
-        params = {}
-        if page_size is not None:
-            params['pageSize'] = page_size
-        if timestamp is not None:
-            params['timestamp'] = timestamp
+        params = self._history_query(
+            page_size=page_size,
+            timestamp=timestamp,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            sort_order=sort_order,
+            symbol=symbol,
+            trade_id=trade_id,
+        )
         endpoint = config.get_endpoint(['private', 'trade', 'transaction_history'])
         return self._request('GET', endpoint, params=params)

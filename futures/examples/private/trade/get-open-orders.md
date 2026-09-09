@@ -2,41 +2,47 @@
 
 Retrieves a list of the user's currently open orders, optionally filtered by symbol and pagination parameters.
 
-> **💡 Tip:** For full details on endpoint parameters see the [API Reference for Get Open Orders](../../api-reference/private-endpoints/trade.md#get-open-orders).
+> **💡 Tip:** For full details on endpoint parameters see the [API Reference for Get Open Orders](../../../api-reference/private-endpoints/trade.md#get-open-orders).
 
 **Endpoint:** `GET /api/v1/trade/order/open-orders`
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
 * `symbol` (`string`, required): Trading symbol to filter orders by (e.g., "BTCUSDT") .
-* `limit` (`number`, optional): Maximum number of orders to return .
+* `limit` (`number`, optional): Maximum number of orders to return. Defaults to **100**.
 * `since` (`number`, optional): Fetch orders created after this Unix timestamp (ms) .
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
 ```bash
 # Example: Get open BTCUSDT orders
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/open-orders?symbol=BTCUSDT&limit=10 \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/order/open-orders?symbol=BTCUSDT&limit=10" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
-````
+```
 
 #### Using API Key + Secret Authentication
 
 ```bash
-# Example: Get open ETHUSDT orders since a specific time
-# Remember to include the timestamp in the query string for signing
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/open-orders?symbol=ETHUSDT&since=1712300000000 \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="symbol=BTCUSDT&limit=10&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/order/open-orders?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+The signature is generated from the exact query string sent after `?`.
 
 #### Success Response (Example)
 
@@ -71,7 +77,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order/open-orders?symbol=E
 }
 ```
 
-*Note: See [OrdersListResponse model](../../api-reference/data-models.md#orderslistresponse) and [Order model](../../api-reference/data-models.md#order) for field details.*
+*Note: See [OpenOrdersListResponse model](../../../api-reference/data-models.md#openorderslistresponse) and [Order model](../../../api-reference/data-models.md#order) for field details.*
 
 -----
 

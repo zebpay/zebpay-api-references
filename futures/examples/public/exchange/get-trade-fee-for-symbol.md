@@ -24,11 +24,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/tradefee?symbol=BTCUSDT
 ```json
 {
   "statusDescription": "Success",
-  "data": {
-    "symbol": "BTCUSDT",
-    "makerFee": 0.001,
-    "takerFee": 0.002
-  },
+  "data": [
+    {
+      "symbol": "BTCUSDT",
+      "makerFee": "0.001",
+      "takerFee": "0.002"
+    }
+  ],
   "statusCode": 200,
   "customMessage": ["OK"]
 }
@@ -56,8 +58,8 @@ async function getTradeFeeExample(symbol) {
     if (response && [200, 201].includes(response.statusCode)) {
       console.log(`Trade Fee Data for ${symbol}:`, response.data);
       // Access fees:
-      // const makerFee = response.data.makerFee;
-      // const takerFee = response.data.takerFee;
+      // const makerFee = response.data[0].makerFee;
+      // const takerFee = response.data[0].takerFee;
       // console.log(`Maker: ${makerFee}, Taker: ${takerFee}`);
     } else {
       console.error(`Failed to fetch trade fee for ${symbol}:`, response.statusDescription);
@@ -78,22 +80,26 @@ getTradeFeeExample('BTCUSDT');
 Fetching trade fee for BTCUSDT...
 API Response: {
   "statusDescription": "Success",
-  "data": {
-    "symbol": "BTCUSDT",
-    "makerFee": 0.001,
-    "takerFee": 0.002
-  },
+  "data": [
+    {
+      "symbol": "BTCUSDT",
+      "makerFee": "0.001",
+      "takerFee": "0.002"
+    }
+  ],
   "statusCode": 200,
   "customMessage": [
     "OK"
   ]
 }
 // Followed by the extracted data
-Trade Fee Data for BTCUSDT: {
-  "symbol": "BTCUSDT",
-  "makerFee": 0.001,
-  "takerFee": 0.002
-}
+Trade Fee Data for BTCUSDT: [
+  {
+    "symbol": "BTCUSDT",
+    "makerFee": "0.001",
+    "takerFee": "0.002"
+  }
+]
 ```
 
 ---
@@ -119,7 +125,7 @@ def get_trade_fee_example(symbol):
         if response and response.get("statusCode") in [200, 201]:
             print(f"Trade Fee Data for {symbol}: {response.get('data')}")
             # Access fees:
-            # data = response.get('data', {})
+            # data = response.get('data', [])[0]
             # maker_fee = data.get('makerFee')
             # taker_fee = data.get('takerFee')
             # print(f"Maker: {maker_fee}, Taker: {taker_fee}")
@@ -140,16 +146,18 @@ get_trade_fee_example('BTCUSDT')
 Fetching trade fee for BTCUSDT...
 API Response: {
   "statusDescription": "Success",
-  "data": {
-    "symbol": "BTCUSDT",
-    "makerFee": 0.001,
-    "takerFee": 0.002
-  },
+  "data": [
+    {
+      "symbol": "BTCUSDT",
+      "makerFee": "0.001",
+      "takerFee": "0.002"
+    }
+  ],
   "statusCode": 200,
   "customMessage": [
     "OK"
   ]
 }
 // Followed by the extracted data
-Trade Fee Data for BTCUSDT: {'symbol': 'BTCUSDT', 'makerFee': 0.001, 'takerFee': 0.002}
+Trade Fee Data for BTCUSDT: [{'symbol': 'BTCUSDT', 'makerFee': '0.001', 'takerFee': '0.002'}]
 ```

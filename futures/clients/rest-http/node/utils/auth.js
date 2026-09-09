@@ -9,6 +9,23 @@ const crypto = require('crypto');
  */
 class AuthUtils {
   /**
+   * Serializes query parameters exactly as they are signed and transmitted.
+   *
+   * @param {Object} queryParams - Query parameters
+   * @returns {string} URL-encoded query string
+   */
+  static serializeQueryParams(queryParams = {}) {
+    return Object.entries(queryParams)
+      .flatMap(([key, value]) => {
+        const values = Array.isArray(value) ? value : [value];
+        return values.map(
+          (item) => `${encodeURIComponent(key)}=${encodeURIComponent(item)}`
+        );
+      })
+      .join('&');
+  }
+
+  /**
    * Creates authentication headers for JWT-based authentication
    *
    * @param {string} jwt - JWT authentication token
@@ -40,13 +57,14 @@ class AuthUtils {
     // Clone query params to avoid modifying the original
     const params = { ...queryParams };
 
-    // Add timestamp to query parameters
-    params.timestamp = Date.now();
+    // The request builder normally supplies the timestamp so the signed
+    // parameters and transmitted parameters are identical.
+    if (params.timestamp === undefined) {
+      params.timestamp = Date.now();
+    }
 
     // Create the query string
-    const queryString = Object.entries(params)
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join('&');
+    const queryString = AuthUtils.serializeQueryParams(params);
 
     // Generate signature
     const signature = crypto
@@ -76,8 +94,10 @@ class AuthUtils {
     // Clone body params to avoid modifying the original
     const body = { ...bodyParams };
 
-    // Add timestamp to body
-    body.timestamp = Date.now();
+    // Preserve a timestamp supplied by the request builder.
+    if (body.timestamp === undefined) {
+      body.timestamp = Date.now();
+    }
 
     // Convert body to JSON string
     const bodyString = JSON.stringify(body);

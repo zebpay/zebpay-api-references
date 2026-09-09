@@ -22,13 +22,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/system/status \
 {
   "statusDescription": "Success",
   "data": {
-    "status": "ok"
+    "systemStatus": "ok"
   },
   "statusCode": 200,
   "customMessage": ["OK"]
 }
 ```
-*Note: The `status` value might change based on the actual system health.*
+*Note: The `systemStatus` value might change based on the actual system health.*
 
 ---
 
@@ -50,7 +50,7 @@ async function getSystemStatusExample() {
     if (response && [200, 201].includes(response.statusCode)) {
       console.log("System Status Data:", response.data);
       // Access the status:
-      // const systemOk = response.data.status === 'ok';
+      // const systemOk = response.data.systemStatus === 'ok';
       // console.log("Is system OK?", systemOk);
     } else {
       console.error("Failed to fetch system status:", response.statusDescription);
@@ -71,7 +71,7 @@ Fetching system status...
 API Response: {
   "statusDescription": "Success",
   "data": {
-    "status": "ok"
+    "systemStatus": "ok"
   },
   "statusCode": 200,
   "customMessage": [
@@ -80,7 +80,7 @@ API Response: {
 }
 // Followed by the extracted data
 System Status Data: {
-  "status": "ok"
+  "systemStatus": "ok"
 }
 ```
 
@@ -106,7 +106,7 @@ def get_system_status_example():
         if response and response.get("statusCode") in [200, 201]:
             print(f"System Status Data: {response.get('data')}")
             # Access the status:
-            # system_ok = response.get('data', {}).get('status') == 'ok'
+            # system_ok = response.get('data', {}).get('systemStatus') == 'ok'
             # print(f"Is system OK? {system_ok}")
         else:
             print(f"Failed to fetch system status: {response.get('statusDescription')}")
@@ -125,7 +125,7 @@ Fetching system status...
 API Response: {
   "statusDescription": "Success",
   "data": {
-    "status": "ok"
+    "systemStatus": "ok"
   },
   "statusCode": 200,
   "customMessage": [
@@ -133,5 +133,5 @@ API Response: {
   ]
 }
 // Followed by the extracted data
-System Status Data: {'status': 'ok'}
+System Status Data: {'systemStatus': 'ok'}
 ```

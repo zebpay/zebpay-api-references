@@ -12,8 +12,7 @@ Retrieves details about all available trading symbols (markets), including their
 **Request:**
 
 ```bash
-# Replace BTCUSDT with the desired symbol
-curl -X GET https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
   -H "Accept: application/json"
 ```
 

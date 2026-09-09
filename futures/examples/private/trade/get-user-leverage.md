@@ -2,7 +2,7 @@
 
 Retrieves the user's current leverage setting for a specific trading symbol.
 
-> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get User Leverage](../../../../api-reference/private-endpoints/trade.md).
+> **💡 Tip:** For full details on endpoint parameters, see the [API Reference for Get User Leverage](../../../api-reference/private-endpoints/trade.md).
 
 **Endpoint:** `GET /api/v1/trade/userLeverage`
 **Authentication:** Required (JWT or API Key/Secret)
@@ -14,7 +14,7 @@ Retrieves the user's current leverage setting for a specific trading symbol.
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../../../api-reference/authentication.md) for details on generating headers . For API Key auth, the query string (including `timestamp`) is used for signature generation.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers . For API Key auth, the query string (including `timestamp`) is used for signature generation.
 
 #### Using JWT Authentication
 
@@ -23,16 +23,24 @@ Retrieves the user's current leverage setting for a specific trading symbol.
 curl -X GET https://futuresbe.zebpay.com/api/v1/trade/userLeverage?symbol=BTCUSDT \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
-````
+```
 
 #### Using API Key + Secret Authentication
 
 ```bash
-curl -X GET "[https://futuresbe.zebpay.com/api/v1/trade/userLeverage?symbol=BTCUSDT&timestamp=](https://futuresbe.zebpay.com/api/v1/trade/userLeverage?symbol=BTCUSDT \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="symbol=BTCUSDT&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/userLeverage?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+The signature is generated from the exact query string sent after `?`.
 
 #### Success Response (Example)
 
@@ -55,7 +63,7 @@ curl -X GET "[https://futuresbe.zebpay.com/api/v1/trade/userLeverage?symbol=BTCU
 }
 ```
 
-*Note: See [Leverage model](../../../../api-reference/data-models.md#leverage) for field details. Leverage value and margin mode reflect user settings.*
+*Note: See [Leverage model](../../../api-reference/data-models.md#leverage) for field details. Leverage value and margin mode reflect user settings.*
 
 -----
 

@@ -1,17 +1,18 @@
 # Example: Create Order
 
-Places a new trading order (Market or Limit).
+Places a market, limit, stop-market, or stop-limit order.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Create Order](../../api-reference/private-endpoints/trade.md#create-order).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Create Order](../../../api-reference/private-endpoints/trade.md#create-order).
 
 **Endpoint:** `POST /api/v1/trade/order`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1\. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers .
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers .
 
 #### Using JWT Authentication (Limit Order)
 
@@ -30,52 +31,72 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order \
       }'
 ```
 
-#### Using API Key + Secret Authentication (Market Order)
+#### Using API Key + Secret Authentication (STOP_MARKET Order)
 
 ```bash
-# Timestamp must be included in the body for signature generation
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"symbol":"BTCUSDT","amount":0.005,"side":"BUY","type":"STOP_MARKET","triggerPrice":65500,"timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
 curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>" \
-  -d '{
-        "symbol": "BTCUSDT",
-        "amount": 0.005,
-        "side": "SELL",
-        "type": "MARKET",
-        "marginAsset": "USDT",
-        "timestamp": <current_timestamp_ms>
-      }'
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
 ```
 
-#### Success Response (Example - Limit Order Created)
+`STOP_MARKET` requires `triggerPrice` and does not use `price`. The signature is generated from the exact compact body sent by `curl`.
+
+#### Using API Key + Secret Authentication (STOP_LIMIT Bracket Order)
+
+```bash
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"symbol":"BTCUSDT","amount":0.005,"side":"BUY","type":"STOP_LIMIT","price":66000,"triggerPrice":65500,"stopLossPrice":63000,"takeProfitPrice":70000,"timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
+```
+
+The signature is generated from the exact compact body sent by `curl`. The symbol must list `STOP_LIMIT` in Exchange Info. The entry activates at `triggerPrice`; `stopLossPrice` and `takeProfitPrice` configure protection for the resulting position. Either bracket field may be omitted, or both may be supplied.
+
+#### Success Response (Example - STOP_LIMIT Entry Created)
 
 ```json
 {
   "statusDescription": "Success",
   "data": {
-    "clientOrderId": "myNewLimitOrder777",
+    "clientOrderId": "myStopLimitOrder777",
     "datetime": "2025-04-09T12:20:00.123Z",
     "timestamp": 1744066800123,
     "symbol": "BTCUSDT",
-    "type": "LIMIT",
+    "type": "stop_limit",
     "timeInForce": "GTC",
-    "side": "BUY",
-    "price": 65000.00,
-    "amount": 0.01,
+    "side": "buy",
+    "price": 66000.00,
+    "triggerPrice": 65500.00,
+    "amount": 0.005,
     "filled": 0.0,
-    "remaining": 0.01,
+    "remaining": 0.005,
     "reduceOnly": false,
     "postOnly": false,
     "status": "new"
   },
-  "statusCode": 200,
+  "statusCode": 201,
   "customMessage": ["OK"]
 }
 ```
 
-*Note: See [CreateOrderResponseData model](../../api-reference/data-models.md#createorderresponsedata) for field details.*
+*Note: See [CreateOrderResponseData model](../../../api-reference/data-models.md#createorderresponsedata) for field details.*
 
 -----
 
@@ -104,27 +125,29 @@ async function createOrderExample(orderParams) {
   }
 }
 
-// Example usage for a LIMIT order:
-const limitOrderParams = {
+// Example usage for a STOP_LIMIT order:
+const stopLimitOrderParams = {
   symbol: "BTCUSDT",
   amount: 0.01,
   side: "BUY",
-  type: "LIMIT",
-  marginAsset: "USDT",
-  price: 65000
+  type: "STOP_LIMIT",
+  price: 66000,
+  triggerPrice: 65500,
+  stopLossPrice: 63000,
+  takeProfitPrice: 70000
 };
-createOrderExample(limitOrderParams);
+createOrderExample(stopLimitOrderParams);
 ```
 
 **Output (Example):**
 
 ```js
 // Full API response first...
-Creating LIMIT order for BTCUSDT...
+Creating STOP_LIMIT order for BTCUSDT...
 API Response: {
   "statusDescription": "Success",
   "data": { // ... (data as shown in cURL example) ... },
-  "statusCode": 200, "customMessage": ["OK"] }
+  "statusCode": 201, "customMessage": ["OK"] }
 // Extracted data...
 Create Order Response Data: { // ... (data as shown in cURL example) ... }
 ```
@@ -154,27 +177,26 @@ def create_order_example(order_params):
     except Exception as e:
         print(f"Error creating order: {e}")
 
-# Example usage for a LIMIT order:
-limit_order_params = {
+# Example usage for a STOP_MARKET order:
+stop_market_order_params = {
   "symbol": "BTCUSDT",
   "amount": 0.01,
-  "side": "BUY",
-  "type": "LIMIT",
-  "marginAsset": "USDT",
-  "price": 65000
+  "side": "SELL",
+  "type": "STOP_MARKET",
+  "triggerPrice": 62000
 }
-create_order_example(limit_order_params)
+create_order_example(stop_market_order_params)
 ```
 
 **Output (Example):**
 
 ```js
 // Full API response first...
-Creating LIMIT order for BTCUSDT...
+Creating STOP_MARKET order for BTCUSDT...
 API Response: {
   "statusDescription": "Success",
   "data": { // ... (data as shown in cURL example, Python format) ... },
-  "statusCode": 200, "customMessage": ["OK"] }
+  "statusCode": 201, "customMessage": ["OK"] }
 // Extracted data...
 Create Order Response Data: { // ... (data as shown in cURL example, Python format) ... }
 ```

@@ -2,7 +2,7 @@
 
 Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a specified trading symbol and timeframe.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Get K-Lines](../../api-reference/public-endpoints/market.md#get-klines).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Get K-Lines](../../../api-reference/public-endpoints/market.md#get-klines).
 
 **Endpoint:** `POST /api/v1/market/klines`
 **Authentication:** Not Required
@@ -15,9 +15,9 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -d '{
+      -d '{
         "symbol": "BTCINR",
-        "interval": "1h",
+        "timeframe": "1h",
         "limit": 100
       }'
 ```
@@ -44,7 +44,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
 
 ### 2\. Node.js Client Example
 
-> **💡 Tip:** See [Node.js Client README](../../clients/rest-http/node/README.md).
+> **💡 Tip:** See [Node.js Client README](../../../clients/rest-http/node/README.md).
 
 ```javascript
 async function getKlinesExample(klineParams) {
@@ -69,7 +69,7 @@ async function getKlinesExample(klineParams) {
 // Example usage:
 const klineParams = {
   symbol: "BTCINR",
-  interval: "1h",
+  timeframe: "1h",
   limit: 100
 };
 getKlinesExample(klineParams);
@@ -91,7 +91,7 @@ K-Lines Data: [ // ... (data as shown in cURL example) ... ]
 
 ### 3\. Python Client Example
 
-> **💡 Tip:** See [Python Client README](../../clients/rest-http/python/README.md).
+> **💡 Tip:** See [Python Client README](../../../clients/rest-http/python/README.md).
 
 ```python
 import json
@@ -114,7 +114,7 @@ def get_klines_example(kline_params):
 # Example usage:
 kline_params = {
   "symbol": "BTCINR",
-  "interval": "1h",
+  "timeframe": "1h",
   "limit": 100
 }
 get_klines_example(kline_params)

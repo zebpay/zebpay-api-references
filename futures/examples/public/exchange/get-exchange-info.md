@@ -27,7 +27,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/exchange/exchangeInfo \
       {
         "name": "Bitcoin",
         "pair": "BTCUSDT",
-        "orderTypes": ["MARKET", "LIMIT"],
+        "orderTypes": ["MARKET", "LIMIT", "STOP_MARKET", "STOP_LIMIT"],
         "filters": [ { "filterType": "LIMIT_QTY_SIZE", "maxQty": "100", "minQty": "0.0001" } /* , ... */ ],
         "makerFee": 0.001,
         "takerFee": 0.002,

@@ -26,19 +26,21 @@ Retrieves trading fee details (maker/taker) for a specific trading symbol.
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** (object):
+**`data`** (array of one object):
 - **`symbol`** (`string`): The trading symbol queried.
-- **`makerFee`** (`number`): The maker fee rate.
-- **`takerFee`** (`number`): The taker fee rate.
+- **`makerFee`** (`string`): The maker fee rate.
+- **`takerFee`** (`string`): The taker fee rate.
 
 ##### Example (`data` field content)
 
 ```json
-{
-  "symbol": "BTCUSDT",
-  "makerFee": 0.001,
-  "takerFee": 0.002
-}
+[
+  {
+    "symbol": "BTCUSDT",
+    "makerFee": "0.001",
+    "takerFee": "0.002"
+  }
+]
 ```
 
 > See [Error Response Structure](../error-handling.md) for error formats.
@@ -68,7 +70,7 @@ Retrieves trading fee details for all supported trading pairs.
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (Array<object>):
-- A list where each object contains `symbol` (`string`), `makerFee` (`number`), and `takerFee` (`number`) for a trading pair.
+- A list where each object contains `symbol` (`string`), `makerFee` (`string`), and `takerFee` (`string`) for a trading pair.
 
 ##### Example (`data` field content - excerpt)
 
@@ -76,13 +78,13 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 [
   {
     "symbol": "BTCUSDT",
-    "makerFee": 0.001,
-    "takerFee": 0.002
+    "makerFee": "0.001",
+    "takerFee": "0.002"
   },
   {
     "symbol": "ETHUSDT",
-    "makerFee": 0.0012,
-    "takerFee": 0.0022
+    "makerFee": "0.0012",
+    "takerFee": "0.0022"
   }
 ]
 ```
@@ -94,6 +96,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 ### Get Exchange Info
 
 Retrieves comprehensive exchange configuration information, including trading rules, filters, limits, precision settings, supported assets, etc.
+
+The `orderTypes` field for each pair describes which order types the pair is configured for. Create-order currently accepts `MARKET`, `LIMIT`, `STOP_MARKET`, and `STOP_LIMIT` globally and does not reject against the pair's stored `enabledOrderTypes` list.
 
 #### Request
 
@@ -124,7 +128,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     {
       "name": "Bitcoin",
       "pair": "BTCUSDT",
-      "orderTypes": ["MARKET", "LIMIT"],
+      "orderTypes": ["MARKET", "LIMIT", "STOP_MARKET", "STOP_LIMIT"],
       "filters": [ { "filterType": "LIMIT_QTY_SIZE", "maxQty": "100", "minQty": "0.0001" } ],
       "makerFee": 0.001,
       "takerFee": 0.002,

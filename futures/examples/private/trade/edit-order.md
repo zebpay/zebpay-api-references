@@ -1,19 +1,20 @@
 # Example: Edit Order
 
-Edits an existing open order. This can be used to change the price or amount of a pending order.
+Edits an existing open order. This example changes the trigger price of a pending stop-loss or take-profit order.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Edit Order](../../api-reference/private-endpoints/trade.md#edit-order) and the [EditOrderResponseData Data Model](../../api-reference/data-models.md#editorderresponsedata).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Edit Order](../../../api-reference/private-endpoints/trade.md#edit-order) and the [EditOrderResponseData Data Model](../../../api-reference/data-models.md#editorderresponsedata).
 
 **Endpoint:** `PATCH /api/v1/trade/order`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
-#### Using JWT Authentication
+#### Using JWT Authentication (Modify TP/SL Trigger)
 
 ```bash
 curl -X PATCH https://futuresbe.zebpay.com/api/v1/trade/order \
@@ -22,58 +23,51 @@ curl -X PATCH https://futuresbe.zebpay.com/api/v1/trade/order \
   -H "Authorization: Bearer <your_jwt_token>" \
   -d '{
         "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-        "price": 7100000,
-        "amount": 0.001,
         "triggerPrice": 7050000
       }'
 ```
 
-#### Using API Key + Secret Authentication
+#### Using API Key + Secret Authentication (Modify TP/SL Trigger)
 
 ```bash
-# Timestamp must be included in the body for signature generation
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"clientOrderId":"7a5be049213ad0fb5e17-370-zeb","triggerPrice":7050000,"timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
 curl -X PATCH https://futuresbe.zebpay.com/api/v1/trade/order \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>" \
-  -d '{
-        "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-        "price": 7100000,
-        "amount": 0.001,
-        "triggerPrice": 7050000,
-        "timestamp": <current_timestamp_ms>
-      }'
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
 ```
+
+Use the TP/SL order's own `clientOrderId`, obtained from open orders or a private WebSocket order event. The signature is generated from the exact compact body sent by `curl`.
 
 #### Success Response (Example)
 
 ```json
 {
-  "statusDescription": "OK",
-  "data": {
-    "id": undefined,
-    "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-    "lastTradeTimestamp": null,
-    "timeInForce": "GTC",
-    "price": 7100000,
-    "average": null,
-    "amount": 0.001,
-    "trades": [],
-    "fee": null,
-    "info": {
-      "status": "Edit request submitted successfully",
-      "availableBalance": 700,
-      "lockedMargin": 200,
-      "lockedMarginInMarginAsset": 200
-    }
-  },
-  "statusCode": 200,
-  "customMessage": ["OK"]
+    "statusDescription": "OK",
+    "data": {
+        "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+        "timeInForce": "GTC",
+        "triggerPrice": 7050000,
+        "info": {
+            "availableBalance": 150.00,
+            "status": "Edit request submitted successfully",
+            "lockedMargin": 0,
+            "lockedMarginInMarginAsset": 0
+        }
+    },
+    "statusCode": 200,
+    "customMessage": ["OK"]
 }
 ```
 
-*Note: See [EditOrderResponseData model](../../api-reference/data-models.md#editorderresponsedata) for field details. Balances are illustrative.*
+*Note: See [EditOrderResponseData model](../../../api-reference/data-models.md#editorderresponsedata) for field details. Balances are illustrative.*
 
 -----
 
@@ -105,8 +99,6 @@ async function editOrderExample(orderParams) {
 // Example usage:
 const editOrderParams = {
   clientOrderId: "7a5be049213ad0fb5e17-370-zeb",
-  price: 7100000,
-  amount: 0.001,
   triggerPrice: 7050000
 };
 editOrderExample(editOrderParams);
@@ -153,8 +145,6 @@ def edit_order_example(order_params):
 # Example usage:
 edit_order_params = {
   "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-  "price": 7100000,
-  "amount": 0.001,
   "triggerPrice": 7050000
 }
 edit_order_example(edit_order_params)

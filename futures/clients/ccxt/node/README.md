@@ -15,7 +15,7 @@
    - [🟢 Public Methods](#-public-methods)
    - [🔒 Private Methods](#-private-methods)
 7. [🧪 Example Usage](#-example-usage)
-9. [📌 Compatibility & Version](#-compatibility--version)
+9. [📌 Compatibility & Version](#compatibility-version)
 10. [🔗 Helpful Links](#-helpful-links)
 
 ---
@@ -149,11 +149,11 @@ The CCXT client exposes both public and private methods that mirror those of you
 | Method                      | Description                                      |
 |-----------------------------|--------------------------------------------------|
 | `fetchBalance()`            | Fetch user wallet balances                       |
-| `createOrder(orderParams)`  | Place a new order                                |
+| `createOrder(orderParams)`  | Place a MARKET, LIMIT, STOP_MARKET, or STOP_LIMIT order |
 | `cancelOrder(cancelParams)` | Cancel an existing order                         |
 | `fetchOrder(orderId)`       | Retrieve details for a specific order            |
 | `fetchOpenOrders(symbol)`   | Fetch open orders for a specific symbol          |
-| `addTPSLOrder(params)`      | Add take-profit and/or stop-loss orders          |
+| `addTPSLOrder(params)`      | Add one take-profit or stop-loss order per call  |
 | `addMargin(params)`         | Add margin to an existing position               |
 | `reduceMargin(params)`      | Reduce margin from an existing position          |
 | `closePosition(params)`     | Close a trading position                         |
@@ -217,10 +217,11 @@ const client = new exchangeClass({
 })();
 ```
 
-For additional examples and detailed usage of every method, please see the documentation in [examples/ccxt/module/action.md](../../examples/ccxt/module/action.md).
+For a complete runnable example, see [`run.example.js`](./run.example.js).
 
 ---
 
+<a id="compatibility-version"></a>
 ## 📌 Compatibility & Version
 
 | Field             | Value                                      |
@@ -233,7 +234,7 @@ For additional examples and detailed usage of every method, please see the docum
 ---
 
 ## 🔗 Helpful Links
-- [Zebpay Futures REST API Reference](https://dev-futuresbe.zebstage.com/api/docs)
+- [Zebpay Futures REST API Reference](https://futuresbe.zebpay.com/api/docs)
 - [ccxt GitHub Repository](https://github.com/ccxt/ccxt)
 - [ccxt Zebpay Futures Official Documentation](https://docs.ccxt.com/#/exchanges/zebpayfutures)
 - [Native Node.js Client Repository](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/node)

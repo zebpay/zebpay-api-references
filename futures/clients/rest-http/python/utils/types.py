@@ -39,7 +39,7 @@ class MarketSymbol(TypedDict):
         quantityPrecision (int): Decimal places for quantity.
         baseAssetPrecision (int): Precision for base asset.
         quotePrecision (int): Precision for quote asset.
-        orderTypes (List[str]): Supported order types (e.g., ["LIMIT", "MARKET"]).
+        orderTypes (List[str]): Enabled order types, including stop types when supported.
         timeInForce (List[str]): Supported time-in-force policies (e.g., ["GTC"]).
         makerFee (float): Maker fee rate.
         takerFee (float): Taker fee rate.
@@ -92,8 +92,8 @@ class OrderBook(TypedDict):
         bids (List[Tuple[float, float]]): Buy orders as [price, amount] pairs.
         asks (List[Tuple[float, float]]): Sell orders as [price, amount] pairs.
         timestamp (Optional[int]): Unix timestamp in milliseconds.
-        datetime (Optional[str]): ISO8601 datetime string.
-        nonce (Optional[int]): Exchange-provided sequence number.
+        datetime (Optional[str]): Always `None` in the current implementation.
+        nonce (Optional[int]): Set to `Date.now()` when the book is transformed.
     """
     symbol: str
     bids: List[Tuple[float, float]]
@@ -299,6 +299,7 @@ class Order(TypedDict, total=False):
         reduceOnly (bool)
         postOnly (bool)
     Optional attributes:
+        triggerPrice (float)
         status (str)
         average (float)
         trades (List[Dict[str, Any]])
@@ -312,6 +313,7 @@ class Order(TypedDict, total=False):
     timeInForce: str
     side: str
     price: float
+    triggerPrice: float
     amount: float
     filled: float
     remaining: float
@@ -485,6 +487,7 @@ class Transaction(TypedDict):
 
     Attributes:
         txid (str)
+        tradeId (Optional[str])
         timestamp (int)
         datetime (str)
         type (str)
@@ -495,6 +498,7 @@ class Transaction(TypedDict):
         info (Dict[str, Any])
     """
     txid: str
+    tradeId: Optional[str]
     timestamp: int
     datetime: str
     type: str
@@ -646,7 +650,7 @@ class MarketInfo(TypedDict):
 # ---------------------------
 # Order Creation & Cancellation Types
 # ---------------------------
-class CreateOrderResponseData(TypedDict):
+class _CreateOrderResponseDataRequired(TypedDict):
     """
     Represents the response from creating an order.
 
@@ -659,6 +663,7 @@ class CreateOrderResponseData(TypedDict):
         timeInForce (str)
         side (str)
         price (float)
+        triggerPrice (float, optional)
         amount (float)
         filled (float)
         remaining (float)
@@ -679,51 +684,36 @@ class CreateOrderResponseData(TypedDict):
     reduceOnly: bool
     postOnly: bool
 
+class CreateOrderResponseData(_CreateOrderResponseDataRequired, total=False):
+    """Create-order response with stop-order fields that are conditionally present."""
+    triggerPrice: float
+
 # Aliases for similar responses
 AddTPSLResponseData = CreateOrderResponseData
 ClosePositionResponseData = CreateOrderResponseData
 
 class EditOrderResponseInfo(TypedDict):
     """
-    Contains additional edit order details from the raw exchange response.
-
-    Attributes:
-        status (str): Edit operation status message.
-        availableBalance (float): Available balance after the edit operation.
-        lockedMargin (float): Amount of margin locked for positions.
-        lockedMarginInMarginAsset (float): Locked margin amount in the margin asset.
+    Contains additional edit order details.
     """
-    status: str
     availableBalance: float
+    status: str
     lockedMargin: float
     lockedMarginInMarginAsset: float
 
-class EditOrderResponseData(TypedDict):
+class _EditOrderResponseDataRequired(TypedDict):
     """
-    Represents the response from editing an order via PATCH /api/v1/trade/order.
-
-    Attributes:
-        id: Order ID (undefined/None in edit response).
-        clientOrderId (str): The client-generated unique order identifier that was edited.
-        lastTradeTimestamp: Last trade timestamp (None in edit response).
-        timeInForce (str): Time in force policy (typically "GTC").
-        price (float): The new/updated price for the order.
-        average: Average fill price (None in edit response).
-        amount (float): The new/updated amount for the order.
-        trades (List[Dict[str, Any]]): List of trades (empty list in edit response).
-        fee: Fee information (None in edit response).
-        info (EditOrderResponseInfo): Raw response data from the exchange containing edit status details.
+    Represents the response from editing an order.
     """
-    id: None
     clientOrderId: str
-    lastTradeTimestamp: None
     timeInForce: str
-    price: float
-    average: None
-    amount: float
-    trades: List[Dict[str, Any]]
-    fee: None
     info: EditOrderResponseInfo
+
+class EditOrderResponseData(_EditOrderResponseDataRequired, total=False):
+    """Edit response values that are present only when submitted."""
+    price: float
+    amount: float
+    triggerPrice: float
 
 class CancelOrderResponseInfo(TypedDict):
     """
@@ -758,6 +748,19 @@ class CancelOrderResponseData(TypedDict):
 # ---------------------------
 # Paginated Response Types
 # ---------------------------
+class OpenOrdersListResponse(TypedDict):
+    """
+    Represents the open-orders envelope.
+
+    Attributes:
+        data (List[Order]): Nested list of open orders.
+        totalCount (int)
+        nextTimestamp (int)
+    """
+    data: List[Order]
+    totalCount: int
+    nextTimestamp: int
+
 class OrdersListResponse(TypedDict):
     """
     Represents a paginated list of orders.

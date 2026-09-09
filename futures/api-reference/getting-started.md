@@ -42,6 +42,12 @@ Before making your first call, ensure you have:
 3. **API credentials** — either:
    - A **JWT token** (for user session-based access)
    - Or an **API Key + Secret Key** pair (for programmatic access)
+4. **API-key scope**:
+   - Use `fetch:details` for read-only access and private WebSocket authentication.
+   - Use `futures:trading` for REST trading operations.
+   - Select **both scopes on the same key** to run full REST trading plus the private WebSocket without a web-session JWT.
+
+Create the key in the **API Trading** section of the [ZebPay API portal](https://api.zebpay.com). Keep the secret private; clients use it locally to generate HMAC signatures and never transmit it.
 
 ---
 
@@ -52,13 +58,13 @@ Let’s query the market order book for a symbol.
 ### Example: `GET /api/v1/market/orderBook`
 
 ```bash
-curl -X GET "https://api.zebapi.com/api/v1/market/orderBook?symbol=BTCUSDT" \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT" \
   -H "Accept: application/json"
 ```
 
 ✅ **No authentication required**
 
-🔄 **Response Format:** [ApiResponse](../api-reference/data-models.md#apiresponse) with `data` as [OrderBook](../api-reference/data-models.md#orderbook)
+🔄 **Response Format:** [ApiResponse](./data-models.md#apiresponse) with `data` as [OrderBook](./data-models.md#orderbook)
 
 ---
 
@@ -75,7 +81,7 @@ Choose your preferred auth method:
 ### 🔑 Option 1: JWT Token
 
 ```bash
-curl -X GET "https://api.zebapi.com/api/v1/wallet/balance" \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/wallet/balance" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
@@ -102,11 +108,13 @@ Accept: application/json
 #### Example `curl` for API Key auth
 
 ```bash
-curl -X GET "https://api.zebapi.com/api/v1/wallet/balance?timestamp=1712345678901" \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/wallet/balance?timestamp=1712345678901" \
   -H "x-auth-apikey: YOUR_API_KEY" \
   -H "x-auth-signature: abcdef1234567890deadbeef..." \
   -H "Accept: application/json"
 ```
+
+> The signature must be generated from the complete transmitted query string, including `timestamp`.
 
 ---
 
@@ -114,9 +122,10 @@ curl -X GET "https://api.zebapi.com/api/v1/wallet/balance?timestamp=171234567890
 
 If you're using direct HTTP:
 
-- 📚 **Explore the [API Reference](../api-reference)** for all endpoints.
-- 🔍 **Review [Data Models](../api-reference/data-models.md)** to understand request/response shapes.
+- 📚 **Explore the [API Reference](.)** for all endpoints.
+- 🔍 **Review [Data Models](./data-models.md)** to understand request/response shapes.
 - 🚨 **Handle errors gracefully** with our [Error Handling Guide](./error-handling.md).
+- ⚡ **Subscribe to private updates** with the [Futures Private WebSocket](./websocket/README.md).
 
 Or…
 

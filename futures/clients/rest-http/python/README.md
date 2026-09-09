@@ -19,7 +19,7 @@
 8. [📦 API Response Structure](#-api-response-structure)
 9. [🧯 Error Handling](#-error-handling)
 10. [🗂️ Project Structure](#-project-structure)
-11. [📌 Compatibility & Version](#-compatibility--version)
+11. [📌 Compatibility & Version](#compatibility-version)
 12. [🔗 Helpful Links](#-helpful-links)
 
 ---
@@ -39,11 +39,11 @@ Focus on writing your **strategies**, **analytics**, or **integrations** — we 
 
 ## ⚡ Quickstart
 
-Once installed and authenticated, you're one line away from live data:
+Public market data does not require authentication:
 
 ```python
 from client.client import FuturesApiClient
-client = FuturesApiClient(jwt="your_token")
+client = FuturesApiClient()
 print(client.get_market_info())
 ```
 
@@ -65,6 +65,12 @@ Dive deeper into [📡 Client Methods](#-client-methods) for full capabilities.
 pip install -r requirements.txt
 ```
 
+Run request-signing, validation, and local HTTP transport tests with:
+
+```bash
+python -m unittest discover -s tests
+```
+
 ---
 
 ## 🔐 Authentication Setup
@@ -82,11 +88,22 @@ SECRET_KEY=your_secret_key_here
 
 The `python-dotenv` package is used to load these into the environment automatically.
 
+API-key REST reads require `fetch:details` or `futures:trading`; REST writes require `futures:trading`. The client adds and signs a millisecond timestamp automatically.
+
+Authentication is optional for public methods. Private methods require either JWT or API-key credentials, never both.
+
 ---
 
 ## 🚀 Client Initialization
 
 > `timeout` is optional (default: 30 seconds).
+
+### Public Methods Only
+
+```python
+from client.client import FuturesApiClient
+client = FuturesApiClient()
+```
 
 ### 🛡️ Using JWT Authentication
 
@@ -113,7 +130,9 @@ load_dotenv()
 
 client = FuturesApiClient(
     api_key=os.getenv("API_KEY"),
-    secret_key=os.getenv("SECRET_KEY")
+    secret_key=os.getenv("SECRET_KEY"),
+    # Optional:
+    subaccount_id=os.getenv("SUBACCOUNT_ID")
 )
 ```
 
@@ -125,10 +144,12 @@ client = FuturesApiClient(
 
 | Method | Description |
 |--------|-------------|
+| `fetch_markets()` | Get all available markets |
 | `get_order_book(symbol)` | Get order book (bids/asks) for a symbol |
 | `get_ticker_24hr(symbol)` | 24-hour price stats |
 | `get_market_info()` | Market status and metrics |
 | `get_agg_trade(symbol)` | Recent aggregated trades |
+| `get_klines(kline_params)` | Fetch OHLCV candles |
 | `get_system_time()` | API server time |
 | `get_system_status()` | System operational status |
 | `get_trade_fee(symbol)` | Fee info for one symbol |
@@ -143,18 +164,20 @@ client = FuturesApiClient(
 | Method | Description |
 |--------|-------------|
 | `get_balance()` | Wallet balances for all assets |
-| `create_order(order_params)` | Place a new order. Required fields: `symbol`, `amount`, `side`, `type`, `marginAsset`, and optionally `price` (for LIMIT orders) |
+| `create_order(order_params)` | Place `MARKET`, `LIMIT`, `STOP_MARKET`, or `STOP_LIMIT`. `marginAsset` is optional; stop orders require `triggerPrice` |
 | `cancel_order(cancel_params)` | Cancel order by `clientOrderId` |
+| `cancel_all_orders()` | Cancel all open orders |
+| `edit_order(order_params)` | Edit an open order |
 | `get_order(client_order_id)` | Get order details |
-| `get_open_orders(symbol, limit=None, since=None)` | Open orders for a symbol |
-| `get_order_history(page_size=None, timestamp=None)` | Historical orders |
-| `get_trade_history(page_size=None, timestamp=None)` | Historical trades |
-| `get_transaction_history(page_size=None, timestamp=None)` | Wallet activity (deposits, withdrawals, fees) |
-| `add_tpsl_order(tpsl_params)` | Add take-profit / stop-loss |
+| `get_open_orders(symbol, limit=None, since=None)` | Open orders for a symbol (`data` nested array; `limit` default 100) |
+| `get_order_history(...)` | Historical orders (`page_size` default 10; supports start/end timestamps, `sort_order`, `symbol`) |
+| `get_trade_history(...)` | Historical trades (same pagination filters as order history) |
+| `get_transaction_history(...)` | Wallet activity (same filters plus `trade_id`) |
+| `add_tpsl_order(tpsl_params)` | Add one take-profit or stop-loss; requires `symbol` and exactly one trigger |
 | `add_margin(margin_params)` | Add margin to position |
 | `reduce_margin(margin_params)` | Reduce margin from position |
-| `close_position(close_params)` | Close position by `positionId` |
-| `get_positions(symbols=None, status=None)` | Filter by symbols and status (OPEN/CLOSED) |
+| `close_position(close_params)` | Close position by `positionId` and `symbol` |
+| `get_positions(symbols=None, status=None)` | Filter by symbols array and status (OPEN/CLOSED/LIQUIDATED; default OPEN) |
 | `get_user_leverage(symbol)` | Leverage for a symbol |
 | `get_user_leverages()` | All user leverages |
 | `update_leverage(leverage_params)` | Set leverage for a symbol |
@@ -253,6 +276,7 @@ python/
 
 ---
 
+<a id="compatibility-version"></a>
 ## 📌 Compatibility & Version
 
 | Field | Value |
@@ -265,7 +289,7 @@ python/
 
 ## 🔗 Helpful Links
 
-- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://dev-futuresbe.zebstage.com/api/docs)
+- 📘 [Futures REST API Reference (Swagger/OpenAPI)](https://futuresbe.zebpay.com/api/docs)
 - 🛠 [Submit an Issue](https://github.com/zebpay/zebpay-api-references/issues)
 - 🧪 [Python Client Code](https://github.com/zebpay/zebpay-api-references/tree/main/futures/clients/rest-http/python)
 - 🗃️ [ZebPay API GitHub Monorepo (Root)](https://github.com/zebpay/zebpay-api-references/)

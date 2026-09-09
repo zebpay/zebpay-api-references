@@ -2,7 +2,7 @@
 
 Fetches details of a specific order using its client order ID.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Details](../../api-reference/private-endpoints/trade.md#get-order).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Details](../../../api-reference/private-endpoints/trade.md#get-order).
 
 **Endpoint:** `GET /api/v1/trade/order`
 **Authentication:** Required (JWT or API Key/Secret)
@@ -14,13 +14,13 @@ Fetches details of a specific order using its client order ID.
 
 ### 1\. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
 ```bash
 # Replace 'myLimitOrder456' with the actual clientOrderId
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order?id=myLimitOrder456 \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/order?id=myLimitOrder456" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
@@ -28,11 +28,19 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order?id=myLimitOrder456 \
 #### Using API Key + Secret Authentication
 
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order?id=myLimitOrder456 \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="id=myLimitOrder456&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/order?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+The signature is generated from the exact query string sent after `?`.
 
 #### Success Response (Example - Canceled Order)
 
@@ -63,7 +71,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/order?id=myLimitOrder456 \
 }
 ```
 
-*Note: See [Order model](../../api-reference/data-models.#order) for field details.*
+*Note: See [Order model](../../../api-reference/data-models.md#order) for field details.*
 
 -----
 

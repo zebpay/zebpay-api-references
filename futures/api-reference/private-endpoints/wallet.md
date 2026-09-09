@@ -2,6 +2,8 @@
 
 These endpoints interact with the user's wallet and require **Authentication (JWT or API Key/Secret)**. See the [Authentication Guide](../authentication.md) for details on how to authenticate requests. All successful responses follow the standard [ApiResponse](../data-models.md#apiresponse) structure.
 
+API-key requests require either `fetch:details` or `futures:trading`.
+
 ---
 
 ### Get Wallet Balance
@@ -15,8 +17,11 @@ Retrieves the user's balances for all assets in their wallet.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/wallet/balance` [cite: node/utils/config.js]   |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | None                        |
 | **Request Body** | N/A                         |
+
+This endpoint uses the same IP-based `/api` rate limit as other REST routes.
 
 #### Success Response
 

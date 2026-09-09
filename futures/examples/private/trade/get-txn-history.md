@@ -2,37 +2,50 @@
 
 Retrieves the user's historical transactions (e.g., commissions, funding fees) with pagination support.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Get Transaction History](../../../../api-reference/private-endpoints/trade.md#get-txn-history).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Get Transaction History](../../../api-reference/private-endpoints/trade.md#get-txn-history).
 
 **Endpoint:** `GET /api/v1/trade/transaction/history`
 **Authentication:** Required (JWT or API Key/Secret)
 **Query Parameters:**
 
-* `pageSize` (`number`, optional): Number of transactions to return per page .
-* `timestamp` (`number`, optional): Fetch transactions created before this Unix timestamp (ms). Used for pagination; use the `nextTimestamp` value from a previous response to get the next page .
+* `pageSize` (`number`, optional): Number of transactions to return per page. Defaults to **10**.
+* `timestamp` (`number`, optional): Pagination cursor: fetch transactions created before this Unix timestamp (ms). Use `nextTimestamp` from a previous response for the next page.
+* `startTimestamp` (`number`, optional): Inclusive lower bound on transaction time (ms).
+* `endTimestamp` (`number`, optional): Inclusive upper bound on transaction time (ms).
+* `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+* `symbol` (`string`, optional): Filter to a single trading symbol.
+* `tradeId` (`number`, optional): Filter transactions belonging to a specific trade.
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
 ```bash
 # Get the first page, e.g., 20 transactions per page
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/transaction/history?pageSize=20 \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/transaction/history?pageSize=20" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
 
+For API-key auth, sign the complete query string in the same order. Because this endpoint also uses `timestamp` as its pagination cursor, use JWT auth when requesting a cursor older than the authentication timestamp window.
+
 ### Using API Key + Secret Authentication
 
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/transaction/history?pageSize=20 \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="pageSize=20&timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/transaction/history?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
 
 #### Success Response (Example)
@@ -78,7 +91,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/trade/transaction/history?pageSi
 }
 ```
 
-*Note: See [TransactionsListResponse model](../../../../api-reference/data-models.md#transactionslistresponse) and [Transaction model](../../../../api-reference/data-models.md#transaction) for field details.*
+*Note: See [TransactionsListResponse model](../../../api-reference/data-models.md#transactionslistresponse) and [Transaction model](../../../api-reference/data-models.md#transaction) for field details.*
 
 -----
 

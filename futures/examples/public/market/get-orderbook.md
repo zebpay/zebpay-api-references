@@ -37,14 +37,14 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT 
       [65002.00, 0.7]
     ],
     "timestamp": 1712345678901,
-    "datetime": "2025-04-05T11:59:38.901Z",
-    "nonce": 123456789
+    "datetime": null,
+    "nonce": 1712345678901
   },
   "statusCode": 200,
   "customMessage": ["OK"]
 }
 ```
-*Note: Bids, asks, and timestamp will reflect live market data.*
+*Note: `datetime` is always `null`. `timestamp` and `nonce` are both `Date.now()` at transform time.*
 
 ---
 
@@ -100,8 +100,8 @@ API Response: {
       // ... more asks
     ],
     "timestamp": 1712345678901,
-    "datetime": "2025-04-05T11:59:38.901Z",
-    "nonce": 123456789
+    "datetime": null,
+    "nonce": 1712345678901
   },
   "statusCode": 200,
   "customMessage": [
@@ -185,8 +185,8 @@ API Response: {
       // ... more asks
     ],
     "timestamp": 1712345678901,
-    "datetime": "2025-04-05T11:59:38.901Z",
-    "nonce": 123456789
+    "datetime": null,
+    "nonce": 1712345678901
   },
   "statusCode": 200,
   "customMessage": [

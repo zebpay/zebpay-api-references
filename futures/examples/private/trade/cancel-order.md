@@ -2,16 +2,17 @@
 
 Cancels an existing open order using its `clientOrderId`.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Cancel Order](../../api-reference/private-endpoints/trade.md#cancel-order).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Cancel Order](../../../api-reference/private-endpoints/trade.md#cancel-order).
 
 **Endpoint:** `DELETE /api/v1/trade/order`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1\. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
@@ -29,16 +30,21 @@ curl -X DELETE https://futuresbe.zebpay.com/api/v1/trade/order \
 #### Using API Key + Secret Authentication
 
 ```bash
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"clientOrderId":"myLimitOrder456","symbol":"BTCUSDT","timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
 curl -X DELETE https://futuresbe.zebpay.com/api/v1/trade/order \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>" \
-  -d '{
-        "clientOrderId": "myLimitOrder456",
-        "symbol": "BTCUSDT",
-      }'
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
 ```
+
+Sign and send the same DELETE body. Omitting `timestamp` from the body or signing different JSON bytes causes authentication to fail.
 
 #### Success Response (Example)
 
@@ -61,7 +67,7 @@ curl -X DELETE https://futuresbe.zebpay.com/api/v1/trade/order \
 }
 ```
 
-*Note: See [CancelOrderResponseData model](../../api-reference/data-models.md#cancelorderresponsedata) for field details.*
+*Note: See [CancelOrderResponseData model](../../../api-reference/data-models.md#cancelorderresponsedata) for field details.*
 
 -----
 

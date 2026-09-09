@@ -2,6 +2,17 @@
 
 These endpoints allow users to manage orders, positions, leverage, and view trade-related history. **Authentication (JWT or API Key/Secret) is required.** See the [Authentication Guide](../authentication.md) for details on how to authenticate requests.
 
+## API Key Scopes
+
+| Operations | Required API-key scope |
+| :--- | :--- |
+| Create, edit, or cancel orders; add TP/SL; add/reduce margin; close positions; update leverage | `futures:trading` |
+| Read orders, positions, leverage, trade history, or transaction history | `fetch:details` or `futures:trading` |
+
+JWT requests are not subject to API-key scope checks. Every API-key write request must include `timestamp` in the signed and transmitted JSON body.
+
+For the order, trade, and transaction history endpoints, `timestamp` is also the pagination cursor. With API-key auth it must remain inside the authentication timestamp window, so use JWT auth when requesting older cursor values.
+
 ---
 
 ### <a id="create-order"> </a> Create Order
@@ -15,6 +26,7 @@ Places a new trading order.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/order`       |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -23,22 +35,39 @@ Places a new trading order.
 -   **`symbol`** (`string`, required): Trading symbol (e.g., "BTCUSDT") .
 -   **`amount`** (`number`, required): Order quantity in base asset .
 -   **`side`** (`string`, required): `"BUY"` or `"SELL"` .
--   **`type`** (`string`, required): `"MARKET"` or `"LIMIT"` .
--   **`marginAsset`** (`string`, required): Asset used for margin (e.g., "USDT") .
--   `price` (`number`, optional): Required if `type` is `"LIMIT"`. Must be positive .
--   `stopLossPrice` (`number`, optional): Trigger price for stop-loss .
--   `takeProfitPrice` (`number`, optional): Trigger price for take-profit .
+-   **`type`** (`string`, required): `"MARKET"`, `"LIMIT"`, `"STOP_MARKET"`, or `"STOP_LIMIT"`.
+-   `marginAsset` (`string`, optional): Asset used for margin. When omitted, it is inferred from an `INR` or `USDT` symbol.
+-   `price` (`number`, conditionally required): Required for `LIMIT` and `STOP_LIMIT`; ignored for market orders.
+-   `triggerPrice` (`number`, conditionally required): Required for `STOP_MARKET` and `STOP_LIMIT`.
+-   `stopLossPrice` (`number`, optional): Stop-loss trigger attached to the entry order.
+-   `takeProfitPrice` (`number`, optional): Take-profit trigger attached to the entry order.
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
+
+**Order-type rules:**
+
+- `STOP_MARKET` requires `triggerPrice` and does not use `price`.
+- `STOP_LIMIT` requires both `triggerPrice` and `price`.
+- For a BUY `STOP_LIMIT`, `price` must be greater than or equal to `triggerPrice`.
+- For a SELL `STOP_LIMIT`, `price` must be less than or equal to `triggerPrice`.
+- Create-order accepts `MARKET`, `LIMIT`, `STOP_MARKET`, and `STOP_LIMIT` globally. It does not currently reject against a pair's stored `orderTypes` / `enabledOrderTypes` list from [Exchange Info](../public-endpoints/exchange.md#get-exchange-info).
+
+**Bracket-on-entry rules:**
+
+- `stopLossPrice` and `takeProfitPrice` may be supplied individually or together when creating an entry order.
+- For a stop-triggered entry, `triggerPrice` controls when the entry activates; the bracket fields configure protection for the resulting position and do not replace `triggerPrice`.
+- The create-order response describes the entry order. After the entry fills, reconcile its protective orders through open orders and the private WebSocket stream.
+- This differs from [Add TP/SL to Position](#add-tpsl), which accepts exactly one TP or SL trigger per request for an existing position.
 
 #### Success Response
 
 | Status Code | Description      |
 | :---------- | :--------------- |
-| `200 OK`    | Request succeeded. | *(Note: Some APIs might return 201 Created)* |
+| `201 Created` | Order created successfully. |
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** ([CreateOrderResponseData](../data-models.md#createorderresponsedata) object) :
-- Details of the created order, typically including fields like `clientOrderId`, `timestamp`, `status`, etc.
+- Details of the created entry order, including `triggerPrice` for stop orders.
 
 ##### Example (`data` field content)
 
@@ -48,16 +77,17 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
   "datetime": "2025-04-05T13:10:00.123Z",
   "timestamp": 1712346600123,
   "symbol": "BTCUSDT",
-  "type": "MARKET",
+  "type": "stop_limit",
   "timeInForce": "GTC",
-  "side": "BUY",
-  "price": 0, // Market order price is determined at execution
-  "amount": 0.001,
-  "filled": 0.001, // Example if filled immediately
-  "remaining": 0,
+  "side": "buy",
+  "price": 66000,
+  "triggerPrice": 65500,
+  "amount": 0.005,
+  "filled": 0,
+  "remaining": 0.005,
   "reduceOnly": false,
   "postOnly": false,
-  "status": "filled" // Example status
+  "status": "new"
 }
 ```
 
@@ -76,6 +106,7 @@ Cancels an existing open order.
 | **HTTP Method** | `DELETE`                    |
 | **Endpoint Path**| `/api/v1/trade/order`       |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -83,6 +114,9 @@ Cancels an existing open order.
 
 -   **`clientOrderId`** (`string`, required): The client-generated ID of the order to cancel .
 -   `symbol` (`string`, optional): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds. Sign and send the complete DELETE body.
+
+A `403` with the scope-specific message indicates a missing `futures:trading` permission. A generic `Forbidden request` can instead indicate subaccount or order ownership/access failure.
 
 #### Success Response
 
@@ -126,8 +160,9 @@ Cancels all open (unfilled) orders for the authenticated user.
 | **HTTP Method** | `DELETE`                      |
 | **Endpoint Path**| `/api/v1/trade/order/all`     |
 | **Auth Required**| Yes                           |
+| **API Key Scope**| `futures:trading`             |
 | **Query Params** | None                          |
-| **Request Body** | N/A                           |
+| **Request Body** | JWT: none. API key: signed `{ "timestamp": ... }` body |
 
 #### Success Response
 
@@ -167,6 +202,7 @@ Fetches details of a specific order using its client order ID.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/order`       |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | `id` (string, required)     |
 | **Request Body** | N/A                         |
 
@@ -208,7 +244,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 ### <a id="edit-order"> </a> Edit Order
 
-Edits an existing open order. This can be used to change the price or amount of a pending order.
+Edits an existing open order. This can change the price or amount of a pending entry order, or the trigger price of a pending stop-loss or take-profit order.
 
 #### Request
 
@@ -217,6 +253,7 @@ Edits an existing open order. This can be used to change the price or amount of 
 | **HTTP Method** | `PATCH`                     |
 | **Endpoint Path**| `/api/v1/trade/order`       |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -228,6 +265,8 @@ Edits an existing open order. This can be used to change the price or amount of 
 | `price` | number | No | The new price for the order. |
 | `amount` | number | No | The new quantity for the order. |
 | `triggerPrice`| number | No | The new trigger price for stop or take-profit orders. |
+
+At least one of `price`, `amount`, or `triggerPrice` is required, and every supplied value must be positive. To modify TP/SL, obtain the pending protective order's `clientOrderId` from open orders or a private WebSocket order event, then submit that ID with the new `triggerPrice`.
 
 #### Success Response
 
@@ -244,21 +283,15 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 ```json
 {
-  "id": undefined,
-  "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
-  "lastTradeTimestamp": null,
-  "timeInForce": "GTC",
-  "price": 7100000,
-  "average": null,
-  "amount": 0.001,
-  "trades": [],
-  "fee": null,
-  "info": {
-    "status": "Edit request submitted successfully",
-    "availableBalance": 700,
-    "lockedMargin": 200,
-    "lockedMarginInMarginAsset": 200
-  }
+    "clientOrderId": "7a5be049213ad0fb5e17-370-zeb",
+    "timeInForce": "GTC",
+    "triggerPrice": 7050000,
+    "info": {
+        "availableBalance": 150.00,
+        "status": "Edit request submitted successfully",
+        "lockedMargin": 0,
+        "lockedMarginInMarginAsset": 0
+    }
 }
 ```
 
@@ -268,7 +301,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 ### <a id="add-tpsl"> Add TP/SL to Position
 
-Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing position.
+Adds one Take Profit (TP) or one Stop Loss (SL) order to an existing position.
 
 #### Request
 
@@ -277,6 +310,7 @@ Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing position.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/order/addTPSL`  |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -285,15 +319,18 @@ Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing position.
 -   **`positionId`** (`string`, required): Identifier of the position .
 -   **`amount`** (`number`, required): Order amount .
 -   **`side`** (`string`, required): Order side (`"BUY"` or `"SELL"`) .
--   `symbol` (`string`, optional): Trading symbol .
--   `stopLossPrice` (`number`, optional): Trigger price for stop-loss. At least one of `stopLossPrice` or `takeProfitPrice` is required .
--   `takeProfitPrice` (`number`, optional): Trigger price for take-profit. At least one of `stopLossPrice` or `takeProfitPrice` is required .
+-   **`symbol`** (`string`, required): Trading symbol.
+-   `stopLossPrice` (`number`, conditionally required): Trigger price for stop-loss.
+-   `takeProfitPrice` (`number`, conditionally required): Trigger price for take-profit.
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
+
+Exactly one of `stopLossPrice` and `takeProfitPrice` must be supplied. To attach both protections, call this endpoint twice.
 
 #### Success Response
 
 | Status Code | Description      |
 | :---------- | :--------------- |
-| `200 OK`    | Request succeeded. |
+| `201 Created` | TP/SL order created successfully. |
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
@@ -308,7 +345,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
   "datetime": "2025-04-05T13:15:00.987Z",
   "timestamp": 1712346900987,
   "symbol": "BTCUSDT",
-  "type": "TAKE_PROFIT_MARKET", // Example type
+  "type": "stop_market",
   "timeInForce": "GTC",
   "side": "SELL", // Assuming added to a long position
   "price": 67000.00, // The trigger price
@@ -336,6 +373,7 @@ Adds margin to an existing isolated margin position.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/addMargin`    |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -343,7 +381,8 @@ Adds margin to an existing isolated margin position.
 
 -   **`positionId`** (`string`, required): Identifier of the position .
 -   **`amount`** (`number`, required): Amount of margin to add .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -389,6 +428,7 @@ Reduces margin from an existing isolated margin position.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/reduceMargin` |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -396,7 +436,8 @@ Reduces margin from an existing isolated margin position.
 
 -   **`positionId`** (`string`, required): Identifier of the position .
 -   **`amount`** (`number`, required): Amount of margin to reduce .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -442,13 +483,15 @@ Closes an existing open position using a market order.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/position/close`  |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
 **Request Body Parameters:**
 
 -   **`positionId`** (`string`, required): Identifier of the position to close .
--   `symbol` (`string`, optional): Trading symbol .
+-   **`symbol`** (`string`, required): Trading symbol .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 | Status Code | Description      |
@@ -496,13 +539,14 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/order/open-orders` |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | See below                   |
 | **Request Body** | N/A                         |
 
 **Query Parameters:**
 
 -   **`symbol`** (`string`, required): Trading symbol .
--   `limit` (`number`, optional): Maximum number of orders to return .
+-   `limit` (`number`, optional): Maximum number of orders to return. Defaults to **100**.
 -   `since` (`number`, optional): Fetch orders created after this Unix timestamp (ms) .
 
 #### Success Response
@@ -513,14 +557,14 @@ Retrieves a list of the user's currently open orders, optionally filtered by sym
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
-**`data`** ([OrdersListResponse](../data-models.md#orderslistresponse) object) :
-- A list of open [Order](../data-models.md#order) objects, potentially with pagination info.
+**`data`** ([OpenOrdersListResponse](../data-models.md#openorderslistresponse) object) :
+- Nested `data` array of open [Order](../data-models.md#order) objects, plus `totalCount` and `nextTimestamp`. This envelope is not the history `items` shape.
 
 ##### Example (`data` field content)
 
 ```json
 {
-  "items": [
+  "data": [
     {
       "clientOrderId": "myOpenLimitOrder789",
       "datetime": "2025-04-05T13:18:00.000Z",
@@ -537,10 +581,9 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
       "reduceOnly": false,
       "postOnly": false
     }
-    // ... potentially more open orders
   ],
-  "totalCount": 1, // Example count
-  "nextTimestamp": null // Example if no more pages
+  "totalCount": 1,
+  "nextTimestamp": null
 }
 ```
 
@@ -548,7 +591,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 ---
 
-### <a id="get-open-orders">  Get Positions
+### <a id="get-positions"> Get Positions
 
 Retrieves a list of the user's current positions, optionally filtered by symbols or status.
 
@@ -559,13 +602,14 @@ Retrieves a list of the user's current positions, optionally filtered by symbols
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/positions`    |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | See below                   |
 | **Request Body** | N/A                         |
 
 **Query Parameters:**
 
--   `symbols` (`Array<string>`, optional): List of trading symbols to filter by .
--   `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`) .
+-   `symbols` (`Array<string>`, optional): List of trading symbols to filter by. When provided it must be an array (repeat the query key: `symbols=BTCUSDT&symbols=ETHUSDT`). A single string is rejected.
+-   `status` (`string`, optional): Filter by status (`"OPEN"`, `"CLOSED"`, `"LIQUIDATED"`). Defaults to **`OPEN`** when omitted.
 
 #### Success Response
 
@@ -616,6 +660,7 @@ Retrieves the user's leverage setting for a specific trading symbol.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/userLeverage` |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | `symbol` (string, required)  |
 | **Request Body** | N/A                         |
 
@@ -661,6 +706,7 @@ Retrieves the user's leverage settings for all symbols.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/userLeverages` |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | None                        |
 | **Request Body** | N/A                         |
 
@@ -700,7 +746,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 ---
 
-### <a id="update-user-leverages"> Update User Leverage
+### <a id="update-user-leverage"> Update User Leverage
 
 Updates the user's leverage setting for a specific symbol.
 
@@ -711,6 +757,7 @@ Updates the user's leverage setting for a specific symbol.
 | **HTTP Method** | `POST`                      |
 | **Endpoint Path**| `/api/v1/trade/update/userLeverage` |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `futures:trading`           |
 | **Query Params** | None                        |
 | **Request Body** | (object, required) See below |
 
@@ -718,6 +765,7 @@ Updates the user's leverage setting for a specific symbol.
 
 -   **`symbol`** (`string`, required): Trading symbol .
 -   **`leverage`** (`number`, required): The new desired leverage value .
+-   `timestamp` (`number`, API-key requests only): Current Unix time in milliseconds, included in the signed body.
 
 #### Success Response
 
@@ -761,13 +809,18 @@ Retrieves the user's historical orders with pagination.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/order/history`  |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | See below                   |
 | **Request Body** | N/A                         |
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of orders per page .
--   `timestamp` (`number`, optional): Fetch orders created before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of orders per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch orders created before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on order time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on order time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
 
 #### Success Response
 
@@ -824,13 +877,18 @@ Retrieves the user's historical trades with pagination.
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/history`      |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | See below                   |
 | **Request Body** | N/A                         |
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of trades per page .
--   `timestamp` (`number`, optional): Fetch trades executed before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of trades per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch trades executed before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on trade time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on trade time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
 
 #### Success Response
 
@@ -885,13 +943,19 @@ Retrieves the user's historical wallet transactions (fees, funding, etc.) with p
 | **HTTP Method** | `GET`                       |
 | **Endpoint Path**| `/api/v1/trade/transaction/history`  |
 | **Auth Required**| Yes                         |
+| **API Key Scope**| `fetch:details` or `futures:trading` |
 | **Query Params** | See below                   |
 | **Request Body** | N/A                         |
 
 **Query Parameters:**
 
--   `pageSize` (`number`, optional): Number of transactions per page .
--   `timestamp` (`number`, optional): Fetch transactions before this Unix timestamp (ms) .
+-   `pageSize` (`number`, optional): Number of transactions per page. Defaults to **10**.
+-   `timestamp` (`number`, optional): Pagination cursor: fetch transactions before this Unix timestamp (ms).
+-   `startTimestamp` (`number`, optional): Inclusive lower bound on transaction time (ms).
+-   `endTimestamp` (`number`, optional): Inclusive upper bound on transaction time (ms).
+-   `sortOrder` (`string`, optional): `"asc"` or `"desc"`. Defaults to **`desc`**.
+-   `symbol` (`string`, optional): Filter to a single trading symbol.
+-   `tradeId` (`number`, optional): Filter transactions belonging to a specific trade.
 
 #### Success Response
 
@@ -940,4 +1004,3 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 > See [Error Response Structure](../error-handling.md) for error formats.
 
 ---
-```

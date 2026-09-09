@@ -2,16 +2,17 @@
 
 Reduces margin from an existing isolated margin position. This can free up collateral but may increase the risk of liquidation.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Reduce Margin](../../api-reference/private-endpoints/trade.md#reduce-margin) and the [MarginResponse Data Model](../../api-reference/data-models.md#marginresponse).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Reduce Margin](../../../api-reference/private-endpoints/trade.md#reduce-margin) and the [MarginResponse Data Model](../../../api-reference/data-models.md#marginresponse).
 
 **Endpoint:** `POST /api/v1/trade/reduceMargin`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
@@ -67,7 +68,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/reduceMargin \
 }
 ```
 
-*Note: See [MarginResponse model](../../api-reference/data-models.md#marginresponse) for field details. Balances are illustrative.*
+*Note: See [MarginResponse model](../../../api-reference/data-models.md#marginresponse) for field details. Balances are illustrative.*
 
 -----
 

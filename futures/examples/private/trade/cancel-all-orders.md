@@ -2,16 +2,17 @@
 
 Cancels all open (unfilled) orders for the authenticated user.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Cancel All Orders](../../api-reference/private-endpoints/trade.md#cancel-all-orders).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Cancel All Orders](../../../api-reference/private-endpoints/trade.md#cancel-all-orders).
 
 **Endpoint:** `DELETE /api/v1/trade/order/all`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers.
 
 #### Using JWT Authentication
 
@@ -25,13 +26,18 @@ curl -X DELETE https://futuresbe.zebpay.com/api/v1/trade/order/all \
 #### Using API Key + Secret Authentication
 
 ```bash
-# Timestamp must be included in the body for signature generation
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
 curl -X DELETE https://futuresbe.zebpay.com/api/v1/trade/order/all \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>" \
-  -d '{"timestamp": <current_timestamp_ms>}'
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
 ```
 
 #### Success Response (Example)

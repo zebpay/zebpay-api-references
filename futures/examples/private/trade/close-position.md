@@ -2,16 +2,17 @@
 
 Closes an existing open position entirely using a market order.
 
-> **💡 Tip:** For full details on endpoint parameters see the [API Reference for Close Position](../../api-reference/private-endpoints/trade.md#close-position).
+> **💡 Tip:** For full details on endpoint parameters see the [API Reference for Close Position](../../../api-reference/private-endpoints/trade.md#close-position).
 
 **Endpoint:** `POST /api/v1/trade/position/close`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
 
 -----
 
 ### 1. cURL Example
 
-> **💡 Tip:** See the [Authentication Guide](../../api-reference/authentication.md) for details on generating headers . The request body (including `timestamp` for API key auth) is used for signature generation.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for details on generating headers . The request body (including `timestamp` for API key auth) is used for signature generation.
 
 #### Using JWT Authentication
 
@@ -68,7 +69,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/position/close \
 }
 ```
 
-*Note: The response details the market order created to close the position. Fields like `side` and `amount` reflect the closing order. See [ClosePositionResponseData model](../../api-reference/data-models.md#closepositionresponsedata).*
+*Note: The response details the market order created to close the position. Fields like `side` and `amount` reflect the closing order. See [ClosePositionResponseData model](../../../api-reference/data-models.md#closepositionresponsedata).*
 
 -----
 

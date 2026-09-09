@@ -20,15 +20,23 @@ Retrieves the user's leverage settings for all trading symbols where leverage ha
 curl -X GET https://futuresbe.zebpay.com/api/v1/trade/userLeverages \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
-````
+```
 
 #### Using API Key + Secret Authentication
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/trade/userLeverages \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/trade/userLeverages?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+The signature is generated from the exact query string sent after `?`.
 
 #### Success Response (Example)
 

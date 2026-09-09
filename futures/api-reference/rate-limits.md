@@ -1,26 +1,39 @@
 # Rate Limits
 
-To ensure fair usage, stability, and protect the system from abuse, the [Your Service Name] REST API enforces rate limits on incoming requests.
+To ensure fair usage and service stability, the ZebPay Futures REST API enforces rate limits on incoming `/api` requests.
 
 ## Rate Limit Rule
 
-A general rate limit applies across **all** public and private API endpoints:
+A single rate limit applies across public and private `/api` routes:
 
-* **Limit:** **180 requests per minute** (equivalent to **3 requests per second**)
+* **Tracker:** client IP address (applied before API-key or JWT authentication)
+* **Values:** `config.apiRateLimit.limit` requests per `config.apiRateLimit.ttl` milliseconds in the deployed service
 
-This limit generally applies per user account or API key for authenticated (private) endpoints, and potentially per IP address for public endpoints.
+Per-route `@Throttle` annotations (including a 1 request/second wallet decorator) are overwritten by that shared configuration. Do not assume a 180 requests/minute budget, a per-API-key budget, or a stricter wallet limit.
 
 ## Exceeding the Limit
 
-If your application exceeds the rate limit, the API will respond with:
+If your application exceeds the rate limit, the API responds with:
 
 * **HTTP Status Code:** `429 Too Many Requests`
-* **Response Body:** Typically contains an error message indicating the rate limit has been exceeded, following the standard [Error Response Structure](./error-handling.md#errorresponse).
-* **`Retry-After` Header (Optional):** The response *may* include a `Retry-After` header indicating how many seconds you should wait before attempting another request.
+* **Response Body:** the standard [Error Response Structure](./error-handling.md#errorresponse), with:
 
-Your application should be designed to handle `429` responses gracefully, typically by implementing an exponential backoff strategy (waiting for the duration specified in `Retry-After` or a default period before retrying). Continuously hitting the rate limit may lead to temporary IP or key blocking.
+```json
+{
+  "statusDescription": "Please note your API request has exceeded daily limits.",
+  "data": {},
+  "statusCode": 429,
+  "customMessage": [
+    "Please note your API request has exceeded daily limits."
+  ]
+}
+```
+
+The response does not include a `Retry-After` header.
+
+Handle `429` by backing off before retrying. Continuously hitting the limit may lead to temporary IP blocking.
 
 ## Recommendations
 
-* **Implement Backoff:** Handle `429` responses by waiting before retrying.
-* **Optimize Calls:** Avoid making unnecessary requests. Cache frequently accessed, non-critical data (especially from public endpoints) where appropriate.
+* **Implement Backoff:** Wait before retrying after a `429`.
+* **Optimize Calls:** Avoid unnecessary requests. Cache frequently accessed public data where appropriate.

@@ -16,6 +16,31 @@ class AuthUtils:
     """
 
     @staticmethod
+    def _normalize_for_js_json(value: Any) -> Any:
+        """Normalize values that Python and JSON.stringify encode differently."""
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        if isinstance(value, dict):
+            return {
+                key: AuthUtils._normalize_for_js_json(item)
+                for key, item in value.items()
+            }
+        if isinstance(value, (list, tuple)):
+            return [AuthUtils._normalize_for_js_json(item) for item in value]
+        return value
+
+    @staticmethod
+    def serialize_body(body: Dict[str, Any]) -> str:
+        """Serialize a request body like the server's JSON.stringify for API values."""
+        normalized = AuthUtils._normalize_for_js_json(body)
+        return json.dumps(
+            normalized,
+            separators=(',', ':'),
+            ensure_ascii=False,
+            allow_nan=False
+        )
+
+    @staticmethod
     def get_jwt_auth_headers(jwt: str) -> Dict[str, str]:
         """
         Creates authentication headers for JWT-based authentication.
@@ -62,11 +87,12 @@ class AuthUtils:
         # Clone query params to avoid modifying the original
         params = query_params.copy() if query_params else {}
 
-        # Add timestamp to query parameters
-        params['timestamp'] = int(time.time() * 1000)  # Current time in milliseconds
+        # Preserve the request builder's timestamp so the signed and
+        # transmitted query parameters are identical.
+        params.setdefault('timestamp', int(time.time() * 1000))
 
         # Create the query string
-        query_string = urlencode(params)
+        query_string = urlencode(params, doseq=True)
 
         # Generate signature
         signature = hmac.new(
@@ -106,11 +132,11 @@ class AuthUtils:
         # Clone body params to avoid modifying the original
         body = body_params.copy() if body_params else {}
 
-        # Add timestamp to body
-        body['timestamp'] = int(time.time() * 1000)  # Current time in milliseconds
+        # Preserve the request builder's timestamp.
+        body.setdefault('timestamp', int(time.time() * 1000))
 
         # Convert body to JSON string
-        body_string = json.dumps(body)
+        body_string = AuthUtils.serialize_body(body)
 
         # Generate signature
         signature = hmac.new(

@@ -1,17 +1,20 @@
 # Example: Add TP/SL to Position
 
-Adds Take Profit (TP) and/or Stop Loss (SL) orders to an existing open position.
+Adds one Take Profit (TP) or one Stop Loss (SL) order to an existing open position.
 
-> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Details](../../api-reference/private-endpoints/trade.md#add-tpsl).
+> **💡 Tip:** For full details on endpoint parameters and response fields, see the [API Reference for Details](../../../api-reference/private-endpoints/trade.md#add-tpsl).
 
 **Endpoint:** `POST /api/v1/trade/order/addTPSL`
 **Authentication:** Required (JWT or API Key/Secret)
+**API Key Scope:** `futures:trading`
+
+Exactly one of `takeProfitPrice` and `stopLossPrice` is allowed per request. Call the endpoint twice to add both protections.
 
 -----
 
 ### 1\. cURL Example
 
-> **💡 Tip:** See the [invalid URL removed] for details on generating headers . The request body (including `timestamp` for API key auth) is used for signature generation.
+> **💡 Tip:** See the [Authentication Guide](../../../api-reference/authentication.md) for signing details. The exact request body, including `timestamp`, is used for API-key signature generation.
 
 #### Using JWT Authentication (Adding Take Profit)
 
@@ -32,18 +35,18 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order/addTPSL \
 #### Using API Key + Secret Authentication (Adding Stop Loss)
 
 ```bash
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+BODY="$(printf '{"positionId":"pos-eth-short-456","amount":0.2,"side":"BUY","symbol":"ETHUSDT","stopLossPrice":3400,"timestamp":%s}' "$TIMESTAMP")"
+SIGNATURE="$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
 curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order/addTPSL \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>" \
-  -d '{
-        "positionId": "pos-eth-short-456",
-        "amount": 0.2,
-        "side": "BUY",
-        "symbol": "ETHUSDT",
-        "stopLossPrice": 3400,
-      }'
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE" \
+  --data-raw "$BODY"
 ```
 
 #### Success Response (Example - Take Profit Order Created)
@@ -56,7 +59,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order/addTPSL \
     "datetime": "2025-04-05T13:15:00.987Z",
     "timestamp": 1712346900987,
     "symbol": "BTCUSDT",
-    "type": "TAKE_PROFIT_MARKET",
+    "type": "stop_market",
     "timeInForce": "GTC",
     "side": "SELL",
     "price": 67000.00,
@@ -67,12 +70,12 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/trade/order/addTPSL \
     "postOnly": false,
     "status": "new"
   },
-  "statusCode": 200,
+  "statusCode": 201,
   "customMessage": ["OK"]
 }
 ```
 
-*Note: See [AddTPSLResponseData model](../../api-reference/data-models.md#addtpslresponsedata) (aliased to CreateOrderResponseData) for field details.*
+*Note: See [AddTPSLResponseData model](../../../api-reference/data-models.md#addtpslresponsedata) (aliased to CreateOrderResponseData) for field details.*
 
 -----
 
@@ -108,7 +111,7 @@ const tpParams = {
   amount: 0.05,
   side: "SELL", // Side to close the long position
   symbol: "BTCUSDT",
-  takeProfitPrice": 67000
+  takeProfitPrice: 67000
 };
 addTPSLOrderExample(tpParams);
 
@@ -116,7 +119,7 @@ addTPSLOrderExample(tpParams);
 /*
 const slParams = {
   positionId: "pos-eth-short-456",
-  amount": 0.2,
+  amount: 0.2,
   side: "BUY", // Side to close the short position
   symbol: "ETHUSDT",
   stopLossPrice: 3400
@@ -133,7 +136,7 @@ Adding Take Profit order for position ID: pos-btc-long-123...
 API Response: {
   "statusDescription": "Success",
   "data": { // ... (data as shown in cURL example) ... },
-  "statusCode": 200, "customMessage": ["OK"] }
+  "statusCode": 201, "customMessage": ["OK"] }
 // Extracted data...
 Add TP/SL Order Response Data: { // ... (data as shown in cURL example) ... }
 ```
@@ -194,7 +197,7 @@ Adding Take Profit order for position ID: pos-btc-long-123...
 API Response: {
   "statusDescription": "Success",
   "data": { // ... (data as shown in cURL example, Python format) ... },
-  "statusCode": 200, "customMessage": ["OK"] }
+  "statusCode": 201, "customMessage": ["OK"] }
 // Extracted data...
 Add TP/SL Order Response Data: { // ... (data as shown in cURL example, Python format) ... }
 ```

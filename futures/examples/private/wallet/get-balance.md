@@ -17,7 +17,7 @@ Retrieves the user's balances for all assets in their futures wallet.
 **Request:**
 
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/wallet/balance \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/wallet/balance" \
   -H "Accept: application/json" \
   -H "Authorization: Bearer <your_jwt_token>"
 ```
@@ -28,11 +28,19 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/wallet/balance \
 **Request:**
 
 ```bash
-curl -X GET https://futuresbe.zebpay.com/api/v1/wallet/balance \
+API_KEY="YOUR_API_KEY"
+SECRET_KEY="YOUR_SECRET_KEY"
+TIMESTAMP="$(node -e 'process.stdout.write(Date.now().toString())')"
+QUERY="timestamp=$TIMESTAMP"
+SIGNATURE="$(printf '%s' "$QUERY" | openssl dgst -sha256 -hmac "$SECRET_KEY" -hex | awk '{print $NF}')"
+
+curl -X GET "https://futuresbe.zebpay.com/api/v1/wallet/balance?$QUERY" \
   -H "Accept: application/json" \
-  -H "x-auth-apikey: YOUR_API_KEY" \
-  -H "x-auth-signature: <generated_hmac_sha256_signature>"
+  -H "x-auth-apikey: $API_KEY" \
+  -H "x-auth-signature: $SIGNATURE"
 ```
+
+The signature is generated from the exact query string sent after `?`.
 
 
 **Success Response (Example):**

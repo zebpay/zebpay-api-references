@@ -20,8 +20,9 @@ class FuturesApiClient {
    * @param {string} [options.jwt] - JWT authentication token
    * @param {string} [options.apiKey] - API key for authentication
    * @param {string} [options.secretKey] - Secret key for API key authentication
+   * @param {string} [options.subaccountId] - Optional subaccount ID
    * @param {number} [options.timeout] - Request timeout in milliseconds
-   * @throws {Error} If authentication credentials are missing or invalid
+   * @throws {Error} If authentication credentials are incomplete or ambiguous
    * @example
    * // Create client with JWT authentication
    * const client = new FuturesApiClient({ jwt: 'your-jwt-token' });
@@ -33,15 +34,20 @@ class FuturesApiClient {
    * });
    */
   constructor(options = {}) {
-    // Validate authentication options
-    if (!options.jwt && (!options.apiKey || !options.secretKey)) {
-      throw new Error('Authentication credentials are required. Provide either a JWT token or an API key and secret key.');
+    const hasJwt = Boolean(options.jwt);
+    const hasApiKeyCredentials = Boolean(options.apiKey || options.secretKey);
+    if (hasJwt && hasApiKeyCredentials) {
+      throw new Error('JWT and API key authentication are mutually exclusive.');
+    }
+    if (hasApiKeyCredentials && (!options.apiKey || !options.secretKey)) {
+      throw new Error('Both apiKey and secretKey are required.');
     }
 
     // Initialize client properties
     this.jwt = options.jwt;
     this.apiKey = options.apiKey;
     this.secretKey = options.secretKey;
+    this.subaccountId = options.subaccountId;
     this.timeout = options.timeout || 30_000;
 
     // Initialize axios instance with default configuration
@@ -100,12 +106,43 @@ class FuturesApiClient {
    */
   async _request(method, endpoint, params = {}, data = null) {
     try {
+      const requestMethod = method.toUpperCase();
+      const requestParams = { ...(params || {}) };
+      let requestData = data === null ? null : { ...data };
+      const isPrivate = AuthUtils.isPrivateEndpoint(endpoint);
+      if (isPrivate && !this.jwt && !(this.apiKey && this.secretKey)) {
+        throw new Error('Authentication credentials are required for private endpoints.');
+      }
+      const isApiKeyRequest = isPrivate && !this.jwt && this.apiKey && this.secretKey;
+
+      // API-key authentication requires the same timestamp to be present in
+      // both the signed payload and the payload sent over the wire.
+      if (isApiKeyRequest) {
+        if (requestMethod === 'GET') {
+          requestParams.timestamp = Date.now();
+        } else {
+          requestData = { ...(requestData || {}), timestamp: Date.now() };
+        }
+      }
+
       // Get authentication headers
-      const headers = this._getHeaders(method, endpoint, params, data);
+      const headers = this._getHeaders(requestMethod, endpoint, requestParams, requestData);
+      if (isPrivate && this.subaccountId) {
+        headers.subaccountid = this.subaccountId;
+      }
       const url =`${config.baseUrl}${endpoint}`;
-      const requestPayload = { method, url, headers }
-      if(method=='GET') requestPayload.params=params
-      else if(data) requestPayload.data=data;
+      const requestPayload = { method: requestMethod, url, headers };
+      if (Object.keys(requestParams).length > 0) {
+        requestPayload.params = requestParams;
+        if (isApiKeyRequest && requestMethod === 'GET') {
+          requestPayload.paramsSerializer = {
+            serialize: AuthUtils.serializeQueryParams
+          };
+        }
+      }
+      if (requestMethod !== 'GET' && requestData !== null) {
+        requestPayload.data = requestData;
+      }
       const response = await this.http.request(requestPayload);
       return response.data;
     } catch (error) {
@@ -147,7 +184,7 @@ class FuturesApiClient {
    */
   async fetchMarkets() {
     // The endpoint path is sourced from the config file
-    return await this._request('GET', config.endpoints.public.market.markets); [cite: futures/clients/rest-http/node/utils/config.js]
+    return await this._request('GET', config.endpoints.public.market.markets);  //[cite: futures/clients/rest-http/node/utils/config.js]
   }
 
   /**
@@ -208,18 +245,38 @@ class FuturesApiClient {
    *
    * @param {Object} klineParams - K-line parameters
    * @param {string} klineParams.symbol - Trading symbol (e.g., 'BTCINR')
-   * @param {string} klineParams.interval - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
-   * @param {number} [klineParams.startTime] - Start time in milliseconds
-   * @param {number} [klineParams.endTime] - End time in milliseconds
+   * @param {string} [klineParams.timeframe] - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
+   * @param {string} [klineParams.interval] - Alias for `timeframe`
+   * @param {number} [klineParams.since] - Start time in milliseconds
+   * @param {number} [klineParams.startTime] - Alias for `since`
    * @param {number} [klineParams.limit] - Maximum number of data points to return
+   * @param {string} [klineParams.priceType] - `LTP` (default) or `MARK_PRICE`
    * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
    */
   async getKlines(klineParams) {
-    if (!klineParams.symbol || !klineParams.interval) {
-      throw new Error('Symbol and interval are required');
+    if (!klineParams || !klineParams.symbol) {
+      throw new Error('Symbol is required');
     }
-    klineParams.symbol = this._normalizeString(klineParams.symbol);
-    return await this._request('POST', config.endpoints.public.market.klines, {}, klineParams);
+    const timeframe = klineParams.timeframe || klineParams.interval;
+    if (!timeframe) {
+      throw new Error('timeframe (or interval) is required');
+    }
+    const body = {
+      symbol: this._normalizeString(klineParams.symbol),
+      timeframe
+    };
+    const since = klineParams.since ?? klineParams.startTime;
+    if (since != null) {
+      body.since = since;
+    }
+    if (klineParams.limit != null) {
+      body.limit = klineParams.limit;
+    }
+    const query = {};
+    if (klineParams.priceType != null) {
+      query.priceType = klineParams.priceType;
+    }
+    return await this._request('POST', config.endpoints.public.market.klines, query, body);
   }
 
   /**
@@ -238,7 +295,7 @@ class FuturesApiClient {
   /**
    * Fetches the current system status
    *
-   * @returns {Promise<ApiResponse<{status: "ok" | "error"}>>} Current system status
+   * @returns {Promise<ApiResponse<{systemStatus: "ok" | "error"}>>} Current system status
    */
   async getSystemStatus() {
     return await this._request('GET', config.endpoints.public.system.status);
@@ -252,7 +309,7 @@ class FuturesApiClient {
    * Fetches trading fee for a specific symbol
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
-   * @returns {Promise<ApiResponse<{symbol: string, makerFee: number, takerFee: number}>>} Trading fee information
+   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: string, takerFee: string}>>>} One-element array of trading fee information (fees as strings)
    */
   async getTradeFee(symbol) {
     if (!symbol) {
@@ -265,7 +322,7 @@ class FuturesApiClient {
   /**
    * Fetches trading fees for all supported trading pairs
    *
-   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: number, takerFee: number}>>>} Trading fees for all pairs
+   * @returns {Promise<ApiResponse<Array<{symbol: string, makerFee: string, takerFee: string}>>>} Trading fees for all pairs (fees as strings)
    */
   async getTradeFees() {
     return await this._request('GET', config.endpoints.public.exchange.tradefees);
@@ -321,8 +378,9 @@ class FuturesApiClient {
    * @param {string} orderParams.symbol - Trading symbol (e.g., 'BTCUSDT'), will be converted to uppercase
    * @param {number} orderParams.amount - Order amount in base asset
    * @param {string} orderParams.side - Order side ('BUY' or 'SELL'), will be converted to uppercase
-   * @param {string} orderParams.type - Order type ('MARKET' or 'LIMIT'), will be converted to uppercase
-   * @param {number} [orderParams.price] - Order price (required for LIMIT orders), must be positive
+   * @param {string} orderParams.type - MARKET, LIMIT, STOP_MARKET, or STOP_LIMIT
+   * @param {number} [orderParams.price] - Required for LIMIT and STOP_LIMIT orders
+   * @param {number} [orderParams.triggerPrice] - Required for STOP_MARKET and STOP_LIMIT orders
    * @param {number} [orderParams.stopLossPrice] - Stop loss price
    * @param {number} [orderParams.takeProfitPrice] - Take profit price
    * @param {string} [orderParams.marginAsset] - Margin asset (e.g., 'USDT'), will be converted to uppercase
@@ -330,23 +388,50 @@ class FuturesApiClient {
    * @throws {Error} If required parameters are missing or invalid
    */
   async createOrder(orderParams) {
-    // Validate required parameters
-    if (!orderParams.symbol || !orderParams.amount || !orderParams.side || !orderParams.type || !orderParams.marginAsset) {
+    if (!orderParams || !orderParams.symbol || !orderParams.amount || !orderParams.side || !orderParams.type) {
       throw new Error('Required order parameters missing');
     }
 
-    // Normalize parameters to uppercase
-    orderParams.symbol = this._normalizeString(orderParams.symbol);
-    orderParams.side = this._normalizeString(orderParams.side);
-    orderParams.type = this._normalizeString(orderParams.type);
-    orderParams.marginAsset = this._normalizeString(orderParams.marginAsset);
-
-    // Validate price for LIMIT orders
-    if (orderParams.type === 'LIMIT' && !orderParams.price) {
-      throw new Error('Price is required for LIMIT orders');
+    const normalizedParams = {
+      ...orderParams,
+      symbol: this._normalizeString(orderParams.symbol),
+      side: this._normalizeString(orderParams.side),
+      type: this._normalizeString(orderParams.type)
+    };
+    if (orderParams.marginAsset) {
+      normalizedParams.marginAsset = this._normalizeString(orderParams.marginAsset);
     }
 
-    return await this._request('POST', config.endpoints.private.trade.order, {}, orderParams);
+    const supportedTypes = ['MARKET', 'LIMIT', 'STOP_MARKET', 'STOP_LIMIT'];
+    if (!supportedTypes.includes(normalizedParams.type)) {
+      throw new Error(`Order type must be one of: ${supportedTypes.join(', ')}`);
+    }
+    if (!['BUY', 'SELL'].includes(normalizedParams.side)) {
+      throw new Error('Order side must be BUY or SELL');
+    }
+    if (normalizedParams.amount <= 0) {
+      throw new Error('Amount must be positive');
+    }
+
+    if (['LIMIT', 'STOP_LIMIT'].includes(normalizedParams.type) &&
+        (!normalizedParams.price || normalizedParams.price <= 0)) {
+      throw new Error(`Price is required for ${normalizedParams.type} orders and must be positive`);
+    }
+    if (['STOP_MARKET', 'STOP_LIMIT'].includes(normalizedParams.type) &&
+        (!normalizedParams.triggerPrice || normalizedParams.triggerPrice <= 0)) {
+      throw new Error(`Trigger price is required for ${normalizedParams.type} orders and must be positive`);
+    }
+    if (normalizedParams.type === 'STOP_LIMIT') {
+      const invalidBuyPrice = normalizedParams.side === 'BUY' &&
+        normalizedParams.price < normalizedParams.triggerPrice;
+      const invalidSellPrice = normalizedParams.side === 'SELL' &&
+        normalizedParams.price > normalizedParams.triggerPrice;
+      if (invalidBuyPrice || invalidSellPrice) {
+        throw new Error('STOP_LIMIT price must be >= triggerPrice for BUY and <= triggerPrice for SELL');
+      }
+    }
+
+    return await this._request('POST', config.endpoints.private.trade.order, {}, normalizedParams);
   }
 
   /**
@@ -410,12 +495,12 @@ class FuturesApiClient {
   }
 
   /**
-   * Adds take-profit (TP) and/or stop-loss (SL) orders to an existing position
+   * Adds one take-profit (TP) or one stop-loss (SL) order to an existing position
    *
    * These orders help secure profits or limit losses automatically when certain price levels are reached.
    *
    * @param {Object} tpslParams - TP/SL parameters
-   * @param {string} [tpslParams.symbol] - Trading symbol (e.g., 'BTCUSDT') - Will be converted to uppercase (optional)
+   * @param {string} tpslParams.symbol - Trading symbol (e.g., 'BTCUSDT')
    * @param {string} tpslParams.positionId - Unique identifier of the position to attach the TP/SL order to
    * @param {number} tpslParams.amount - Order amount in base asset (e.g., 0.001 BTC)
    * @param {string} tpslParams.side - Order side ('BUY' or 'SELL') - Will be converted to uppercase
@@ -434,8 +519,8 @@ class FuturesApiClient {
    * });
    */
   async addTPSLOrder(tpslParams) {
-    if (!tpslParams.positionId || !tpslParams.amount || !tpslParams.side) {
-      throw new Error('positionId, amount & side are required parameters');
+    if (!tpslParams || !tpslParams.positionId || !tpslParams.amount || !tpslParams.side || !tpslParams.symbol) {
+      throw new Error('positionId, amount, side & symbol are required parameters');
     }
     // Normalize parameters if provided
     if (tpslParams.symbol) {
@@ -443,8 +528,14 @@ class FuturesApiClient {
     }
     tpslParams.side = this._normalizeString(tpslParams.side);
 
-    if (!tpslParams.stopLossPrice && !tpslParams.takeProfitPrice) {
-      throw new Error('Either stop loss price or take profit price must be provided');
+    const hasStopLoss = tpslParams.stopLossPrice !== undefined;
+    const hasTakeProfit = tpslParams.takeProfitPrice !== undefined;
+    if (hasStopLoss === hasTakeProfit) {
+      throw new Error('Exactly one of stopLossPrice or takeProfitPrice must be provided');
+    }
+    const triggerPrice = hasStopLoss ? tpslParams.stopLossPrice : tpslParams.takeProfitPrice;
+    if (tpslParams.amount <= 0 || triggerPrice <= 0) {
+      throw new Error('Amount and TP/SL trigger price must be positive');
     }
 
     return await this._request('POST', config.endpoints.private.trade.addTPSL, {}, tpslParams);
@@ -454,19 +545,16 @@ class FuturesApiClient {
    * Adds margin to a position
    *
    * @param {Object} marginParams - Add margin parameters
-   * @param {string} [marginParams.symbol] - Trading symbol (Optional)
+   * @param {string} marginParams.symbol - Trading symbol
    * @param {string} marginParams.positionId - Position ID
    * @param {number} marginParams.amount - Margin amount to add
    * @returns {Promise<ApiResponse<MarginResponse>>} Updated position details
    */
   async addMargin(marginParams) {
-    if (!marginParams.positionId || !marginParams.amount) {
-      throw new Error('positionId and amount are required parameters');
+    if (!marginParams.positionId || !marginParams.amount || !marginParams.symbol) {
+      throw new Error('positionId, amount, and symbol are required parameters');
     }
-    // Normalize symbol if provided
-    if (marginParams.symbol) {
-      marginParams.symbol = this._normalizeString(marginParams.symbol);
-    }
+    marginParams.symbol = this._normalizeString(marginParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.addMargin, {}, marginParams);
   }
 
@@ -474,19 +562,16 @@ class FuturesApiClient {
    * Reduces margin from a position
    *
    * @param {Object} marginParams - Reduce margin parameters
-   * @param {string} [marginParams.symbol] - Trading symbol (Optional)
+   * @param {string} marginParams.symbol - Trading symbol
    * @param {string} marginParams.positionId - Position ID
    * @param {number} marginParams.amount - Margin amount to reduce
    * @returns {Promise<ApiResponse<MarginResponse>>} Updated position details
    */
   async reduceMargin(marginParams) {
-    if (!marginParams.positionId || !marginParams.amount) {
-      throw new Error('positionId and amount are required parameters');
+    if (!marginParams.positionId || !marginParams.amount || !marginParams.symbol) {
+      throw new Error('positionId, amount, and symbol are required parameters');
     }
-    // Normalize symbol if provided
-    if (marginParams.symbol) {
-      marginParams.symbol = this._normalizeString(marginParams.symbol);
-    }
+    marginParams.symbol = this._normalizeString(marginParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.reduceMargin, {}, marginParams);
   }
 
@@ -494,7 +579,7 @@ class FuturesApiClient {
    * Closes a position at MARKET
    *
    * @param {Object} closeParams - Close position parameters
-   * @param {string} [closeParams.symbol] - Trading symbol (e.g., 'BTCUSDT') (optional)
+   * @param {string} closeParams.symbol - Trading symbol (e.g., 'BTCUSDT')
    * @param {string} closeParams.positionId - Position ID
    * @returns {Promise<ApiResponse<ClosePositionResponseData>>} Closed position details including execution details
    *
@@ -506,13 +591,10 @@ class FuturesApiClient {
    * });
    */
   async closePosition(closeParams) {
-    if (!closeParams.positionId) {
-      throw new Error('positionId is required');
+    if (!closeParams.positionId || !closeParams.symbol) {
+      throw new Error('positionId and symbol are required');
     }
-    // Normalize symbol if provided
-    if (closeParams.symbol) {
-      closeParams.symbol = this._normalizeString(closeParams.symbol);
-    }
+    closeParams.symbol = this._normalizeString(closeParams.symbol);
     return await this._request('POST', config.endpoints.private.trade.closePosition, {}, closeParams);
   }
 
@@ -521,9 +603,9 @@ class FuturesApiClient {
    *
    * @param {string} symbol - Trading symbol
    * @param {Object} [options] - Additional options
-   * @param {number} [options.limit] - Maximum number of orders to return
+   * @param {number} [options.limit] - Maximum number of orders to return (server default 100)
    * @param {number} [options.since] - Timestamp to fetch orders placed after this time
-   * @returns {Promise<ApiResponse<OrdersListResponse>>} Open orders
+   * @returns {Promise<ApiResponse<OpenOrdersListResponse>>} Open orders (`data.data` array)
    */
   async getOpenOrders(symbol, options = {}) {
     if (!symbol) {
@@ -540,8 +622,8 @@ class FuturesApiClient {
   /**
    * Fetches positions
    *
-   * @param {string[]} [symbols] - Array of trading symbols; if empty or not provided all positions will be returned
-   * @param {string} [status] - Filter positions by status (OPEN, CLOSED, LIQUIDATED)
+   * @param {string[]} [symbols] - Array of trading symbols; must be an array when provided
+   * @param {string} [status] - Filter by status (OPEN, CLOSED, LIQUIDATED). Server default is OPEN.
    * @returns {Promise<ApiResponse<Position[]>>} Positions
    */
   async getPositions(symbols = [], status=undefined) {
@@ -599,36 +681,61 @@ class FuturesApiClient {
    * Fetches order history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of orders to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch orders before this time
+   * @param {number} [options.pageSize] - Number of orders to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch orders before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on order time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on order time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
    * @returns {Promise<ApiResponse<OrdersListResponse>>} Paginated order history
    */
   async getOrderHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.orderHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.orderHistory, params);
   }
 
   /**
    * Fetches trade history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of trades to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch trades before this time
+   * @param {number} [options.pageSize] - Number of trades to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch trades before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on trade time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on trade time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
    * @returns {Promise<ApiResponse<TradesListResponse>>} Paginated trade history
    */
   async getTradeHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.tradeHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.tradeHistory, params);
   }
 
   /**
    * Fetches transaction history with pagination
    *
    * @param {Object} [options] - Filter and pagination options
-   * @param {number} [options.pageSize] - Number of transactions to return per page
-   * @param {number} [options.timestamp] - Unix timestamp in milliseconds to fetch transactions before this time
+   * @param {number} [options.pageSize] - Number of transactions to return per page (server default 10)
+   * @param {number} [options.timestamp] - Pagination cursor: Unix timestamp in milliseconds to fetch transactions before this time
+   * @param {number} [options.startTimestamp] - Inclusive lower bound on transaction time (ms)
+   * @param {number} [options.endTimestamp] - Inclusive upper bound on transaction time (ms)
+   * @param {string} [options.sortOrder] - `asc` or `desc` (server default `desc`)
+   * @param {string} [options.symbol] - Filter to a single trading symbol
+   * @param {number} [options.tradeId] - Filter transactions belonging to a specific trade
    * @returns {Promise<ApiResponse<TransactionsListResponse>>} Paginated transaction history
    */
   async getTransactionHistory(options = {}) {
-    return await this._request('GET', config.endpoints.private.trade.transactionHistory, options);
+    const params = { ...options };
+    if (params.symbol) {
+      params.symbol = this._normalizeString(params.symbol);
+    }
+    return await this._request('GET', config.endpoints.private.trade.transactionHistory, params);
   }
 }
 
