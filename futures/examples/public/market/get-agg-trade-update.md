@@ -2,10 +2,13 @@
 
 Retrieves recent aggregate trades (trades at the same price level) for a specific trading symbol.
 
-**Endpoint:** `GET /api/v1/market/aggTrade` [cite: futures/clients/rest-http/node/utils/config.js, futures/clients/rest-http/python/utils/config.py]
-**Authentication:** None Required [cite: futures/api-reference/public-endpoints/market.md]
+**Endpoint:** `GET /api/v1/market/aggTrade`
+**Authentication:** None Required
 **Parameters:**
-* `symbol` (string, query, required): The trading symbol (e.g., "BTCINR") [cite: futures/api-reference/public-endpoints/market.md].
+* `symbol` (string, query, required): Trading pair in concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
+* `limit` (integer, query, optional): Number of most recent trades to return. Range: 1–50. Default: 50.
+
+`fromId`, `startTime`, and `endTime` are not supported.
 
 ---
 
@@ -15,7 +18,7 @@ Retrieves recent aggregate trades (trades at the same price level) for a specifi
 
 ```bash
 # Replace BTCINR with the desired symbol
-curl -X GET https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR&limit=50" \
   -H "Accept: application/json"
 ```
 
@@ -23,7 +26,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR \
 
 ```json
 {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": [
     {
       "aggregateTradeId": 543210,
@@ -51,24 +54,24 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR \
   "customMessage": ["OK"]
 }
 ```
-*Note: Values will reflect live market data.* [cite: futures/api-reference/public-endpoints/market.md, futures/api-reference/data-models.md]
+*Note: Values will reflect live market data.*
 
 ---
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions [cite: ../../../clients/rest-http/node/README.md].
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions.
 
-Assumes you have initialized the `FuturesApiClient` as `client`. [cite: futures/clients/rest-http/node/run.example.js]
+Assumes you have initialized the `FuturesApiClient` as `client`.
 
 **Request:**
 
 ```javascript
-async function getAggTradeExample(symbol) {
+async function getAggTradeExample(symbol, limit = 50) {
   try {
-    console.log(`Workspaceing aggregate trades for ${symbol}...`);
+    console.log(`Fetching aggregate trades for ${symbol}...`);
     // Ensure symbol is passed to the method
-    const response = await client.getAggTrade(symbol); // [cite: futures/clients/rest-http/node/client.js]
+    const response = await client.getAggTrade(symbol, limit);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -87,7 +90,7 @@ async function getAggTradeExample(symbol) {
 }
 
 // Example usage:
-getAggTradeExample('BTCINR');
+getAggTradeExample('BTCINR', 50);
 ```
 
 **Output (Example):**
@@ -96,7 +99,7 @@ getAggTradeExample('BTCINR');
 // Console output showing the full API response first
 Fetching aggregate trades for BTCINR...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": [
     {
       "aggregateTradeId": 543210,
@@ -129,20 +132,20 @@ Aggregate Trades Data for BTCINR: [
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions [cite: ../../../clients/rest-http/python/README.md].
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions.
 
-Assumes you have initialized the `FuturesApiClient` as `client`. [cite: futures/clients/rest-http/python/run_example.py]
+Assumes you have initialized the `FuturesApiClient` as `client`.
 
 **Request:**
 
 ```python
 import json
 
-def get_agg_trade_example(symbol):
+def get_agg_trade_example(symbol, limit=50):
     try:
         print(f"Fetching aggregate trades for {symbol}...")
         # Ensure symbol is passed to the method
-        response = client.get_agg_trade(symbol=symbol) # [cite: futures/clients/rest-http/python/client/client.py]
+        response = client.get_agg_trade(symbol=symbol, limit=limit)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -159,7 +162,7 @@ def get_agg_trade_example(symbol):
         print(f"Error fetching aggregate trades for {symbol}: {e}")
 
 # Example usage:
-get_agg_trade_example('BTCINR')
+get_agg_trade_example('BTCINR', limit=50)
 ```
 
 **Output (Example):**
@@ -168,7 +171,7 @@ get_agg_trade_example('BTCINR')
 // Console output showing the full API response first
 Fetching aggregate trades for BTCINR...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": [
     {
       "aggregateTradeId": 543210,

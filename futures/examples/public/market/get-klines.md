@@ -7,6 +7,16 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 **Endpoint:** `POST /api/v1/market/klines`
 **Authentication:** Not Required
 
+**Request fields:**
+* `symbol` (string, body, required): Concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
+* `timeframe` (string, body, optional): Defaults to `1m`. See the API reference for supported values.
+* `since` (integer, body, optional): Inclusive start time in Unix epoch milliseconds.
+* `until` (integer, body, optional): Inclusive end time; accepted only with `since`.
+* `limit` (integer, body, optional): Range: 1–1500. Default: 500.
+* `priceType` (string, query, optional): `LTP` (default) or `MARK_PRICE`.
+
+Unknown HTTP body fields return `400 Bad Request`. The sample clients accept `interval` and `startTime` as local aliases, but send `timeframe` and `since` to the API.
+
 -----
 
 ### 1. cURL Example
@@ -26,17 +36,20 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
 
 ```json
 {
-    "data": [
-        [
-            1612345678000, //startTs
-            "5500000",  //open
-            "5600000",  //high
-            "5400000",  //low
-            "5550000",  //close
-            "10.5",     //volume
-            1612345738000 //endTs
-        ]
+  "statusDescription": "OK",
+  "data": [
+    [
+      1612345678000,
+      "5500000",
+      "5600000",
+      "5400000",
+      "5550000",
+      "10.5",
+      1612345738000
     ]
+  ],
+  "statusCode": 200,
+  "customMessage": ["OK"]
 }
 ```
 
@@ -77,14 +90,19 @@ getKlinesExample(klineParams);
 
 **Output (Example):**
 
-```js
-// Full API response first...
+```text
 Fetching k-lines for symbol: BTCINR...
 API Response: {
-  "data": [ // ... (data as shown in cURL example) ... ]
+  "statusDescription": "OK",
+  "data": [
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
+  ],
+  "statusCode": 200,
+  "customMessage": ["OK"]
 }
-// Extracted data...
-K-Lines Data: [ // ... (data as shown in cURL example) ... ]
+K-Lines Data: [
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
+]
 ```
 
 -----
@@ -122,12 +140,17 @@ get_klines_example(kline_params)
 
 **Output (Example):**
 
-```js
-// Full API response first...
+```text
 Fetching k-lines for symbol: BTCINR...
 API Response: {
-  "data": [ // ... (data as shown in cURL example, Python format) ... ]
+  "statusDescription": "OK",
+  "data": [
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
+  ],
+  "statusCode": 200,
+  "customMessage": ["OK"]
 }
-// Extracted data...
-K-Lines Data: [ // ... (data as shown in cURL example, Python format) ... ]
+K-Lines Data: [
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
+]
 ```

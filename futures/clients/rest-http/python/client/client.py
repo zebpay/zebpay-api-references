@@ -16,6 +16,7 @@ from utils.types import (
     OrderBook,
     Ticker,
     AggregateTrade,
+    MarketInfo,
     WalletBalance,
     Order,
     CreateOrderResponseData,
@@ -257,12 +258,17 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['public', 'market', 'markets']) # [cite: futures/clients/rest-http/python/utils/config.py]
         return self._request('GET', endpoint)
 
-    def get_order_book(self, symbol: str) -> ApiResponse[OrderBook]:
+    def get_order_book(
+        self,
+        symbol: str,
+        limit: Optional[int] = None,
+    ) -> ApiResponse[OrderBook]:
         """
         Retrieve the order book for a specified trading pair.
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCUSDT').
+            limit (Optional[int]): Depth levels per side (1-20; server default 20).
 
         Returns:
             ApiResponse[OrderBook]: Order book data including lists of bids and asks.
@@ -271,13 +277,16 @@ class FuturesApiClient:
             ValueError: If the symbol is not provided.
 
         Example:
-            order_book = client.get_order_book("BTCUSDT")
+            order_book = client.get_order_book("BTCUSDT", limit=20)
         """
         if not symbol:
             raise ValueError('Symbol is required')
         symbol = self._normalize_string(symbol)
         endpoint = config.get_endpoint(['public', 'market', 'order_book'])
-        return self._request('GET', endpoint, params={'symbol': symbol})
+        params: Dict[str, Any] = {'symbol': symbol}
+        if limit is not None:
+            params['limit'] = limit
+        return self._request('GET', endpoint, params=params)
 
     def get_ticker_24hr(self, symbol: str) -> ApiResponse[Ticker]:
         """
@@ -301,12 +310,12 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['public', 'market', 'ticker_24hr'])
         return self._request('GET', endpoint, params={'symbol': symbol})
 
-    def get_market_info(self) -> ApiResponse[Any]:
+    def get_market_info(self) -> ApiResponse[Dict[str, MarketInfo]]:
         """
         Retrieve general market information.
 
         Returns:
-            ApiResponse[Any]: Data regarding market statistics and available configurations.
+            ApiResponse[Dict[str, MarketInfo]]: Market statistics keyed by symbol.
 
         Example:
             market_info = client.get_market_info()
@@ -314,12 +323,17 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['public', 'market', 'market_info'])
         return self._request('GET', endpoint)
 
-    def get_agg_trade(self, symbol: str) -> ApiResponse[List[AggregateTrade]]:
+    def get_agg_trade(
+        self,
+        symbol: str,
+        limit: Optional[int] = None,
+    ) -> ApiResponse[List[AggregateTrade]]:
         """
         Retrieve a list of recent aggregate trades for a given symbol.
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCINR').
+            limit (Optional[int]): Most recent trades to return (1-50; server default 50).
 
         Returns:
             ApiResponse[List[AggregateTrade]]: List of aggregated trade data.
@@ -328,13 +342,16 @@ class FuturesApiClient:
             ValueError: If the symbol is not provided.
 
         Example:
-            agg_trades = client.get_agg_trade("BTCINR")
+            agg_trades = client.get_agg_trade("BTCINR", limit=50)
         """
         if not symbol:
             raise ValueError('Symbol is required')
         symbol = self._normalize_string(symbol)
         endpoint = config.get_endpoint(['public', 'market', 'agg_trade'])
-        return self._request('GET', endpoint, params={'symbol': symbol})
+        params: Dict[str, Any] = {'symbol': symbol}
+        if limit is not None:
+            params['limit'] = limit
+        return self._request('GET', endpoint, params=params)
 
     def get_klines(self, kline_params: Dict[str, Any]) -> ApiResponse[List[List[Any]]]:
         """
@@ -344,10 +361,11 @@ class FuturesApiClient:
             kline_params (Dict[str, Any]): Dictionary containing k-line parameters.
                 Must include:
                   - symbol: Trading symbol (e.g., 'BTCINR').
-                  - timeframe: Candlestick interval (e.g., '1m', '5m', '1h').
-                    `interval` is accepted as an alias for `timeframe`.
                 Optionally include:
+                  - timeframe: Candlestick interval (server default `1m`).
+                    `interval` is accepted as an alias for `timeframe`.
                   - since: Start time in milliseconds (`startTime` is accepted as an alias).
+                  - until: Inclusive end time in milliseconds; requires `since`.
                   - limit: Maximum number of data points to return.
                   - priceType: `LTP` (default) or `MARK_PRICE`, sent as a query parameter.
 
@@ -367,16 +385,17 @@ class FuturesApiClient:
         if not kline_params or not kline_params.get('symbol'):
             raise ValueError('Symbol is required')
         timeframe = kline_params.get('timeframe') or kline_params.get('interval')
-        if not timeframe:
-            raise ValueError('timeframe (or interval) is required')
 
         body: Dict[str, Any] = {
             'symbol': self._normalize_string(kline_params['symbol']),
-            'timeframe': timeframe,
         }
+        if timeframe is not None:
+            body['timeframe'] = timeframe
         since = kline_params.get('since', kline_params.get('startTime'))
         if since is not None:
             body['since'] = since
+        if kline_params.get('until') is not None:
+            body['until'] = kline_params['until']
         if kline_params.get('limit') is not None:
             body['limit'] = kline_params['limit']
 

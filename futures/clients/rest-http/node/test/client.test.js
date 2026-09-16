@@ -165,6 +165,22 @@ test('addTPSLOrder requires a symbol and exactly one trigger', async () => {
   );
 });
 
+test('market depth methods forward optional limits', async () => {
+  const { client, getCaptured } = createCapturedClient();
+
+  await client.getOrderBook('btcusdt', 20);
+  assert.deepEqual(getCaptured().params, {
+    symbol: 'BTCUSDT',
+    limit: 20
+  });
+
+  await client.getAggTrade('btcinr', 50);
+  assert.deepEqual(getCaptured().params, {
+    symbol: 'BTCINR',
+    limit: 50
+  });
+});
+
 test('getKlines maps aliases and omits unsupported body fields', async () => {
   const { client, getCaptured } = createCapturedClient();
 
@@ -173,6 +189,7 @@ test('getKlines maps aliases and omits unsupported body fields', async () => {
     interval: '1h',
     startTime: 1712345678000,
     endTime: 1712349278000,
+    until: 1712348278000,
     limit: 50,
     priceType: 'MARK_PRICE'
   });
@@ -185,13 +202,14 @@ test('getKlines maps aliases and omits unsupported body fields', async () => {
     symbol: 'BTCUSDT',
     timeframe: '1h',
     since: 1712345678000,
+    until: 1712348278000,
     limit: 50
   });
 
-  await assert.rejects(
-    client.getKlines({ symbol: 'BTCUSDT' }),
-    /timeframe/
-  );
+  await client.getKlines({ symbol: 'BTCUSDT' });
+  assert.deepEqual(getCaptured().data, {
+    symbol: 'BTCUSDT'
+  });
 });
 
 test('history methods forward extra filters as query params', async () => {

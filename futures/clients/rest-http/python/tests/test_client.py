@@ -178,12 +178,26 @@ class FuturesApiClientTest(unittest.TestCase):
                 'stopLossPrice': 62000
             })
 
+    def test_market_depth_methods_forward_optional_limits(self):
+        self.client.get_order_book('btcusdt', limit=20)
+        self.assertEqual(self.request_kwargs()['params'], {
+            'symbol': 'BTCUSDT',
+            'limit': 20
+        })
+
+        self.client.get_agg_trade('btcinr', limit=50)
+        self.assertEqual(self.request_kwargs()['params'], {
+            'symbol': 'BTCINR',
+            'limit': 50
+        })
+
     def test_get_klines_maps_aliases_and_omits_unsupported_body_fields(self):
         self.client.get_klines({
             'symbol': 'btcusdt',
             'interval': '1h',
             'startTime': 1712345678000,
             'endTime': 1712349278000,
+            'until': 1712348278000,
             'limit': 50,
             'priceType': 'MARK_PRICE'
         })
@@ -195,10 +209,14 @@ class FuturesApiClientTest(unittest.TestCase):
             'symbol': 'BTCUSDT',
             'timeframe': '1h',
             'since': 1712345678000,
+            'until': 1712348278000,
             'limit': 50
         })
-        with self.assertRaisesRegex(ValueError, 'timeframe'):
-            self.client.get_klines({'symbol': 'BTCUSDT'})
+
+        self.client.get_klines({'symbol': 'BTCUSDT'})
+        self.assertEqual(self.request_kwargs()['json'], {
+            'symbol': 'BTCUSDT'
+        })
 
     def test_history_methods_forward_extra_filters(self):
         self.client.get_order_history(

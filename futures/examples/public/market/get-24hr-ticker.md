@@ -5,7 +5,7 @@ Retrieves price change statistics for a specific trading symbol over the last 24
 **Endpoint:** `GET /api/v1/market/ticker24Hr`
 **Authentication:** None Required
 **Parameters:**
-* `symbol` (string, query, required): The trading symbol (e.g., "BTCUSDT") .
+* `symbol` (string, query, required): Trading pair in concatenated (`BTCUSDT`) or slash (`BTC/USDT`) notation.
 
 ---
 
@@ -23,7 +23,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
 
 ```json
 {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "info": {
@@ -46,7 +46,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
       "numberOfTrades": 2501
     },
     "timestamp": 1712345678905,
-    "datetime": "2025-04-05T11:59:38.905Z",
+    "datetime": "2024-04-05T19:34:38.905Z",
     "high": 65500.00,
     "low": 64800.00,
     "vwap": 65100.00,
@@ -73,7 +73,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -84,7 +84,7 @@ async function getTicker24hrExample(symbol) {
   try {
     console.log(`Fetching 24hr ticker for ${symbol}...`);
     // Ensure symbol is passed to the method
-    const response = await client.getTicker24Hr(symbol); //
+    const response = await client.getTicker24Hr(symbol);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -111,7 +111,7 @@ getTicker24hrExample('BTCUSDT');
 // Console output showing the full API response first
 Fetching 24hr ticker for BTCUSDT...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "info": {
@@ -144,7 +144,7 @@ Ticker Data for BTCUSDT: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -157,7 +157,7 @@ def get_ticker_24hr_example(symbol):
     try:
         print(f"Fetching 24hr ticker for {symbol}...")
         # Ensure symbol is passed to the method
-        response = client.get_ticker_24hr(symbol=symbol) #
+        response = client.get_ticker_24hr(symbol=symbol)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -183,7 +183,7 @@ get_ticker_24hr_example('BTCUSDT')
 // Console output showing the full API response first
 Fetching 24hr ticker for BTCUSDT...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "info": {

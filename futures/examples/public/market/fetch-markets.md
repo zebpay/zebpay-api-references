@@ -5,6 +5,8 @@ Retrieves details about all available trading symbols (markets), including their
 **Endpoint:** `GET /api/v1/market/markets`
 **Authentication:** None Required
 **Parameters:** None
+
+The response may include `Cache-Control`, `ETag`, or `304 Not Modified` for efficient short-lived caching.
 ---
 
 ### 1. cURL Example
@@ -24,7 +26,14 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
   "data": {
     "timezone": "UTC",
     "serverTime": 1744364554387,
-    "rateLimits": [],
+    "rateLimits": [
+      {
+        "rateLimitType": "REQUESTS",
+        "interval": "SECOND",
+        "intervalNum": 10,
+        "limit": 3
+      }
+    ],
     "exchangeFilters": [],
     "symbols": [
       {
@@ -35,10 +44,13 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
         "baseAsset": "1000PEPE",
         "quoteAsset": "INR",
         "pricePrecision": 5,
+        "tickSz": "0.00001",
         "quantityPrecision": 0,
+        "lotSz": "1",
         "baseAssetPrecision": 0,
         "quotePrecision": 0,
-        "orderTypes": [ "LIMIT", "MARKET" ],
+        "filters": [],
+        "orderTypes": [ "LIMIT", "MARKET", "STOP_MARKET", "STOP_LIMIT" ],
         "timeInForce": [ "GTC" ],
         "makerFee": 0.05,
         "takerFee": 0.1,
@@ -53,10 +65,13 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
         "baseAsset": "XRP",
         "quoteAsset": "INR",
         "pricePrecision": 2,
+        "tickSz": "0.01",
         "quantityPrecision": 1,
+        "lotSz": "0.1",
         "baseAssetPrecision": 0,
         "quotePrecision": 0,
-        "orderTypes": [ "LIMIT", "MARKET" ],
+        "filters": [],
+        "orderTypes": [ "LIMIT", "MARKET", "STOP_MARKET", "STOP_LIMIT" ],
         "timeInForce": [ "GTC" ],
         "makerFee": 0.05,
         "takerFee": 0.1,
@@ -71,11 +86,13 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
 }
 ```
 
+*Note: `rateLimits` values come from the deployed API configuration and can differ from this example.*
+
 ---
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -85,7 +102,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 async function fetchMarketsExample() {
   try {
     console.log("Fetching all markets...");
-    const response = await client.fetchMarkets(); // [cite: futures/clients/rest-http/node/client.js]
+    const response = await client.fetchMarkets();
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -122,7 +139,14 @@ API Response: {
   "data": {
     "timezone": "UTC",
     "serverTime": 1744364554387,
-    "rateLimits": [],
+    "rateLimits": [
+      {
+        "rateLimitType": "REQUESTS",
+        "interval": "SECOND",
+        "intervalNum": 10,
+        "limit": 3
+      }
+    ],
     "exchangeFilters": [],
     "symbols": [
       {
@@ -140,7 +164,14 @@ API Response: {
 Markets Response Data: {
   "timezone": "UTC",
   "serverTime": 1744364554387,
-  "rateLimits": [],
+  "rateLimits": [
+    {
+      "rateLimitType": "REQUESTS",
+      "interval": "SECOND",
+      "intervalNum": 10,
+      "limit": 3
+    }
+  ],
   "exchangeFilters": [],
   "symbols": [ /* ... list of symbol objects ... */ ]
 }
@@ -150,7 +181,7 @@ Markets Response Data: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -162,7 +193,7 @@ import json
 def fetch_markets_example():
     try:
         print("Fetching all markets...")
-        response = client.fetch_markets() # [cite: futures/clients/rest-http/python/client/client.py]
+        response = client.fetch_markets()
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -194,7 +225,14 @@ API Response: {
   "data": {
     "timezone": "UTC",
     "serverTime": 1744364554387,
-    "rateLimits": [],
+    "rateLimits": [
+      {
+        "rateLimitType": "REQUESTS",
+        "interval": "SECOND",
+        "intervalNum": 10,
+        "limit": 3
+      }
+    ],
     "exchangeFilters": [],
     "symbols": [
       {
@@ -209,5 +247,5 @@ API Response: {
   "customMessage": [ "OK" ]
 }
 // Followed by the extracted data
-Markets Response Data: {'timezone': 'UTC', 'serverTime': 1744364554387, 'rateLimits': [], 'exchangeFilters': [], 'symbols': [ { ... }, { ... } ]}
+Markets Response Data: {'timezone': 'UTC', 'serverTime': 1744364554387, 'rateLimits': [{...}], 'exchangeFilters': [], 'symbols': [ { ... }, { ... } ]}
 ```
