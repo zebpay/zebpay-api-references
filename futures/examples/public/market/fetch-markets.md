@@ -30,8 +30,8 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
       {
         "rateLimitType": "REQUESTS",
         "interval": "SECOND",
-        "intervalNum": 10,
-        "limit": 3
+        "intervalNum": 60,
+        "limit": 180
       }
     ],
     "exchangeFilters": [],
@@ -86,7 +86,7 @@ curl -X GET "https://futuresbe.zebpay.com/api/v1/market/markets" \
 }
 ```
 
-*Note: `rateLimits` values come from the deployed API configuration and can differ from this example.*
+*Note: Production advertises 180 requests per 60 seconds (`intervalNum` 60, `limit` 180). Other environments can use a tighter budget; this field reports the active values.*
 
 ---
 
@@ -143,8 +143,8 @@ API Response: {
       {
         "rateLimitType": "REQUESTS",
         "interval": "SECOND",
-        "intervalNum": 10,
-        "limit": 3
+        "intervalNum": 60,
+        "limit": 180
       }
     ],
     "exchangeFilters": [],
@@ -168,8 +168,8 @@ Markets Response Data: {
     {
       "rateLimitType": "REQUESTS",
       "interval": "SECOND",
-      "intervalNum": 10,
-      "limit": 3
+      "intervalNum": 60,
+      "limit": 180
     }
   ],
   "exchangeFilters": [],
@@ -229,8 +229,8 @@ API Response: {
       {
         "rateLimitType": "REQUESTS",
         "interval": "SECOND",
-        "intervalNum": 10,
-        "limit": 3
+        "intervalNum": 60,
+        "limit": 180
       }
     ],
     "exchangeFilters": [],

@@ -737,7 +737,7 @@ Represents the structure of the `data` field returned by `GET /api/v1/market/mar
 |-------------------|------------------------|--------------------------------------------------------------|
 | `timezone`        | `string`               | Exchange timezone (e.g., "UTC").                             |
 | `serverTime`      | `number`               | Current server time in Unix timestamp (ms).                  |
-| `rateLimits`      | `Array<object>`        | List of rate limit rules applied by the exchange.            |
+| `rateLimits`      | `Array<object>`        | List of rate limit rules. Production advertises 180 requests per 60 seconds. |
 | `exchangeFilters` | `Array<object>`        | List of global exchange filters.                             |
 | `symbols`         | `Array<MarketSymbol>` | List of available trading symbols and their details. See [`MarketSymbol`](#marketsymbol)      |
 
@@ -747,7 +747,14 @@ Represents the structure of the `data` field returned by `GET /api/v1/market/mar
 {
   "timezone": "UTC",
   "serverTime": 1744364554387,
-  "rateLimits": [],
+  "rateLimits": [
+    {
+      "rateLimitType": "REQUESTS",
+      "interval": "SECOND",
+      "intervalNum": 60,
+      "limit": 180
+    }
+  ],
   "exchangeFilters": [],
   "symbols": [
     { /* MarketSymbol object for 1000PEPEINR */ },

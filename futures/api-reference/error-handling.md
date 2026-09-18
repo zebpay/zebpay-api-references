@@ -15,7 +15,7 @@ Your application should be prepared to handle the following common HTTP status c
 | `401 Unauthorized`          | Client Error | Authentication failed (missing/invalid/expired JWT or API Key/Secret signature). Verify credentials/auth logic.                                   |
 | `403 Forbidden`             | Client Error | Authentication succeeded, but the user/key lacks permission for the requested action/resource.                                                    |
 | `404 Not Found`             | Client Error | The requested resource or endpoint path could not be found.                                                                                       |
-| `429 Too Many Requests`     | Client Error | Rate limit exceeded. The response does not include `Retry-After`. Back off before retrying. See [Rate Limits](./rate-limits.md).                      |
+| `429 Too Many Requests`     | Client Error | Rate limit exceeded (production: 180 requests per 60 seconds per IP). Includes `Retry-After`. See [Rate Limits](./rate-limits.md).                      |
 | `500 Internal Server Error` | Server Error | An unexpected error occurred on the server side. Retrying later might resolve temporary issues.                                                   |
 | `502 Bad Gateway`           | Server Error | Server received an invalid response from an upstream server while acting as a gateway/proxy. Issue is likely upstream. Retrying later might help. |
 | `503 Service Unavailable`   | Server Error | Server is temporarily unable to handle the request (maintenance, overload). Retrying later is recommended.                                        |

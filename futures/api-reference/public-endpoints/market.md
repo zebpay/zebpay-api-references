@@ -43,8 +43,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     {
       "rateLimitType": "REQUESTS",
       "interval": "SECOND",
-      "intervalNum": 10,
-      "limit": 3
+      "intervalNum": 60,
+      "limit": 180
     }
   ],
   "exchangeFilters": [],
@@ -92,7 +92,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 }
 ```
 
-`rateLimits` values come from the deployed API configuration and can differ from the example.
+Production advertises 180 requests per 60 seconds (`intervalNum` 60, `limit` 180). Other environments can use a tighter budget; `GET /markets` reports the active values.
 
 > See [Error Response Structure](../error-handling.md) for error formats.
 

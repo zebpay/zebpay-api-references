@@ -47,7 +47,7 @@ Compared to documentation on `main`. Covers `GET/POST /api/v1/market/*` and the 
 - New symbol fields: `tickSz`, `lotSz` (exact decimal strings).
 - `filters` is always present (may be `[]`).
 - `orderTypes` in examples now include `STOP_MARKET` and `STOP_LIMIT`.
-- `rateLimits` in examples now show the deployed request budget (values can differ by environment).
+- `rateLimits` in production advertises **180 requests per 60 seconds** (`intervalNum` 60, `limit` 180). Other environments can be tighter.
 
 ### `GET /api/v1/market/marketInfo`
 - Upstream data cached internally up to **1 second**; no public `Cache-Control`.
@@ -65,6 +65,11 @@ Compared to documentation on `main`. Covers `GET/POST /api/v1/market/*` and the 
 
 ### Envelope
 - Success `statusDescription` / `customMessage` example is `"OK"` (was `"Success"`).
+
+### Rate limits
+- Production quota is **180 requests per 60 seconds** per client IP across all `/api` routes.
+- `429` message is `Too many requests. Limit 180 requests per 60 seconds.` (not a daily-limit string).
+- Responses include `Retry-After` (remaining window in seconds).
 
 ## Sample clients (Node / Python)
 
