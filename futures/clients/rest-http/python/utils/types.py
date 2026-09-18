@@ -642,10 +642,12 @@ class MarketInfo(TypedDict):
 
     Attributes:
         marketPrice (str)
+        lastPrice (Optional[str])
         priceChangePercent (Optional[str])
         baseAssetVolume (Optional[str])
     """
     marketPrice: str
+    lastPrice: Optional[str]
     priceChangePercent: Optional[str]
     baseAssetVolume: Optional[str]
 

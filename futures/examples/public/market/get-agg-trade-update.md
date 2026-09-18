@@ -6,9 +6,8 @@ Retrieves recent aggregate trades (trades at the same price level) for a specifi
 **Authentication:** None Required
 **Parameters:**
 * `symbol` (string, query, required): Trading pair in concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
-* `limit` (integer, query, optional): Number of most recent trades to return. Range: 1–50. Default: 50.
 
-`fromId`, `startTime`, and `endTime` are not supported.
+The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order. Additional query parameters such as `limit`, `fromId`, `startTime`, and `endTime` are currently ignored.
 
 ---
 
@@ -18,7 +17,7 @@ Retrieves recent aggregate trades (trades at the same price level) for a specifi
 
 ```bash
 # Replace BTCINR with the desired symbol
-curl -X GET "https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR&limit=50" \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/market/aggTrade?symbol=BTCINR" \
   -H "Accept: application/json"
 ```
 
@@ -67,11 +66,11 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 **Request:**
 
 ```javascript
-async function getAggTradeExample(symbol, limit = 50) {
+async function getAggTradeExample(symbol) {
   try {
     console.log(`Fetching aggregate trades for ${symbol}...`);
     // Ensure symbol is passed to the method
-    const response = await client.getAggTrade(symbol, limit);
+    const response = await client.getAggTrade(symbol);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -90,7 +89,7 @@ async function getAggTradeExample(symbol, limit = 50) {
 }
 
 // Example usage:
-getAggTradeExample('BTCINR', 50);
+getAggTradeExample('BTCINR');
 ```
 
 **Output (Example):**
@@ -141,11 +140,11 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 ```python
 import json
 
-def get_agg_trade_example(symbol, limit=50):
+def get_agg_trade_example(symbol):
     try:
         print(f"Fetching aggregate trades for {symbol}...")
         # Ensure symbol is passed to the method
-        response = client.get_agg_trade(symbol=symbol, limit=limit)
+        response = client.get_agg_trade(symbol=symbol)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -162,7 +161,7 @@ def get_agg_trade_example(symbol, limit=50):
         print(f"Error fetching aggregate trades for {symbol}: {e}")
 
 # Example usage:
-get_agg_trade_example('BTCINR', limit=50)
+get_agg_trade_example('BTCINR')
 ```
 
 **Output (Example):**

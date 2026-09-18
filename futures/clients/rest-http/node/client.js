@@ -191,7 +191,7 @@ class FuturesApiClient {
    * Fetches the order book for a trading pair
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
-   * @param {number} [limit] - Depth levels per side (1-20; server default 20)
+   * @param {number} [limit] - Depth levels per side (minimum 1); omit for the full available book
    * @returns {Promise<ApiResponse<OrderBook>>} Order book data
    * @see {ApiResponse} For the overall response structure
    * @see {OrderBook} For the structure of the data field
@@ -235,7 +235,7 @@ class FuturesApiClient {
    * Fetches aggregate trade updates for a symbol
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCINR')
-   * @param {number} [limit] - Most recent trades to return (1-50; server default 50)
+   * @param {number} [limit] - Legacy compatibility parameter; currently ignored by the server
    * @returns {Promise<ApiResponse<AggregateTrade[]>>} Recent aggregate trades
    */
   async getAggTrade(symbol, limit) {
@@ -260,7 +260,7 @@ class FuturesApiClient {
    * @param {number} [klineParams.since] - Start time in milliseconds
    * @param {number} [klineParams.startTime] - Alias for `since`
    * @param {number} [klineParams.until] - Inclusive end time in milliseconds; requires `since`
-   * @param {number} [klineParams.limit] - Maximum number of data points to return
+   * @param {number} [klineParams.limit] - Number of data points to return (5-500; default 500)
    * @param {string} [klineParams.priceType] - `LTP` (default) or `MARK_PRICE`
    * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
    */

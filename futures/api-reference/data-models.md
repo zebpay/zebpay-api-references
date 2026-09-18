@@ -194,10 +194,10 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
 | `average`    | `number` | Average price.                                                    |
 | `baseVolume` | `number` | Trading volume in the base asset.                                 |
 | `quoteVolume`| `number` | Trading volume in the quote asset.                                |
-| `bid`        | `number` | Highest current bid price.                                         |
-| `bidVolume`  | `number` | Volume available at the highest bid price.                        |
-| `ask`        | `number` | Lowest current ask price.                                          |
-| `askVolume`  | `number` | Volume available at the lowest ask price.                         |
+| `bid`        | `number` (optional) | Highest current bid price; omitted when no valid bid exists. |
+| `bidVolume`  | `number` (optional) | Volume available at the highest bid price.                  |
+| `ask`        | `number` (optional) | Lowest current ask price; omitted when no valid ask exists.   |
+| `askVolume`  | `number` (optional) | Volume available at the lowest ask price.                    |
 
 **`info` Object Fields (Common Examples):**
 
@@ -276,8 +276,11 @@ Represents high-level market information for a trading pair, potentially returne
 | Field Name           | Type     | Description                     |
 |----------------------|----------|---------------------------------|
 | `marketPrice`        | `string`         | Current market price.                    |
+| `lastPrice`          | `string \| null` | Last traded price, when available.       |
 | `priceChangePercent` | `string \| null` | Price change percentage, when available. |
 | `baseAssetVolume`    | `string \| null` | Trading volume in base asset, when available. |
+
+Additional upstream market metrics may also be present.
 
 ##### Example (`data` field content - assuming map structure)
 
@@ -285,11 +288,13 @@ Represents high-level market information for a trading pair, potentially returne
 {
   "BTCUSDT": {
     "marketPrice": "65150.00",
+    "lastPrice": "65150.00",
     "priceChangePercent": "0.23",
     "baseAssetVolume": "1500.50"
   },
   "ETHUSDT": {
     "marketPrice": "3300.00",
+    "lastPrice": null,
     "priceChangePercent": null,
     "baseAssetVolume": null
   }

@@ -356,6 +356,7 @@
  *
  * @typedef {Object} MarketInfo
  * @property {string} marketPrice - Current market price
+ * @property {string|null} lastPrice - Last traded price, when available
  * @property {string|null} priceChangePercent - Price change percentage, when available
  * @property {string|null} baseAssetVolume - Trading volume in base asset, when available
  */

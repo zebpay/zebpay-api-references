@@ -6,7 +6,7 @@ Retrieves the current order book (market depth) for a specific trading symbol.
 **Authentication:** None Required
 **Parameters:**
 * `symbol` (string, query, required): Trading pair in concatenated (`BTCUSDT`) or slash (`BTC/USDT`) notation.
-* `limit` (integer, query, optional): Depth levels per side. Range: 1–20. Default: 20.
+* `limit` (integer, query, optional): Depth levels per side. Minimum: 1. When omitted, the full available order book is returned; no maximum is currently imposed.
 
 ---
 
@@ -58,7 +58,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 **Request:**
 
 ```javascript
-async function getOrderBookExample(symbol, limit = 20) {
+async function getOrderBookExample(symbol, limit) {
   try {
     console.log(`Fetching order book for ${symbol}...`);
     // Ensure symbol is passed to the method
@@ -137,7 +137,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 ```python
 import json
 
-def get_order_book_example(symbol, limit=20):
+def get_order_book_example(symbol, limit=None):
     try:
         print(f"Fetching order book for {symbol}...")
         # Ensure symbol is passed to the method

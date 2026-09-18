@@ -67,7 +67,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/ticker24Hr?symbol=BTCUSDT
   "customMessage": ["OK"]
 }
 ```
-*Note: Values will reflect live market data.*
+*Note: Values will reflect live market data. Best bid/ask prices and volumes are included when a valid level exists on the corresponding side of the order book; otherwise those fields are omitted.*
 
 ---
 

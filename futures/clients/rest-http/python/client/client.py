@@ -268,7 +268,8 @@ class FuturesApiClient:
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCUSDT').
-            limit (Optional[int]): Depth levels per side (1-20; server default 20).
+            limit (Optional[int]): Depth levels per side (minimum 1). Omit it
+                                   to return the full available order book.
 
         Returns:
             ApiResponse[OrderBook]: Order book data including lists of bids and asks.
@@ -333,7 +334,8 @@ class FuturesApiClient:
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCINR').
-            limit (Optional[int]): Most recent trades to return (1-50; server default 50).
+            limit (Optional[int]): Legacy compatibility parameter currently
+                                   ignored by the server.
 
         Returns:
             ApiResponse[List[AggregateTrade]]: List of aggregated trade data.
@@ -366,7 +368,7 @@ class FuturesApiClient:
                     `interval` is accepted as an alias for `timeframe`.
                   - since: Start time in milliseconds (`startTime` is accepted as an alias).
                   - until: Inclusive end time in milliseconds; requires `since`.
-                  - limit: Maximum number of data points to return.
+                  - limit: Number of data points to return (5-500; default 500).
                   - priceType: `LTP` (default) or `MARK_PRICE`, sent as a query parameter.
 
         Returns:

@@ -6,7 +6,7 @@ Retrieves details about all available trading symbols (markets), including their
 **Authentication:** None Required
 **Parameters:** None
 
-The response may include `Cache-Control`, `ETag`, or `304 Not Modified` for efficient short-lived caching.
+Market metadata is cached internally for up to 30 seconds, while `serverTime` is refreshed for every response. The endpoint does not set a public `Cache-Control` policy. A framework-generated `ETag` may be present, but clients should not rely on receiving `304 Not Modified`.
 ---
 
 ### 1. cURL Example

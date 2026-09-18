@@ -12,10 +12,12 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 * `timeframe` (string, body, optional): Defaults to `1m`. See the API reference for supported values.
 * `since` (integer, body, optional): Inclusive start time in Unix epoch milliseconds.
 * `until` (integer, body, optional): Inclusive end time; accepted only with `since`.
-* `limit` (integer, body, optional): Range: 1–1500. Default: 500.
+* `limit` (integer, body, optional): Range: 5–500. Default: 500.
 * `priceType` (string, query, optional): `LTP` (default) or `MARK_PRICE`.
 
 Unknown HTTP body fields return `400 Bad Request`. The sample clients accept `interval` and `startTime` as local aliases, but send `timeframe` and `since` to the API.
+
+For `MARK_PRICE`, a missing or malformed upstream volume is returned as `null`.
 
 -----
 

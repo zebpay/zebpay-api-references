@@ -25,11 +25,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/marketInfo \
   "data": {
     "BTCUSDT": {
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
       "marketPrice": "3300.00",
+      "lastPrice": null,
       "priceChangePercent": null,
       "baseAssetVolume": null
     }
@@ -40,7 +42,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/marketInfo \
 }
 
 ```
-*Note: Values reflect live data for active markets. `priceChangePercent` and `baseAssetVolume` can be `null` when unavailable.*
+*Note: Values reflect live data for active markets. `lastPrice`, `priceChangePercent`, and `baseAssetVolume` can be `null` when unavailable. Additional upstream market metrics may also be present.*
 
 ---
 
@@ -88,11 +90,13 @@ API Response: {
   "data": {
     "BTCUSDT": {
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
       "marketPrice": "3300.00",
+      "lastPrice": null,
       "priceChangePercent": null,
       "baseAssetVolume": null
     }
@@ -157,11 +161,13 @@ API Response: {
   "data": {
     "BTCUSDT": {
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
       "marketPrice": "3300.00",
+      "lastPrice": null,
       "priceChangePercent": null,
       "baseAssetVolume": null
     }
