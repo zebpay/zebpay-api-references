@@ -55,7 +55,7 @@ This is the standard wrapper structure for most successful API responses. The ac
 
 | Field Name         | Type             | Description                                                                 |
 |--------------------|------------------|-----------------------------------------------------------------------------|
-| `statusDescription`| `string`         | Human-readable status description (e.g., "Success").                        |
+| `statusDescription`| `string`         | Human-readable status description (for example, `"OK"` on success).         |
 | `data`             | `T`              | The core response data payload. Its structure varies (see specific models below). |
 | `statusCode`       | `number`         | The HTTP status code returned by the API (e.g., 200, 201).                  |
 | `customMessage`    | `Array<string>`  | Additional informational messages from the API.                           |
@@ -64,7 +64,7 @@ This is the standard wrapper structure for most successful API responses. The ac
 
 ```js
 {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     // Specific data structure depends on the endpoint called
     // See examples for OrderBook, Ticker, etc., below
@@ -91,7 +91,9 @@ Represents details for a single trading symbol, returned within the `symbols` ar
 | `baseAsset`             | `string`        | The base asset code (e.g., "1000PEPE").                                |
 | `quoteAsset`            | `string`        | The quote asset code (e.g., "INR").                                   |
 | `pricePrecision`        | `number`        | Number of decimal places for price formatting/entry.                  |
+| `tickSz`                | `string`        | Minimum price increment represented as an exact decimal string.       |
 | `quantityPrecision`     | `number`        | Number of decimal places for quantity/amount formatting/entry.          |
+| `lotSz`                 | `string`        | Minimum quantity increment represented as an exact decimal string.    |
 | `baseAssetPrecision`    | `number`        | Precision for the base asset itself.                                  |
 | `quotePrecision`        | `number`        | Precision for the quote asset itself.                                 |
 | `orderTypes`            | `Array<string>` | Order types enabled for this symbol, such as `MARKET`, `LIMIT`, `STOP_MARKET`, and `STOP_LIMIT`. |
@@ -100,7 +102,7 @@ Represents details for a single trading symbol, returned within the `symbols` ar
 | `takerFee`              | `number`        | Taker fee rate for this symbol.                                       |
 | `minLeverage`           | `number`        | Minimum allowed leverage for this symbol.                             |
 | `maxLeverage`           | `number`        | Maximum allowed leverage for this symbol.                             |
-| `filters`               | `Array<object>` | *Optional*: List of specific trading filters applied to this symbol (e.g., LOT\_SIZE, PRICE\_FILTER). Not present in the example but common in similar APIs.\* |
+| `filters`               | `Array<object>` | List of trading filters supplied by the exchange. The array can be empty. |
 
 ##### Example (Single element from the `symbols` array)
 
@@ -113,9 +115,12 @@ Represents details for a single trading symbol, returned within the `symbols` ar
   "baseAsset": "1000PEPE",
   "quoteAsset": "INR",
   "pricePrecision": 5,
+  "tickSz": "0.00001",
   "quantityPrecision": 0,
+  "lotSz": "1",
   "baseAssetPrecision": 0,
   "quotePrecision": 0,
+  "filters": [],
   "orderTypes": [ "LIMIT", "MARKET", "STOP_MARKET", "STOP_LIMIT" ],
   "timeInForce": [ "GTC" ],
   "makerFee": 0.05,
@@ -139,8 +144,8 @@ Represents the market depth for a trading pair, returned within the `data` field
 | `bids`     | `Array<[number, number]>` | Array of buy orders `[price, amount]`, sorted by price descending.|
 | `asks`     | `Array<[number, number]>` | Array of sell orders `[price, amount]`, sorted by price ascending.|
 | `timestamp`| `number`                  | Unix timestamp (ms). Set to `Date.now()` when the book is transformed. |
-| `datetime` | `null`                    | Always `null` in the current implementation.                     |
-| `nonce`    | `number`                  | Set to `Date.now()` when the book is transformed (not an exchange sequence). |
+| `datetime` | `string`                  | ISO-8601 representation of `timestamp`.                         |
+| `nonce`    | `null`                    | Exchange sequence number; currently unavailable.                |
 
 ##### Example (`data` field content)
 
@@ -158,8 +163,8 @@ Represents the market depth for a trading pair, returned within the `data` field
     [65002.00, 0.7]
   ],
   "timestamp": 1712345678901,
-  "datetime": null,
-  "nonce": 1712345678901
+  "datetime": "2024-04-05T19:34:38.901Z",
+  "nonce": null
 }
 ```
 
@@ -189,10 +194,10 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
 | `average`    | `number` | Average price.                                                    |
 | `baseVolume` | `number` | Trading volume in the base asset.                                 |
 | `quoteVolume`| `number` | Trading volume in the quote asset.                                |
-| `bid`        | `number` | Highest current bid price.                                         |
-| `bidVolume`  | `number` | Volume available at the highest bid price.                        |
-| `ask`        | `number` | Lowest current ask price.                                          |
-| `askVolume`  | `number` | Volume available at the lowest ask price.                         |
+| `bid`        | `number` (optional) | Highest current bid price; omitted when no valid bid exists. |
+| `bidVolume`  | `number` (optional) | Volume available at the highest bid price.                  |
+| `ask`        | `number` (optional) | Lowest current ask price; omitted when no valid ask exists.   |
+| `askVolume`  | `number` (optional) | Volume available at the lowest ask price.                    |
 
 **`info` Object Fields (Common Examples):**
 
@@ -240,7 +245,7 @@ Represents 24-hour market statistics for a trading pair, returned within the `da
     "numberOfTrades": 2501
   },
   "timestamp": 1712345678905,
-  "datetime": "2025-04-05T11:59:38.905Z",
+  "datetime": "2024-04-05T19:34:38.905Z",
   "high": 65500.00,
   "low": 64800.00,
   "vwap": 65100.00,
@@ -270,26 +275,28 @@ Represents high-level market information for a trading pair, potentially returne
 
 | Field Name           | Type     | Description                     |
 |----------------------|----------|---------------------------------|
-| `lastPrice`          | `string` | Last traded price.              |
-| `marketPrice`        | `string` | Current market price.           |
-| `priceChangePercent` | `string` | Price change percentage.        |
-| `baseAssetVolume`    | `string` | Trading volume in base asset.   |
+| `marketPrice`        | `string`         | Current market price.                    |
+| `lastPrice`          | `string \| null` | Last traded price, when available.       |
+| `priceChangePercent` | `string \| null` | Price change percentage, when available. |
+| `baseAssetVolume`    | `string \| null` | Trading volume in base asset, when available. |
+
+Additional upstream market metrics may also be present.
 
 ##### Example (`data` field content - assuming map structure)
 
 ```js
 {
   "BTCUSDT": {
-    "lastPrice": "65150.50",
     "marketPrice": "65150.00",
+    "lastPrice": "65150.00",
     "priceChangePercent": "0.23",
     "baseAssetVolume": "1500.50"
   },
   "ETHUSDT": {
-    "lastPrice": "3300.10",
     "marketPrice": "3300.00",
-    "priceChangePercent": "1.50",
-    "baseAssetVolume": "25000.75"
+    "lastPrice": null,
+    "priceChangePercent": null,
+    "baseAssetVolume": null
   }
 }
 ```
@@ -730,7 +737,7 @@ Represents the structure of the `data` field returned by `GET /api/v1/market/mar
 |-------------------|------------------------|--------------------------------------------------------------|
 | `timezone`        | `string`               | Exchange timezone (e.g., "UTC").                             |
 | `serverTime`      | `number`               | Current server time in Unix timestamp (ms).                  |
-| `rateLimits`      | `Array<object>`        | List of rate limit rules applied by the exchange.            |
+| `rateLimits`      | `Array<object>`        | List of rate limit rules. Production advertises 180 requests per 60 seconds. |
 | `exchangeFilters` | `Array<object>`        | List of global exchange filters.                             |
 | `symbols`         | `Array<MarketSymbol>` | List of available trading symbols and their details. See [`MarketSymbol`](#marketsymbol)      |
 
@@ -740,7 +747,14 @@ Represents the structure of the `data` field returned by `GET /api/v1/market/mar
 {
   "timezone": "UTC",
   "serverTime": 1744364554387,
-  "rateLimits": [],
+  "rateLimits": [
+    {
+      "rateLimitType": "REQUESTS",
+      "interval": "SECOND",
+      "intervalNum": 60,
+      "limit": 180
+    }
+  ],
   "exchangeFilters": [],
   "symbols": [
     { /* MarketSymbol object for 1000PEPEINR */ },

@@ -139,11 +139,11 @@ const client = new FuturesApiClient({
 | Method | Description |
 |--------|-------------|
 | `fetchMarkets()` | Get all available markets |
-| `getOrderBook(symbol)` | Get order book (bids/asks) for a symbol |
+| `getOrderBook(symbol, limit?)` | Get order book (bids/asks); limit range 1–20, omitted for the full available book |
 | `getTicker24Hr(symbol)` | 24-hour price stats |
 | `getMarketInfo()` | Market status and metrics |
 | `getAggTrade(symbol)` | Recent aggregated trades |
-| `getKlines(klineParams)` | Fetch OHLCV candles |
+| `getKlines(klineParams)` | Fetch OHLCV candles; `limit` is 5–500 (default 500), with optional `since`, `until`, and `priceType` |
 | `getSystemTime()` | API server time |
 | `getSystemStatus()` | System operational status |
 | `getTradeFee(symbol)` | Fee info for one symbol |

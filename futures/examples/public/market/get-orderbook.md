@@ -5,7 +5,8 @@ Retrieves the current order book (market depth) for a specific trading symbol.
 **Endpoint:** `GET /api/v1/market/orderBook`
 **Authentication:** None Required
 **Parameters:**
-* `symbol` (string, query, required): The trading symbol (e.g., "BTCUSDT") .
+* `symbol` (string, query, required): Trading pair in concatenated (`BTCUSDT`) or slash (`BTC/USDT`) notation.
+* `limit` (integer, query, optional): Depth levels per side. Range: 1–20. When omitted, the full available order book is returned.
 
 ---
 
@@ -15,7 +16,7 @@ Retrieves the current order book (market depth) for a specific trading symbol.
 
 ```bash
 # Replace BTCUSDT with the desired symbol
-curl -X GET https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT \
+curl -X GET "https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT&limit=20" \
   -H "Accept: application/json"
 ```
 
@@ -23,7 +24,7 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT 
 
 ```json
 {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "bids": [
@@ -37,31 +38,31 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/orderBook?symbol=BTCUSDT 
       [65002.00, 0.7]
     ],
     "timestamp": 1712345678901,
-    "datetime": null,
-    "nonce": 1712345678901
+    "datetime": "2024-04-05T19:34:38.901Z",
+    "nonce": null
   },
   "statusCode": 200,
   "customMessage": ["OK"]
 }
 ```
-*Note: `datetime` is always `null`. `timestamp` and `nonce` are both `Date.now()` at transform time.*
+*Note: `timestamp` is generated when the snapshot is transformed, `datetime` is its ISO-8601 representation, and `nonce` is currently `null`.*
 
 ---
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
 **Request:**
 
 ```javascript
-async function getOrderBookExample(symbol) {
+async function getOrderBookExample(symbol, limit) {
   try {
-    console.log(`Workspaceing order book for ${symbol}...`);
+    console.log(`Fetching order book for ${symbol}...`);
     // Ensure symbol is passed to the method
-    const response = await client.getOrderBook(symbol); //
+    const response = await client.getOrderBook(symbol, limit);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -79,7 +80,7 @@ async function getOrderBookExample(symbol) {
 }
 
 // Example usage:
-getOrderBookExample('BTCUSDT');
+getOrderBookExample('BTCUSDT', 20);
 ```
 
 **Output (Example):**
@@ -88,7 +89,7 @@ getOrderBookExample('BTCUSDT');
 // Console output showing the full API response first
 Fetching order book for BTCUSDT...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "bids": [
@@ -100,8 +101,8 @@ API Response: {
       // ... more asks
     ],
     "timestamp": 1712345678901,
-    "datetime": null,
-    "nonce": 1712345678901
+    "datetime": "2024-04-05T19:34:38.901Z",
+    "nonce": null
   },
   "statusCode": 200,
   "customMessage": [
@@ -127,7 +128,7 @@ Order Book Data for BTCUSDT: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -136,11 +137,11 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 ```python
 import json
 
-def get_order_book_example(symbol):
+def get_order_book_example(symbol, limit=None):
     try:
         print(f"Fetching order book for {symbol}...")
         # Ensure symbol is passed to the method
-        response = client.get_order_book(symbol=symbol) #
+        response = client.get_order_book(symbol=symbol, limit=limit)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -158,7 +159,7 @@ def get_order_book_example(symbol):
         print(f"Error fetching order book for {symbol}: {e}")
 
 # Example usage:
-get_order_book_example('BTCUSDT')
+get_order_book_example('BTCUSDT', limit=20)
 ```
 
 **Output (Example):**
@@ -167,7 +168,7 @@ get_order_book_example('BTCUSDT')
 // Console output showing the full API response first
 Fetching order book for BTCUSDT...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "symbol": "BTCUSDT",
     "bids": [
@@ -185,8 +186,8 @@ API Response: {
       // ... more asks
     ],
     "timestamp": 1712345678901,
-    "datetime": null,
-    "nonce": 1712345678901
+    "datetime": "2024-04-05T19:34:38.901Z",
+    "nonce": null
   },
   "statusCode": 200,
   "customMessage": [

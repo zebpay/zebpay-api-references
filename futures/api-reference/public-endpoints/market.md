@@ -10,6 +10,8 @@ These endpoints provide public access to market data such as order books, price 
 
 Retrieves details about all available trading symbols (markets), including their status, precision, fees, and leverage limits.
 
+Market metadata is cached internally for up to 30 seconds, while `serverTime` is refreshed for every response. The endpoint does not set a public `Cache-Control` policy. A framework-generated `ETag` may be present, but clients should not rely on receiving `304 Not Modified` because the refreshed `serverTime` changes the response representation.
+
 #### Request
 
 | Attribute         | Value                      |
@@ -37,7 +39,14 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 {
   "timezone": "UTC",
   "serverTime": 1744364554387,
-  "rateLimits": [],
+  "rateLimits": [
+    {
+      "rateLimitType": "REQUESTS",
+      "interval": "SECOND",
+      "intervalNum": 60,
+      "limit": 180
+    }
+  ],
   "exchangeFilters": [],
   "symbols": [
     {
@@ -48,10 +57,13 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
       "baseAsset": "1000PEPE",
       "quoteAsset": "INR",
       "pricePrecision": 5,
+      "tickSz": "0.00001",
       "quantityPrecision": 0,
+      "lotSz": "1",
       "baseAssetPrecision": 0,
       "quotePrecision": 0,
-      "orderTypes": [ "LIMIT", "MARKET" ],
+      "filters": [],
+      "orderTypes": [ "LIMIT", "MARKET", "STOP_MARKET", "STOP_LIMIT" ],
       "timeInForce": [ "GTC" ],
       "makerFee": 0.05,
       "takerFee": 0.1,
@@ -66,7 +78,9 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
       "baseAsset": "XRP",
       "quoteAsset": "INR",
       "pricePrecision": 2,
+      "tickSz": "0.01",
       "quantityPrecision": 1,
+      "lotSz": "0.1",
       // ... other fields ...
       "makerFee": 0.05,
       "takerFee": 0.1,
@@ -77,6 +91,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
   ]
 }
 ```
+
+Production advertises 180 requests per 60 seconds (`intervalNum` 60, `limit` 180). Other environments can use a tighter budget; `GET /markets` reports the active values.
 
 > See [Error Response Structure](../error-handling.md) for error formats.
 
@@ -93,8 +109,12 @@ Retrieves the current order book (bids and asks) for a specific trading symbol.
 | **HTTP Method**   | `GET`                        |
 | **Endpoint Path** | `/api/v1/market/orderBook`   |
 | **Auth Required** | No                           |
-| **Query Params**  | `symbol` (string, required)  |
+| **Query Params**  | `symbol` (string, required), `limit` (integer, optional; minimum 1, maximum 20) |
 | **Request Body**  | N/A                          |
+
+`symbol` accepts concatenated notation such as `BTCINR` or slash notation such as `BTC/INR`. It is trimmed and normalized to uppercase concatenated notation. Supported quote assets are `INR` and `USDT`.
+
+When `limit` is provided, each side is truncated to at most that many levels. `limit` must be an integer from 1 to 20. When it is omitted, the full available order book is returned.
 
 #### Success Response
 
@@ -123,8 +143,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     [65002.00, 0.7]
   ],
   "timestamp": 1712345678901,
-  "datetime": null,
-  "nonce": 1712345678901
+  "datetime": "2024-04-05T19:34:38.901Z",
+  "nonce": null
 }
 ```
 
@@ -146,6 +166,8 @@ Retrieves price change statistics for a specific trading symbol over the last 24
 | **Query Params**  | `symbol` (string, required)    |
 | **Request Body**  | N/A                            |
 
+`symbol` accepts concatenated notation such as `BTCINR` or slash notation such as `BTC/INR`. It is trimmed and normalized to uppercase concatenated notation. Supported quote assets are `INR` and `USDT`.
+
 #### Success Response
 
 | Status Code | Description        |
@@ -156,6 +178,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 
 **`data`** ([Ticker](../data-models.md#ticker) object):
 24-hour statistics including price change, high/low, volume, etc.
+
+The current best bid and ask fields are included when a valid level exists on the corresponding side of the order book. A missing side causes its price and volume fields to be omitted.
 
 ##### Example (`data` field content)
 
@@ -182,7 +206,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     "numberOfTrades": 2501
   },
   "timestamp": 1712345678905,
-  "datetime": "2025-04-05T11:59:38.905Z",
+  "datetime": "2024-04-05T19:34:38.905Z",
   "high": 65500.00,
   "low": 64800.00,
   "vwap": 65100.00,
@@ -208,6 +232,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 ### Get Market Info
 
 Retrieves high-level market information, potentially including metrics for multiple symbols.
+
+The response contains active markets only. Upstream market information is cached internally for up to one second, but the endpoint does not set a public `Cache-Control` policy.
 
 #### Request
 
@@ -235,19 +261,21 @@ A mapping of symbols to their respective [MarketInfo](../data-models.md#marketin
 ```json
 {
   "BTCUSDT": {
-    "lastPrice": "65150.50",
     "marketPrice": "65150.00",
+    "lastPrice": "65150.00",
     "priceChangePercent": "0.23",
     "baseAssetVolume": "1500.50"
   },
   "ETHUSDT": {
-    "lastPrice": "3300.10",
     "marketPrice": "3300.00",
-    "priceChangePercent": "1.50",
-    "baseAssetVolume": "25000.75"
+    "lastPrice": null,
+    "priceChangePercent": null,
+    "baseAssetVolume": null
   }
 }
 ```
+
+`marketPrice` is always a numeric string. `lastPrice`, `priceChangePercent`, and `baseAssetVolume` are numeric strings when available, otherwise `null`. Additional upstream market metrics may also be present.
 
 > See [Error Response Structure](../error-handling.md) for error formats.
 
@@ -264,8 +292,12 @@ Retrieves recent aggregate trades for a specific trading symbol.
 | **HTTP Method**   | `GET`                          |
 | **Endpoint Path** | `/api/v1/market/aggTrade`      |
 | **Auth Required** | No                             |
-| **Query Params**  | `symbol` (string, required)    |
+| **Query Params**  | `symbol` (string, required) |
 | **Request Body**  | N/A                            |
+
+`symbol` accepts concatenated notation such as `BTCINR` or slash notation such as `BTC/INR`. It is trimmed and normalized to uppercase concatenated notation. Supported quote assets are `INR` and `USDT`.
+
+The only accepted query parameter is `symbol`. Extra fields such as `limit`, `fromId`, `startTime`, and `endTime` are rejected with `400 Bad Request`. The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order.
 
 #### Success Response
 
@@ -309,22 +341,25 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 
 **Request Body**
 
-The body must be a JSON object specifying the parameters for the k-line data. Unknown body fields are stripped; send `timeframe` and `since`, not `interval`, `startTime`, or `endTime`.
+The body must be a JSON object specifying the parameters for the k-line data. Unknown body fields produce a `400 Bad Request`; send the wire-format fields below, not client-side aliases such as `interval`, `startTime`, or `endTime`.
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `symbol` | string | Yes | The trading pair symbol (e.g., 'BTCINR'). |
-| `timeframe` | string | Yes | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. If omitted after validation, the server defaults to `1m`. |
-| `since` | number | No | Start time in milliseconds since epoch. |
-| `limit` | number | No | Maximum number of data points to retrieve (e.g., 100). |
+| `symbol` | string | Yes | Trading pair in concatenated (`BTCINR`) or slash (`BTC/INR`) notation. The server normalizes it to uppercase concatenated notation. Supported quotes are `INR` and `USDT`. |
+| `timeframe` | string | No | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. Default: `1m`. |
+| `since` | integer | No | Inclusive start time as Unix epoch milliseconds. Must be at least `1000000000000` and must not be in the future. |
+| `until` | integer | No | Inclusive end time as Unix epoch milliseconds. Accepted only with `since`; it must not precede `since` or be in the future. |
+| `limit` | integer | No | Number of data points to retrieve. Range: 5–500. Default: 500. |
 
-There is no request `endTime`. Candle start and end times appear only in the response arrays below.
+When `since` is omitted, the endpoint returns the latest `limit` candles. When `since` is provided, it returns the first page of candles from that point, optionally bounded by `until`. Candle start and end times also appear in each response array.
 
 **Query Parameters**
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `priceType` | string | No | Price series to use. `LTP` (default) or `MARK_PRICE`. |
+
+For `MARK_PRICE`, a missing or malformed upstream volume is returned as `null`.
 
 #### Success Response
 
@@ -340,11 +375,11 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 | Index | Field       | Type   | Description                                           |
 | :---- | :---------- | :----- | :---------------------------------------------------- |
 | 0     | `startTime` | number | Start time of the interval (milliseconds since epoch).  |
-| 1     | `open`      | string | Opening price for the interval.                       |
-| 2     | `high`      | string | Highest price during the interval.                    |
-| 3     | `low`       | string | Lowest price during the interval.                     |
-| 4     | `close`     | string | Closing price for the interval.                       |
-| 5     | `volume`    | string | Trading volume during the interval.                   |
+| 1     | `open`      | string \| number | Opening price for the interval.              |
+| 2     | `high`      | string \| number | Highest price during the interval.           |
+| 3     | `low`       | string \| number | Lowest price during the interval.             |
+| 4     | `close`     | string \| number | Closing price for the interval.               |
+| 5     | `volume`    | string \| number \| null | Trading volume; `null` when unavailable for `MARK_PRICE`. |
 | 6     | `endTime`   | number | End time of the interval (milliseconds since epoch).    |
 
 ##### Example (`data` field content)
