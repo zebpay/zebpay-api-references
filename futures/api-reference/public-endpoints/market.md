@@ -109,12 +109,12 @@ Retrieves the current order book (bids and asks) for a specific trading symbol.
 | **HTTP Method**   | `GET`                        |
 | **Endpoint Path** | `/api/v1/market/orderBook`   |
 | **Auth Required** | No                           |
-| **Query Params**  | `symbol` (string, required), `limit` (integer, optional; minimum 1) |
+| **Query Params**  | `symbol` (string, required), `limit` (integer, optional; minimum 1, maximum 20) |
 | **Request Body**  | N/A                          |
 
 `symbol` accepts concatenated notation such as `BTCINR` or slash notation such as `BTC/INR`. It is trimmed and normalized to uppercase concatenated notation. Supported quote assets are `INR` and `USDT`.
 
-When `limit` is provided, the response contains at most that many levels on each side. When it is omitted, the full available order book is returned. The endpoint does not currently impose a maximum.
+When `limit` is provided, each side is truncated to at most that many levels. `limit` must be an integer from 1 to 20. When it is omitted, the full available order book is returned.
 
 #### Success Response
 
@@ -297,7 +297,7 @@ Retrieves recent aggregate trades for a specific trading symbol.
 
 `symbol` accepts concatenated notation such as `BTCINR` or slash notation such as `BTC/INR`. It is trimmed and normalized to uppercase concatenated notation. Supported quote assets are `INR` and `USDT`.
 
-The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order. Additional query parameters such as `limit`, `fromId`, `startTime`, and `endTime` are currently ignored.
+The only accepted query parameter is `symbol`. Extra fields such as `limit`, `fromId`, `startTime`, and `endTime` are rejected with `400 Bad Request`. The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order.
 
 #### Success Response
 

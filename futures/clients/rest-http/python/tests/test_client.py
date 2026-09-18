@@ -178,17 +178,21 @@ class FuturesApiClientTest(unittest.TestCase):
                 'stopLossPrice': 62000
             })
 
-    def test_market_depth_methods_forward_optional_limits(self):
+    def test_market_query_params_match_the_public_contract(self):
         self.client.get_order_book('btcusdt', limit=20)
         self.assertEqual(self.request_kwargs()['params'], {
             'symbol': 'BTCUSDT',
             'limit': 20
         })
 
-        self.client.get_agg_trade('btcinr', limit=50)
+        self.client.get_order_book('btcusdt')
         self.assertEqual(self.request_kwargs()['params'], {
-            'symbol': 'BTCINR',
-            'limit': 50
+            'symbol': 'BTCUSDT'
+        })
+
+        self.client.get_agg_trade('btcinr')
+        self.assertEqual(self.request_kwargs()['params'], {
+            'symbol': 'BTCINR'
         })
 
     def test_get_klines_maps_aliases_and_omits_unsupported_body_fields(self):

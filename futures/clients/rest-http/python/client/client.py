@@ -268,7 +268,7 @@ class FuturesApiClient:
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCUSDT').
-            limit (Optional[int]): Depth levels per side (minimum 1). Omit it
+            limit (Optional[int]): Depth levels per side (range 1–20). Omit it
                                    to return the full available order book.
 
         Returns:
@@ -324,18 +324,12 @@ class FuturesApiClient:
         endpoint = config.get_endpoint(['public', 'market', 'market_info'])
         return self._request('GET', endpoint)
 
-    def get_agg_trade(
-        self,
-        symbol: str,
-        limit: Optional[int] = None,
-    ) -> ApiResponse[List[AggregateTrade]]:
+    def get_agg_trade(self, symbol: str) -> ApiResponse[List[AggregateTrade]]:
         """
         Retrieve a list of recent aggregate trades for a given symbol.
 
         Args:
             symbol (str): Trading symbol (e.g., 'BTCINR').
-            limit (Optional[int]): Legacy compatibility parameter currently
-                                   ignored by the server.
 
         Returns:
             ApiResponse[List[AggregateTrade]]: List of aggregated trade data.
@@ -344,16 +338,13 @@ class FuturesApiClient:
             ValueError: If the symbol is not provided.
 
         Example:
-            agg_trades = client.get_agg_trade("BTCINR", limit=50)
+            agg_trades = client.get_agg_trade("BTCINR")
         """
         if not symbol:
             raise ValueError('Symbol is required')
         symbol = self._normalize_string(symbol)
         endpoint = config.get_endpoint(['public', 'market', 'agg_trade'])
-        params: Dict[str, Any] = {'symbol': symbol}
-        if limit is not None:
-            params['limit'] = limit
-        return self._request('GET', endpoint, params=params)
+        return self._request('GET', endpoint, params={'symbol': symbol})
 
     def get_klines(self, kline_params: Dict[str, Any]) -> ApiResponse[List[List[Any]]]:
         """

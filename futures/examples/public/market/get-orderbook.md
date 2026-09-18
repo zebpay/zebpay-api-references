@@ -6,7 +6,7 @@ Retrieves the current order book (market depth) for a specific trading symbol.
 **Authentication:** None Required
 **Parameters:**
 * `symbol` (string, query, required): Trading pair in concatenated (`BTCUSDT`) or slash (`BTC/USDT`) notation.
-* `limit` (integer, query, optional): Depth levels per side. Minimum: 1. When omitted, the full available order book is returned; no maximum is currently imposed.
+* `limit` (integer, query, optional): Depth levels per side. Range: 1–20. When omitted, the full available order book is returned.
 
 ---
 

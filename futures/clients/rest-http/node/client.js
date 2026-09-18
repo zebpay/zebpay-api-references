@@ -191,7 +191,7 @@ class FuturesApiClient {
    * Fetches the order book for a trading pair
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
-   * @param {number} [limit] - Depth levels per side (minimum 1); omit for the full available book
+   * @param {number} [limit] - Depth levels per side (1–20); omit for the full available book
    * @returns {Promise<ApiResponse<OrderBook>>} Order book data
    * @see {ApiResponse} For the overall response structure
    * @see {OrderBook} For the structure of the data field
@@ -235,19 +235,14 @@ class FuturesApiClient {
    * Fetches aggregate trade updates for a symbol
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCINR')
-   * @param {number} [limit] - Legacy compatibility parameter; currently ignored by the server
    * @returns {Promise<ApiResponse<AggregateTrade[]>>} Recent aggregate trades
    */
-  async getAggTrade(symbol, limit) {
+  async getAggTrade(symbol) {
     if (!symbol) {
       throw new Error('Symbol is required');
     }
     symbol = this._normalizeString(symbol);
-    const query = { symbol };
-    if (limit != null) {
-      query.limit = limit;
-    }
-    return await this._request('GET', config.endpoints.public.market.aggTrade, query);
+    return await this._request('GET', config.endpoints.public.market.aggTrade, { symbol });
   }
 
   /**

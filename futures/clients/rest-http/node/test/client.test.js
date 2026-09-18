@@ -165,7 +165,7 @@ test('addTPSLOrder requires a symbol and exactly one trigger', async () => {
   );
 });
 
-test('market depth methods forward optional limits', async () => {
+test('market query params match the public contract', async () => {
   const { client, getCaptured } = createCapturedClient();
 
   await client.getOrderBook('btcusdt', 20);
@@ -174,10 +174,14 @@ test('market depth methods forward optional limits', async () => {
     limit: 20
   });
 
-  await client.getAggTrade('btcinr', 50);
+  await client.getOrderBook('btcusdt');
   assert.deepEqual(getCaptured().params, {
-    symbol: 'BTCINR',
-    limit: 50
+    symbol: 'BTCUSDT'
+  });
+
+  await client.getAggTrade('btcinr');
+  assert.deepEqual(getCaptured().params, {
+    symbol: 'BTCINR'
   });
 });
 

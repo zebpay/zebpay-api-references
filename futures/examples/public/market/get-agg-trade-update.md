@@ -7,7 +7,7 @@ Retrieves recent aggregate trades (trades at the same price level) for a specifi
 **Parameters:**
 * `symbol` (string, query, required): Trading pair in concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
 
-The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order. Additional query parameters such as `limit`, `fromId`, `startTime`, and `endTime` are currently ignored.
+The only accepted query parameter is `symbol`. Extra fields such as `limit`, `fromId`, `startTime`, and `endTime` are rejected with `400 Bad Request`. The endpoint returns every trade supplied by the upstream provider, sorted by `tradeTime` in ascending order.
 
 ---
 
