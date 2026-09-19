@@ -6,39 +6,69 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 
 **Endpoint:** `POST /api/v1/market/klines`
 **Authentication:** Not Required
+**Parameters:**
+* `symbol` (string, body, required): Trading pair (e.g. `"BTCINR"`).
+* `timeframe` (string, body, optional): Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. Defaults to `1m`.
+* `since` (number, body, optional): Start time in milliseconds since epoch.
+* `until` (number, body, optional): Inclusive end time in milliseconds since epoch. Requires `since`.
+* `limit` (number, body, optional): Maximum candles to return (`1`–`1000`, default `1000`).
+* `priceType` (string, query, optional): `LTP` (default) or `MARK_PRICE`.
 
------
+Send `timeframe`, `since`, and `until` in the JSON body. Do not send `interval`, `startTime`, or `endTime`. If `since` is omitted, the response is the latest `limit` candles.
+
+---
 
 ### 1. cURL Example
+
+**Latest candles:**
 
 ```bash
 curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-      -d '{
-        "symbol": "BTCINR",
-        "timeframe": "1h",
-        "limit": 100
-      }'
+  -d '{
+    "symbol": "BTCINR",
+    "timeframe": "1h",
+    "limit": 100
+  }'
+```
+
+**Bounded window (`since` / `until` and mark price):**
+
+```bash
+curl -X POST "https://futuresbe.zebpay.com/api/v1/market/klines?priceType=MARK_PRICE" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "BTCINR",
+    "timeframe": "1h",
+    "since": 1712340000000,
+    "until": 1712343600000,
+    "limit": 100
+  }'
 ```
 
 #### Success Response (Example)
 
 ```json
 {
-    "data": [
-        [
-            1612345678000, //startTs
-            "5500000",  //open
-            "5600000",  //high
-            "5400000",  //low
-            "5550000",  //close
-            "10.5",     //volume
-            1612345738000 //endTs
-        ]
+  "statusDescription": "OK",
+  "data": [
+    [
+      1612345678000,
+      "5500000",
+      "5600000",
+      "5400000",
+      "5550000",
+      "10.5",
+      1612345737999
     ]
+  ],
+  "statusCode": 201,
+  "customMessage": ["OK"]
 }
 ```
+*Note: Success uses HTTP `201` with `statusCode: 201`. Each candle is `[startTime, open, high, low, close, volume, endTime]`. For `priceType=MARK_PRICE`, `volume` may be `null`.*
 
 -----
 
@@ -53,7 +83,7 @@ async function getKlinesExample(klineParams) {
     const response = await client.getKlines(klineParams);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
-    if (response && response.data) {
+    if (response && [200, 201].includes(response.statusCode)) {
       console.log("K-Lines Data:", response.data);
     } else {
       console.error("Failed to fetch k-lines:", response.statusDescription);
@@ -66,11 +96,14 @@ async function getKlinesExample(klineParams) {
   }
 }
 
-// Example usage:
+// Example usage. `interval` is an alias for `timeframe`; `until` requires `since` (or `startTime`).
 const klineParams = {
   symbol: "BTCINR",
   timeframe: "1h",
-  limit: 100
+  since: 1712340000000,
+  until: 1712343600000,
+  limit: 100,
+  priceType: "LTP"
 };
 getKlinesExample(klineParams);
 ```
@@ -81,10 +114,17 @@ getKlinesExample(klineParams);
 // Full API response first...
 Fetching k-lines for symbol: BTCINR...
 API Response: {
-  "data": [ // ... (data as shown in cURL example) ... ]
+  "statusDescription": "OK",
+  "data": [
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+  ],
+  "statusCode": 201,
+  "customMessage": ["OK"]
 }
 // Extracted data...
-K-Lines Data: [ // ... (data as shown in cURL example) ... ]
+K-Lines Data: [
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+]
 ```
 
 -----
@@ -102,7 +142,7 @@ def get_klines_example(kline_params):
         response = client.get_klines(kline_params=kline_params)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
-        if response and response.get("data"):
+        if response and response.get("statusCode") in [200, 201]:
             print(f"K-Lines Data: {response.get('data')}")
         else:
             print(f"Failed to fetch k-lines: {response.get('statusDescription')}")
@@ -111,11 +151,14 @@ def get_klines_example(kline_params):
     except Exception as e:
         print(f"Error fetching k-lines: {e}")
 
-# Example usage:
+# Example usage. `interval` is an alias for `timeframe`; `until` requires `since` (or `startTime`).
 kline_params = {
   "symbol": "BTCINR",
   "timeframe": "1h",
-  "limit": 100
+  "since": 1712340000000,
+  "until": 1712343600000,
+  "limit": 100,
+  "priceType": "LTP"
 }
 get_klines_example(kline_params)
 ```
@@ -126,8 +169,15 @@ get_klines_example(kline_params)
 // Full API response first...
 Fetching k-lines for symbol: BTCINR...
 API Response: {
-  "data": [ // ... (data as shown in cURL example, Python format) ... ]
+  "statusDescription": "OK",
+  "data": [
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+  ],
+  "statusCode": 201,
+  "customMessage": ["OK"]
 }
 // Extracted data...
-K-Lines Data: [ // ... (data as shown in cURL example, Python format) ... ]
+K-Lines Data: [
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+]
 ```

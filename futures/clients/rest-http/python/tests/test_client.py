@@ -200,6 +200,49 @@ class FuturesApiClientTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'timeframe'):
             self.client.get_klines({'symbol': 'BTCUSDT'})
 
+    def test_get_klines_forwards_until_when_a_start_bound_is_present(self):
+        self.client.get_klines({
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'since': 1712345678000,
+            'until': 1712349278000,
+            'endTime': 1712349278000,
+            'limit': 50
+        })
+        self.assertEqual(self.request_kwargs()['json'], {
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'since': 1712345678000,
+            'until': 1712349278000,
+            'limit': 50
+        })
+
+        self.client.get_klines({
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'startTime': 1712345678000,
+            'until': 1712349278000
+        })
+        self.assertEqual(self.request_kwargs()['json'], {
+            'symbol': 'BTCUSDT',
+            'timeframe': '1h',
+            'since': 1712345678000,
+            'until': 1712349278000
+        })
+
+    def test_get_klines_rejects_until_without_a_start_bound(self):
+        self.client.http_session.request.reset_mock()
+        with self.assertRaisesRegex(
+            ValueError,
+            'since is required when until is provided',
+        ):
+            self.client.get_klines({
+                'symbol': 'BTCUSDT',
+                'timeframe': '1h',
+                'until': 1712349278000
+            })
+        self.client.http_session.request.assert_not_called()
+
     def test_history_methods_forward_extra_filters(self):
         self.client.get_order_history(
             page_size=10,
