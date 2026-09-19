@@ -194,6 +194,55 @@ test('getKlines maps aliases and omits unsupported body fields', async () => {
   );
 });
 
+test('getKlines forwards until when a start bound is present', async () => {
+  const { client, getCaptured } = createCapturedClient();
+
+  await client.getKlines({
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    since: 1712345678000,
+    until: 1712349278000,
+    endTime: 1712349278000,
+    limit: 50
+  });
+
+  assert.deepEqual(getCaptured().data, {
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    since: 1712345678000,
+    until: 1712349278000,
+    limit: 50
+  });
+
+  await client.getKlines({
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    startTime: 1712345678000,
+    until: 1712349278000
+  });
+
+  assert.deepEqual(getCaptured().data, {
+    symbol: 'BTCUSDT',
+    timeframe: '1h',
+    since: 1712345678000,
+    until: 1712349278000
+  });
+});
+
+test('getKlines rejects until without a start bound', async () => {
+  const { client, getCaptured } = createCapturedClient();
+
+  await assert.rejects(
+    client.getKlines({
+      symbol: 'BTCUSDT',
+      timeframe: '1h',
+      until: 1712349278000
+    }),
+    /since is required when until is provided/
+  );
+  assert.equal(getCaptured(), undefined);
+});
+
 test('history methods forward extra filters as query params', async () => {
   const { client, getCaptured } = createCapturedClient();
 

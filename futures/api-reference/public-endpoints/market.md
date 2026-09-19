@@ -303,22 +303,27 @@ A list of recent aggregate trades.
 
 Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a specified trading symbol and timeframe.
 
--   **Endpoint:** `POST /api/v1/market/klines`
--   **Method:** `POST`
--   **Handler:** `getKlines`
+#### Request
+
+| Attribute         | Value                          |
+|-------------------|--------------------------------|
+| **HTTP Method**   | `POST`                         |
+| **Endpoint Path** | `/api/v1/market/klines`        |
+| **Auth Required** | No                             |
+| **Query Params**  | `priceType` (string, optional) |
+| **Request Body**  | JSON object (see below)        |
+
+Use `timeframe`, `since`, and `until` in the body. Do not send `interval`, `startTime`, or `endTime`.
 
 **Request Body**
 
-The body must be a JSON object specifying the parameters for the k-line data. Unknown body fields are stripped; send `timeframe` and `since`, not `interval`, `startTime`, or `endTime`.
-
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `symbol` | string | Yes | The trading pair symbol (e.g., 'BTCINR'). |
-| `timeframe` | string | Yes | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. If omitted after validation, the server defaults to `1m`. |
-| `since` | number | No | Start time in milliseconds since epoch. |
-| `limit` | number | No | Maximum number of data points to retrieve (e.g., 100). |
-
-There is no request `endTime`. Candle start and end times appear only in the response arrays below.
+| `symbol` | string | Yes | Trading pair (e.g. `BTCINR`). |
+| `timeframe` | string | No | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. Defaults to `1m`. |
+| `since` | number | No | Start time in milliseconds since epoch. Cannot be in the future. |
+| `until` | number | No | Inclusive end time in milliseconds since epoch. Requires `since`. Cannot be in the future. Must be greater than or equal to `since`. |
+| `limit` | number | No | Maximum candles to return. Integer from `1` to `1000`. Defaults to `1000`. |
 
 **Query Parameters**
 
@@ -326,26 +331,34 @@ There is no request `endTime`. Candle start and end times appear only in the res
 | :--- | :--- | :--- | :--- |
 | `priceType` | string | No | Price series to use. `LTP` (default) or `MARK_PRICE`. |
 
+**Window behavior**
+
+- If `since` is omitted, the response is the **latest** `limit` candles.
+- If `since` is provided, the response is the **first** `limit` candles starting at `since`, optionally bounded by `until`.
+- `until` without `since` returns `400`.
+
 #### Success Response
 
-| Status Code | Description        |
-|-------------|--------------------|
-| `200 OK`    | Request succeeded. |
+| Status Code     | Description |
+|-----------------|-------------|
+| `201 Created`   | Request succeeded. |
 
 The response follows the standard [ApiResponse](../data-models.md#apiresponse) structure. The `data` field contains:
 
 **`data`** (Array of K-Line arrays):
 - A list of k-line/candlestick data points. Each inner array represents one k-line and contains the following values in order:
 
-| Index | Field       | Type   | Description                                           |
-| :---- | :---------- | :----- | :---------------------------------------------------- |
-| 0     | `startTime` | number | Start time of the interval (milliseconds since epoch).  |
-| 1     | `open`      | string | Opening price for the interval.                       |
-| 2     | `high`      | string | Highest price during the interval.                    |
-| 3     | `low`       | string | Lowest price during the interval.                     |
-| 4     | `close`     | string | Closing price for the interval.                       |
-| 5     | `volume`    | string | Trading volume during the interval.                   |
-| 6     | `endTime`   | number | End time of the interval (milliseconds since epoch).    |
+| Index | Field       | Type            | Description                                           |
+| :---- | :---------- | :-------------- | :---------------------------------------------------- |
+| 0     | `startTime` | number          | Start time of the interval (milliseconds since epoch).  |
+| 1     | `open`      | string          | Opening price for the interval.                       |
+| 2     | `high`      | string          | Highest price during the interval.                    |
+| 3     | `low`       | string          | Lowest price during the interval.                     |
+| 4     | `close`     | string          | Closing price for the interval.                       |
+| 5     | `volume`    | string \| null  | Trading volume during the interval. For `priceType=MARK_PRICE`, volume may be `null` if unavailable. |
+| 6     | `endTime`   | number          | End time of the interval (milliseconds since epoch).    |
+
+Rows are sorted by `startTime` ascending.
 
 ##### Example (`data` field content)
 
@@ -358,7 +371,7 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
     "5400000",
     "5550000",
     "10.5",
-    1612345738000
+    1612345737999
   ]
 ]
 ```
