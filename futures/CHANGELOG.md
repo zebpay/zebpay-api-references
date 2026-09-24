@@ -20,7 +20,7 @@ Compared to documentation on `main`. Covers `GET/POST /api/v1/market/*` and the 
 ### `POST /api/v1/market/klines`
 - Unknown **body** fields now return **400** (they used to be stripped).
 - Do not send `interval`, `startTime`, or `endTime` on the wire. Use `timeframe`, `since`, and `until`.
-- `limit` range is **5–500** (default **500**). Values outside that range return **400**.
+- `limit` range is **1–1000** (default **1000**). Values outside that range, and numeric strings, return **400**.
 - `since` must be Unix milliseconds ≥ `1000000000000` and not in the future.
 - `until` is accepted only together with `since`; it must not precede `since` or be in the future.
 
@@ -75,7 +75,7 @@ Compared to documentation on `main`. Covers `GET/POST /api/v1/market/*` and the 
 
 - `getOrderBook(symbol, limit?)` / `get_order_book(symbol, limit=None)` — optional depth 1–20.
 - `getAggTrade(symbol)` / `get_agg_trade(symbol)` — **symbol only**; do not pass `limit` (Python raises `TypeError` if you do).
-- `getKlines` / `get_klines`: `timeframe` no longer required (server default `1m`); local aliases `interval` and `startTime` are still mapped to `timeframe` / `since`; new `until`; `limit` 5–500.
+- `getKlines` / `get_klines`: `timeframe` no longer required (server default `1m`); local aliases `interval` and `startTime` are still mapped to `timeframe` / `since`; new `until`; `limit` 1–1000 (default 1000).
 - Typed models updated for `tickSz`/`lotSz`, order-book `datetime`/`nonce`, and nullable market-info fields.
 
 ## What did not change

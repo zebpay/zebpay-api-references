@@ -149,7 +149,7 @@ client = FuturesApiClient(
 | `get_ticker_24hr(symbol)` | 24-hour price stats |
 | `get_market_info()` | Market status and metrics |
 | `get_agg_trade(symbol)` | Recent aggregated trades |
-| `get_klines(kline_params)` | Fetch OHLCV candles; `limit` is 5–500 (default 500), with optional `since`, `until`, and `priceType` |
+| `get_klines(kline_params)` | Fetch OHLCV candles; `limit` is a JSON integer from 1 to 1000 (default 1000), with optional `since`, `until`, and `priceType` |
 | `get_system_time()` | API server time |
 | `get_system_status()` | System operational status |
 | `get_trade_fee(symbol)` | Fee info for one symbol |

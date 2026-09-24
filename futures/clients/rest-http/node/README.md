@@ -143,7 +143,7 @@ const client = new FuturesApiClient({
 | `getTicker24Hr(symbol)` | 24-hour price stats |
 | `getMarketInfo()` | Market status and metrics |
 | `getAggTrade(symbol)` | Recent aggregated trades |
-| `getKlines(klineParams)` | Fetch OHLCV candles; `limit` is 5–500 (default 500), with optional `since`, `until`, and `priceType` |
+| `getKlines(klineParams)` | Fetch OHLCV candles; `limit` is a JSON integer from 1 to 1000 (default 1000), with optional `since`, `until`, and `priceType` |
 | `getSystemTime()` | API server time |
 | `getSystemStatus()` | System operational status |
 | `getTradeFee(symbol)` | Fee info for one symbol |

@@ -349,7 +349,7 @@ The body must be a JSON object specifying the parameters for the k-line data. Un
 | `timeframe` | string | No | Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. Default: `1m`. |
 | `since` | integer | No | Inclusive start time as Unix epoch milliseconds. Must be at least `1000000000000` and must not be in the future. |
 | `until` | integer | No | Inclusive end time as Unix epoch milliseconds. Accepted only with `since`; it must not precede `since` or be in the future. |
-| `limit` | integer | No | Number of data points to retrieve. Range: 5–500. Default: 500. |
+| `limit` | integer | No | Number of candles to return. JSON integer from 1 to 1000. Default: 1000 when omitted or null. A numeric string is rejected with 400. |
 
 When `since` is omitted, the endpoint returns the latest `limit` candles. When `since` is provided, it returns the first page of candles from that point, optionally bounded by `until`. Candle start and end times also appear in each response array.
 

@@ -359,7 +359,7 @@ class FuturesApiClient:
                     `interval` is accepted as an alias for `timeframe`.
                   - since: Start time in milliseconds (`startTime` is accepted as an alias).
                   - until: Inclusive end time in milliseconds; requires `since`.
-                  - limit: Number of data points to return (5-500; default 500).
+                  - limit: Number of data points to return (1-1000; default 1000).
                   - priceType: `LTP` (default) or `MARK_PRICE`, sent as a query parameter.
 
         Returns:

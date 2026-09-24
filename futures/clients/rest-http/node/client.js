@@ -255,7 +255,7 @@ class FuturesApiClient {
    * @param {number} [klineParams.since] - Start time in milliseconds
    * @param {number} [klineParams.startTime] - Alias for `since`
    * @param {number} [klineParams.until] - Inclusive end time in milliseconds; requires `since`
-   * @param {number} [klineParams.limit] - Number of data points to return (5-500; default 500)
+   * @param {number} [klineParams.limit] - Number of data points to return (1-1000; default 1000)
    * @param {string} [klineParams.priceType] - `LTP` (default) or `MARK_PRICE`
    * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
    */
