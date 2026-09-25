@@ -191,16 +191,21 @@ class FuturesApiClient {
    * Fetches the order book for a trading pair
    *
    * @param {string} symbol - Trading symbol (e.g., 'BTCUSDT')
+   * @param {number} [limit] - Depth levels per side (1–20); omit for the full available book
    * @returns {Promise<ApiResponse<OrderBook>>} Order book data
    * @see {ApiResponse} For the overall response structure
    * @see {OrderBook} For the structure of the data field
    */
-  async getOrderBook(symbol) {
+  async getOrderBook(symbol, limit) {
     if (!symbol) {
       throw new Error('Symbol is required');
     }
     symbol = this._normalizeString(symbol);
-    return await this._request('GET', config.endpoints.public.market.orderBook, { symbol });
+    const query = { symbol };
+    if (limit != null) {
+      query.limit = limit;
+    }
+    return await this._request('GET', config.endpoints.public.market.orderBook, query);
   }
 
   /**
@@ -245,12 +250,12 @@ class FuturesApiClient {
    *
    * @param {Object} klineParams - K-line parameters
    * @param {string} klineParams.symbol - Trading symbol (e.g., 'BTCINR')
-   * @param {string} [klineParams.timeframe] - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
+   * @param {string} [klineParams.timeframe='1m'] - Candlestick interval (e.g., '1m', '5m', '1h', '1d')
    * @param {string} [klineParams.interval] - Alias for `timeframe`
    * @param {number} [klineParams.since] - Start time in milliseconds
    * @param {number} [klineParams.startTime] - Alias for `since`
-   * @param {number} [klineParams.until] - Inclusive end time in milliseconds; requires `since` or `startTime`
-   * @param {number} [klineParams.limit] - Maximum number of data points to return
+   * @param {number} [klineParams.until] - Inclusive end time in milliseconds; requires `since` (`startTime` is a local alias for `since`)
+   * @param {number} [klineParams.limit] - Number of data points to return (1-1000; default 1000)
    * @param {string} [klineParams.priceType] - `LTP` (default) or `MARK_PRICE`
    * @returns {Promise<ApiResponse<Array<number|string>>>} K-line data
    */
@@ -259,13 +264,12 @@ class FuturesApiClient {
       throw new Error('Symbol is required');
     }
     const timeframe = klineParams.timeframe || klineParams.interval;
-    if (!timeframe) {
-      throw new Error('timeframe (or interval) is required');
-    }
     const body = {
-      symbol: this._normalizeString(klineParams.symbol),
-      timeframe
+      symbol: this._normalizeString(klineParams.symbol)
     };
+    if (timeframe != null) {
+      body.timeframe = timeframe;
+    }
     const since = klineParams.since ?? klineParams.startTime;
     const until = klineParams.until;
     if (until != null && since == null) {

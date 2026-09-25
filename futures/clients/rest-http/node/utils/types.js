@@ -27,7 +27,9 @@
  * @property {string} baseAsset - Base asset code
  * @property {string} quoteAsset - Quote asset code
  * @property {number} pricePrecision - Decimal places for price
+ * @property {string} tickSz - Minimum price increment as an exact decimal string
  * @property {number} quantityPrecision - Decimal places for quantity
+ * @property {string} lotSz - Minimum quantity increment as an exact decimal string
  * @property {number} baseAssetPrecision - Precision for base asset
  * @property {number} quotePrecision - Precision for quote asset
  * @property {string[]} orderTypes - Enabled order types (MARKET, LIMIT, STOP_MARKET, STOP_LIMIT)
@@ -36,7 +38,7 @@
  * @property {number} takerFee - Taker fee rate
  * @property {number} minLeverage - Minimum allowed leverage
  * @property {number} maxLeverage - Maximum allowed leverage
- * @property {Array<Object>} [filters] - Optional: List of trading filters
+ * @property {Array<Object>} filters - List of trading filters; can be empty
  */
 
 /**
@@ -59,8 +61,8 @@
  * @property {Array<[number, number]>} bids - Buy orders as array of [price, amount] pairs, sorted by price in descending order
  * @property {Array<[number, number]>} asks - Sell orders as array of [price, amount] pairs, sorted by price in ascending order
  * @property {number} timestamp - Unix timestamp in milliseconds from `Date.now()`
- * @property {null} datetime - Always `null` in the current implementation
- * @property {number} nonce - Set to `Date.now()` when the book is transformed
+ * @property {string} datetime - ISO-8601 representation of `timestamp`
+ * @property {null} nonce - Exchange sequence number; currently unavailable
  */
 
 /**
@@ -121,7 +123,9 @@
  * @property {string} symbols[].baseAsset - Base asset/cryptocurrency code
  * @property {string} symbols[].quoteAsset - Quote asset/currency code
  * @property {number} symbols[].pricePrecision - Decimal precision for price values
+ * @property {string} symbols[].tickSz - Minimum price increment as an exact decimal string
  * @property {number} symbols[].quantityPrecision - Decimal precision for quantity values
+ * @property {string} symbols[].lotSz - Minimum quantity increment as an exact decimal string
  * @property {number} symbols[].baseAssetPrecision - Decimal precision for the base asset
  * @property {number} symbols[].quotePrecision - Decimal precision for the quote asset
  * @property {Array<Object>} symbols[].filters - List of trading filters applied to this symbol
@@ -351,10 +355,10 @@
  * MarketInfo data model representing market information for a trading pair
  *
  * @typedef {Object} MarketInfo
- * @property {string} lastPrice - Last traded price
  * @property {string} marketPrice - Current market price
- * @property {string} priceChangePercent - Price change percentage
- * @property {string} baseAssetVolume - Trading volume in base asset
+ * @property {string|null} lastPrice - Last traded price, when available
+ * @property {string|null} priceChangePercent - Price change percentage, when available
+ * @property {string|null} baseAssetVolume - Trading volume in base asset, when available
  */
 
 

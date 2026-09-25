@@ -145,11 +145,11 @@ client = FuturesApiClient(
 | Method | Description |
 |--------|-------------|
 | `fetch_markets()` | Get all available markets |
-| `get_order_book(symbol)` | Get order book (bids/asks) for a symbol |
+| `get_order_book(symbol, limit=None)` | Get order book (bids/asks); limit range 1–20, omitted for the full available book |
 | `get_ticker_24hr(symbol)` | 24-hour price stats |
 | `get_market_info()` | Market status and metrics |
 | `get_agg_trade(symbol)` | Recent aggregated trades |
-| `get_klines(kline_params)` | Fetch OHLCV candles |
+| `get_klines(kline_params)` | Fetch OHLCV candles; `limit` is a JSON integer from 1 to 1000 (default 1000), with optional `since`, `until`, and `priceType` |
 | `get_system_time()` | API server time |
 | `get_system_status()` | System operational status |
 | `get_trade_fee(symbol)` | Fee info for one symbol |

@@ -36,7 +36,9 @@ class MarketSymbol(TypedDict):
         baseAsset (str): Base asset code.
         quoteAsset (str): Quote asset code.
         pricePrecision (int): Decimal places for price.
+        tickSz (str): Minimum price increment as an exact decimal string.
         quantityPrecision (int): Decimal places for quantity.
+        lotSz (str): Minimum quantity increment as an exact decimal string.
         baseAssetPrecision (int): Precision for base asset.
         quotePrecision (int): Precision for quote asset.
         orderTypes (List[str]): Enabled order types, including stop types when supported.
@@ -45,7 +47,7 @@ class MarketSymbol(TypedDict):
         takerFee (float): Taker fee rate.
         minLeverage (float): Minimum allowed leverage.
         maxLeverage (float): Maximum allowed leverage.
-        filters (Optional[List[Dict[str, Any]]]): Optional: List of trading filters.
+        filters (List[Dict[str, Any]]): List of trading filters; can be empty.
     """
     symbol: str
     status: str
@@ -54,7 +56,9 @@ class MarketSymbol(TypedDict):
     baseAsset: str
     quoteAsset: str
     pricePrecision: int
+    tickSz: str
     quantityPrecision: int
+    lotSz: str
     baseAssetPrecision: int
     quotePrecision: int
     orderTypes: List[str]
@@ -63,7 +67,7 @@ class MarketSymbol(TypedDict):
     takerFee: float
     minLeverage: float
     maxLeverage: float
-    filters: Optional[List[Dict[str, Any]]] # Use Optional for non-required fields
+    filters: List[Dict[str, Any]]
 
 class MarketsData(TypedDict):
     """
@@ -91,16 +95,16 @@ class OrderBook(TypedDict):
         symbol (str): Trading pair symbol (e.g., "BTCUSDT").
         bids (List[Tuple[float, float]]): Buy orders as [price, amount] pairs.
         asks (List[Tuple[float, float]]): Sell orders as [price, amount] pairs.
-        timestamp (Optional[int]): Unix timestamp in milliseconds.
-        datetime (Optional[str]): Always `None` in the current implementation.
-        nonce (Optional[int]): Set to `Date.now()` when the book is transformed.
+        timestamp (int): Unix timestamp in milliseconds.
+        datetime (str): ISO-8601 representation of `timestamp`.
+        nonce (None): Exchange sequence number; currently unavailable.
     """
     symbol: str
     bids: List[Tuple[float, float]]
     asks: List[Tuple[float, float]]
-    timestamp: Optional[int]
-    datetime: Optional[str]
-    nonce: Optional[int]
+    timestamp: int
+    datetime: str
+    nonce: None
 
 class TickerInfo(TypedDict):
     """
@@ -637,15 +641,15 @@ class MarketInfo(TypedDict):
     Represents market information for a trading pair.
 
     Attributes:
-        lastPrice (str)
         marketPrice (str)
-        priceChangePercent (str)
-        baseAssetVolume (str)
+        lastPrice (Optional[str])
+        priceChangePercent (Optional[str])
+        baseAssetVolume (Optional[str])
     """
-    lastPrice: str
     marketPrice: str
-    priceChangePercent: str
-    baseAssetVolume: str
+    lastPrice: Optional[str]
+    priceChangePercent: Optional[str]
+    baseAssetVolume: Optional[str]
 
 # ---------------------------
 # Order Creation & Cancellation Types

@@ -6,17 +6,19 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 
 **Endpoint:** `POST /api/v1/market/klines`
 **Authentication:** Not Required
-**Parameters:**
-* `symbol` (string, body, required): Trading pair (e.g. `"BTCINR"`).
-* `timeframe` (string, body, optional): Candlestick interval. Allowed: `1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `4h`, `6h`, `8h`, `12h`, `1d`, `1w`, `1M`. Defaults to `1m`.
-* `since` (number, body, optional): Start time in milliseconds since epoch.
-* `until` (number, body, optional): Inclusive end time in milliseconds since epoch. Requires `since`.
-* `limit` (number, body, optional): Maximum candles to return (`1`–`1000`, default `1000`).
+**Request fields:**
+* `symbol` (string, body, required): Concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
+* `timeframe` (string, body, optional): Defaults to `1m`. See the API reference for supported values.
+* `since` (integer, body, optional): Inclusive start time in Unix epoch milliseconds.
+* `until` (integer, body, optional): Inclusive end time; accepted only with `since`.
+* `limit` (integer, body, optional): JSON integer from 1 to 1000. Default: 1000. A numeric string is rejected with 400.
 * `priceType` (string, query, optional): `LTP` (default) or `MARK_PRICE`.
 
-Send `timeframe`, `since`, and `until` in the JSON body. Do not send `interval`, `startTime`, or `endTime`. If `since` is omitted, the response is the latest `limit` candles.
+Unknown HTTP body fields return `400 Bad Request`. The sample clients accept `interval` and `startTime` as local aliases, but send `timeframe` and `since` to the API.
 
----
+For `MARK_PRICE`, a missing or malformed upstream volume is returned as `null`.
+
+-----
 
 ### 1. cURL Example
 
@@ -61,14 +63,14 @@ curl -X POST "https://futuresbe.zebpay.com/api/v1/market/klines?priceType=MARK_P
       "5400000",
       "5550000",
       "10.5",
-      1612345737999
+      1612345738000
     ]
   ],
-  "statusCode": 201,
+  "statusCode": 200,
   "customMessage": ["OK"]
 }
 ```
-*Note: Success uses HTTP `201` with `statusCode: 201`. Each candle is `[startTime, open, high, low, close, volume, endTime]`. For `priceType=MARK_PRICE`, `volume` may be `null`.*
+*Note: Success uses HTTP `200` with `statusCode: 200`. Each candle is `[startTime, open, high, low, close, volume, endTime]`. For `priceType=MARK_PRICE`, `volume` may be `null`.*
 
 -----
 
@@ -110,20 +112,18 @@ getKlinesExample(klineParams);
 
 **Output (Example):**
 
-```js
-// Full API response first...
+```text
 Fetching k-lines for symbol: BTCINR...
 API Response: {
   "statusDescription": "OK",
   "data": [
-    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
   ],
-  "statusCode": 201,
+  "statusCode": 200,
   "customMessage": ["OK"]
 }
-// Extracted data...
 K-Lines Data: [
-  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
 ]
 ```
 
@@ -165,19 +165,17 @@ get_klines_example(kline_params)
 
 **Output (Example):**
 
-```js
-// Full API response first...
+```text
 Fetching k-lines for symbol: BTCINR...
 API Response: {
   "statusDescription": "OK",
   "data": [
-    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+    [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
   ],
-  "statusCode": 201,
+  "statusCode": 200,
   "customMessage": ["OK"]
 }
-// Extracted data...
 K-Lines Data: [
-  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345737999]
+  [1612345678000, "5500000", "5600000", "5400000", "5550000", "10.5", 1612345738000]
 ]
 ```

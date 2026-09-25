@@ -21,19 +21,19 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/marketInfo \
 
 ```json
 {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "BTCUSDT": {
-      "lastPrice": "65150.50",
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
-      "lastPrice": "3300.10",
       "marketPrice": "3300.00",
-      "priceChangePercent": "1.50",
-      "baseAssetVolume": "25000.75"
+      "lastPrice": null,
+      "priceChangePercent": null,
+      "baseAssetVolume": null
     }
     // ... potentially other symbols
   },
@@ -42,13 +42,13 @@ curl -X GET https://futuresbe.zebpay.com/api/v1/market/marketInfo \
 }
 
 ```
-*Note: Values will reflect live market data for listed symbols.*
+*Note: Values reflect live data for active markets. `lastPrice`, `priceChangePercent`, and `baseAssetVolume` can be `null` when unavailable. Additional upstream market metrics may also be present.*
 
 ---
 
 ### 2. Node.js Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Node.js Client README](../../../clients/rest-http/node/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -58,7 +58,7 @@ Assumes you have initialized the `FuturesApiClient` as `client`.
 async function getMarketInfoExample() {
   try {
     console.log("Fetching market info...");
-    const response = await client.getMarketInfo(); //
+    const response = await client.getMarketInfo();
     console.log("API Response:", JSON.stringify(response, null, 2));
 
     if (response && [200, 201].includes(response.statusCode)) {
@@ -66,7 +66,7 @@ async function getMarketInfoExample() {
       // Access info for a specific symbol:
       // const btcInfo = response.data.BTCUSDT;
       // if (btcInfo) {
-      //   console.log(`BTC Last Price: ${btcInfo.lastPrice}`);
+      //   console.log(`BTC Market Price: ${btcInfo.marketPrice}`);
       // }
     } else {
       console.error("Failed to fetch market info:", response.statusDescription);
@@ -86,19 +86,19 @@ getMarketInfoExample();
 // Console output showing the full API response first
 Fetching market info...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "BTCUSDT": {
-      "lastPrice": "65150.50",
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
-      "lastPrice": "3300.10",
       "marketPrice": "3300.00",
-      "priceChangePercent": "1.50",
-      "baseAssetVolume": "25000.75"
+      "lastPrice": null,
+      "priceChangePercent": null,
+      "baseAssetVolume": null
     }
     // ...
   },
@@ -119,7 +119,7 @@ Market Info Data: {
 
 ### 3. Python Client Example
 
-> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions .
+> **💡 Tip:** Ensure you have installed and initialized the client first. See the [Python Client README](../../../clients/rest-http/python/README.md) for setup instructions.
 
 Assumes you have initialized the `FuturesApiClient` as `client`.
 
@@ -131,7 +131,7 @@ import json
 def get_market_info_example():
     try:
         print("Fetching market info...")
-        response = client.get_market_info() #
+        response = client.get_market_info()
         print(f"API Response: {json.dumps(response, indent=2)}")
 
         if response and response.get("statusCode") in [200, 201]:
@@ -140,7 +140,7 @@ def get_market_info_example():
             # data = response.get('data', {})
             # btc_info = data.get('BTCUSDT')
             # if btc_info:
-            #     print(f"BTC Last Price: {btc_info.get('lastPrice')}")
+            #     print(f"BTC Market Price: {btc_info.get('marketPrice')}")
         else:
             print(f"Failed to fetch market info: {response.get('statusDescription')}")
 
@@ -157,19 +157,19 @@ get_market_info_example()
 // Console output showing the full API response first
 Fetching market info...
 API Response: {
-  "statusDescription": "Success",
+  "statusDescription": "OK",
   "data": {
     "BTCUSDT": {
-      "lastPrice": "65150.50",
       "marketPrice": "65150.00",
+      "lastPrice": "65150.00",
       "priceChangePercent": "0.23",
       "baseAssetVolume": "1500.50"
     },
     "ETHUSDT": {
-      "lastPrice": "3300.10",
       "marketPrice": "3300.00",
-      "priceChangePercent": "1.50",
-      "baseAssetVolume": "25000.75"
+      "lastPrice": null,
+      "priceChangePercent": null,
+      "baseAssetVolume": null
     }
     // ...
   },
