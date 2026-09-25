@@ -6,7 +6,6 @@ Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a spe
 
 **Endpoint:** `POST /api/v1/market/klines`
 **Authentication:** Not Required
-
 **Request fields:**
 * `symbol` (string, body, required): Concatenated (`BTCINR`) or slash (`BTC/INR`) notation.
 * `timeframe` (string, body, optional): Defaults to `1m`. See the API reference for supported values.
@@ -23,15 +22,32 @@ For `MARK_PRICE`, a missing or malformed upstream volume is returned as `null`.
 
 ### 1. cURL Example
 
+**Latest candles:**
+
 ```bash
 curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
-      -d '{
-        "symbol": "BTCINR",
-        "timeframe": "1h",
-        "limit": 100
-      }'
+  -d '{
+    "symbol": "BTCINR",
+    "timeframe": "1h",
+    "limit": 100
+  }'
+```
+
+**Bounded window (`since` / `until` and mark price):**
+
+```bash
+curl -X POST "https://futuresbe.zebpay.com/api/v1/market/klines?priceType=MARK_PRICE" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "BTCINR",
+    "timeframe": "1h",
+    "since": 1712340000000,
+    "until": 1712343600000,
+    "limit": 100
+  }'
 ```
 
 #### Success Response (Example)
@@ -54,6 +70,7 @@ curl -X POST https://futuresbe.zebpay.com/api/v1/market/klines \
   "customMessage": ["OK"]
 }
 ```
+*Note: Success uses HTTP `200` with `statusCode: 200`. Each candle is `[startTime, open, high, low, close, volume, endTime]`. For `priceType=MARK_PRICE`, `volume` may be `null`.*
 
 -----
 
@@ -68,7 +85,7 @@ async function getKlinesExample(klineParams) {
     const response = await client.getKlines(klineParams);
     console.log("API Response:", JSON.stringify(response, null, 2));
 
-    if (response && response.data) {
+    if (response && [200, 201].includes(response.statusCode)) {
       console.log("K-Lines Data:", response.data);
     } else {
       console.error("Failed to fetch k-lines:", response.statusDescription);
@@ -81,11 +98,14 @@ async function getKlinesExample(klineParams) {
   }
 }
 
-// Example usage:
+// Example usage. `interval` is an alias for `timeframe`; `until` requires `since` (or `startTime`).
 const klineParams = {
   symbol: "BTCINR",
   timeframe: "1h",
-  limit: 100
+  since: 1712340000000,
+  until: 1712343600000,
+  limit: 100,
+  priceType: "LTP"
 };
 getKlinesExample(klineParams);
 ```
@@ -122,7 +142,7 @@ def get_klines_example(kline_params):
         response = client.get_klines(kline_params=kline_params)
         print(f"API Response: {json.dumps(response, indent=2)}")
 
-        if response and response.get("data"):
+        if response and response.get("statusCode") in [200, 201]:
             print(f"K-Lines Data: {response.get('data')}")
         else:
             print(f"Failed to fetch k-lines: {response.get('statusDescription')}")
@@ -131,11 +151,14 @@ def get_klines_example(kline_params):
     except Exception as e:
         print(f"Error fetching k-lines: {e}")
 
-# Example usage:
+# Example usage. `interval` is an alias for `timeframe`; `until` requires `since` (or `startTime`).
 kline_params = {
   "symbol": "BTCINR",
   "timeframe": "1h",
-  "limit": 100
+  "since": 1712340000000,
+  "until": 1712343600000,
+  "limit": 100,
+  "priceType": "LTP"
 }
 get_klines_example(kline_params)
 ```

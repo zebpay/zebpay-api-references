@@ -335,9 +335,15 @@ A list of recent aggregate trades.
 
 Retrieves historical candlestick data (Open, High, Low, Close, Volume) for a specified trading symbol and timeframe.
 
--   **Endpoint:** `POST /api/v1/market/klines`
--   **Method:** `POST`
--   **Handler:** `getKlines`
+#### Request
+
+| Attribute         | Value                          |
+|-------------------|--------------------------------|
+| **HTTP Method**   | `POST`                         |
+| **Endpoint Path** | `/api/v1/market/klines`        |
+| **Auth Required** | No                             |
+| **Query Params**  | `priceType` (string, optional) |
+| **Request Body**  | JSON object (see below)        |
 
 **Request Body**
 
@@ -381,6 +387,8 @@ The response follows the standard [ApiResponse](../data-models.md#apiresponse) s
 | 4     | `close`     | string \| number | Closing price for the interval.               |
 | 5     | `volume`    | string \| number \| null | Trading volume; `null` when unavailable for `MARK_PRICE`. |
 | 6     | `endTime`   | number | End time of the interval (milliseconds since epoch).    |
+
+Rows are sorted by `startTime` ascending.
 
 ##### Example (`data` field content)
 

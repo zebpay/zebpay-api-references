@@ -358,7 +358,8 @@ class FuturesApiClient:
                   - timeframe: Candlestick interval (server default `1m`).
                     `interval` is accepted as an alias for `timeframe`.
                   - since: Start time in milliseconds (`startTime` is accepted as an alias).
-                  - until: Inclusive end time in milliseconds; requires `since`.
+                  - until: Inclusive end time in milliseconds; requires `since`
+                    (`startTime` is a local alias). `endTime` is not sent.
                   - limit: Number of data points to return (1-1000; default 1000).
                   - priceType: `LTP` (default) or `MARK_PRICE`, sent as a query parameter.
 
@@ -366,7 +367,8 @@ class FuturesApiClient:
             ApiResponse[List[List[Any]]]: A list of K-line data points.
 
         Raises:
-            ValueError: If required parameters are missing.
+            ValueError: If required parameters are missing, or if `until` is
+                provided without `since` or `startTime`.
 
         Example:
             klines = client.get_klines({
@@ -385,10 +387,13 @@ class FuturesApiClient:
         if timeframe is not None:
             body['timeframe'] = timeframe
         since = kline_params.get('since', kline_params.get('startTime'))
+        until = kline_params.get('until')
+        if until is not None and since is None:
+            raise ValueError('since is required when until is provided')
         if since is not None:
             body['since'] = since
-        if kline_params.get('until') is not None:
-            body['until'] = kline_params['until']
+        if until is not None:
+            body['until'] = until
         if kline_params.get('limit') is not None:
             body['limit'] = kline_params['limit']
 
